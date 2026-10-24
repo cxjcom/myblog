@@ -51,12 +51,6 @@ function initDecor() {
   document.body.insertAdjacentHTML(
     "beforeend",
     `
-    <div class="aurora" aria-hidden="true">
-      <div class="aurora-blob a1"></div>
-      <div class="aurora-blob a2"></div>
-      <div class="aurora-blob a3"></div>
-    </div>
-    <canvas class="particles" aria-hidden="true"></canvas>
     <div class="cursor-glow" aria-hidden="true"></div>
     <button class="back-top" aria-label="返回顶部" title="返回顶部">${ICONS.arrowUp}</button>
     <div class="search-overlay" role="dialog" aria-modal="true" aria-label="全站搜索">
@@ -75,6 +69,46 @@ function initDecor() {
       </div>
     </div>`
   );
+  initBackground();
+}
+
+/* ---------------- 背景主题 ---------------- */
+let bgStop = null;
+function applyBackground(id) {
+  const presets = window.BG_PRESETS || {};
+  const preset = presets[id] || presets.aurora || { css: "", canvas: "particles" };
+  try {
+    localStorage.setItem("bg", id);
+  } catch (e) {}
+  document.documentElement.dataset.bg = id;
+  if (typeof bgStop === "function") bgStop();
+  bgStop = null;
+  $$(".aurora, .particles").forEach((el) => el.remove());
+  if (typeof preset.css === "string") {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div class="aurora ${preset.css}" aria-hidden="true">
+        <div class="aurora-blob a1"></div>
+        <div class="aurora-blob a2"></div>
+        <div class="aurora-blob a3"></div>
+      </div>`
+    );
+  }
+  if (preset.canvas && window.BG_PAINTERS && window.BG_PAINTERS[preset.canvas]) {
+    const canvas = document.createElement("canvas");
+    canvas.className = "particles";
+    canvas.setAttribute("aria-hidden", "true");
+    document.body.appendChild(canvas);
+    bgStop = window.BG_PAINTERS[preset.canvas](canvas, canvas.getContext("2d")) || null;
+  }
+  document.dispatchEvent(new CustomEvent("bgchange", { detail: id }));
+}
+function initBackground() {
+  let saved = "aurora";
+  try {
+    saved = localStorage.getItem("bg") || "aurora";
+  } catch (e) {}
+  applyBackground(saved);
 }
 
 /* ---------------- 主题 ---------------- */
@@ -211,72 +245,6 @@ function initSearch() {
       escapeHTML(text.slice(idx + q.length))
     );
   }
-}
-
-/* ---------------- 粒子背景 ---------------- */
-function initParticles() {
-  if (reduceMotion) return;
-  const canvas = $(".particles");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  let w, h, dots = [];
-  const COUNT = innerWidth < 700 ? 32 : 64;
-
-  function resize() {
-    w = canvas.width = innerWidth;
-    h = canvas.height = innerHeight;
-  }
-  function makeDots() {
-    dots = Array.from({ length: COUNT }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      r: Math.random() * 1.8 + 0.6,
-    }));
-  }
-  function step() {
-    if (document.hidden) {
-      requestAnimationFrame(step);
-      return;
-    }
-    const dark = document.documentElement.dataset.theme === "dark";
-    const lineColor = dark ? "148, 163, 184" : "99, 102, 241";
-    ctx.clearRect(0, 0, w, h);
-    for (const d of dots) {
-      d.x += d.vx;
-      d.y += d.vy;
-      if (d.x < 0 || d.x > w) d.vx *= -1;
-      if (d.y < 0 || d.y > h) d.vy *= -1;
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${lineColor}, ${dark ? 0.5 : 0.45})`;
-      ctx.fill();
-    }
-    for (let i = 0; i < dots.length; i++) {
-      for (let j = i + 1; j < dots.length; j++) {
-        const dx = dots[i].x - dots[j].x;
-        const dy = dots[i].y - dots[j].y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.moveTo(dots[i].x, dots[i].y);
-          ctx.lineTo(dots[j].x, dots[j].y);
-          ctx.strokeStyle = `rgba(${lineColor}, ${0.16 * (1 - dist / 120)})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(step);
-  }
-  addEventListener("resize", () => {
-    resize();
-    makeDots();
-  });
-  resize();
-  makeDots();
-  requestAnimationFrame(step);
 }
 
 /* ---------------- 鼠标光晕 ---------------- */
@@ -696,7 +664,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initNav();
   initSearch();
-  initParticles();
   initCursorGlow();
   initReveal();
   initBackTop();

@@ -13,6 +13,7 @@
 - **点赞与分享**：本地收藏喜欢文章，一键复制文章链接
 - **归档页**：按年份分组的时间线，附累计字数统计
 - **项目 / 友链 / 关于**：卡片式展示，全部内容可直接改 HTML
+- **主题背景**：右上角调色板按钮进入主题页，10 套动态背景可即时切换——默认极光、科技未来（数字雨 / 霓虹地平线 / 电路脉冲）、自然（樱花雨 / 萤火虫 / 云海）、宇宙（星野 / 星云 / 深空行星），全部 Canvas/CSS 实时绘制，选择保存在本机
 - **明暗双主题**：跟随系统 + 手动切换 + 本地记忆
 - **氛围感**：极光渐变背景、粒子连线、鼠标光晕、滚动显现动效（尊重 `prefers-reduced-motion`）
 - **SEO 与订阅**：RSS（`feed.xml`）、`sitemap.xml`、Open Graph、JSON-LD 结构化数据、PWA manifest
@@ -29,6 +30,7 @@ myblog/
 ├── links.html            # 常用站点 + 友链
 ├── about.html            # 关于
 ├── 404.html              # 错误页（GitHub Pages 自动启用）
+├── themes.html           # 主题背景选择页
 ├── posts/                # 文章目录
 │   ├── _template.html    #   ★ 新文章模板：复制它！
 │   └── hello-world.html  #   每篇文章一个 HTML
@@ -36,6 +38,7 @@ myblog/
 │   ├── css/style.css     # 全站样式（设计系统）
 │   └── js/
 │       ├── posts.js      # ★ 文章元数据（唯一数据源）
+│       ├── backgrounds.js # ★ 背景主题库（新增背景：加一个画师 + 一条预设）
 │       └── main.js       # 站点脚本 + 站点配置 SITE
 ├── feed.xml              # RSS 订阅（发布新文章后手动同步）
 ├── sitemap.xml / robots.txt
