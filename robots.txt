@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /posts/_template.html
+
+Sitemap: https://cxjcom.github.io/myblog/sitemap.xml

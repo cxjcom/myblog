@@ -1,0 +1,19 @@
+{
+  "name": "拾光小栈",
+  "short_name": "拾光",
+  "description": "记录、思考与热爱 —— 拾光的个人博客",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fc",
+  "theme_color": "#f4f6fc",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

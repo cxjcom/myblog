@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>拾光小栈</title>
+    <link>https://cxjcom.github.io/myblog/</link>
+    <description>记录、思考与热爱 —— 拾光的个人博客</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 24 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://cxjcom.github.io/myblog/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>你好，世界：我的博客正式开张</title>
+      <link>https://cxjcom.github.io/myblog/posts/hello-world.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/hello-world.html</guid>
+      <description>搭建这座小站的过程与心情，以及我为什么想在互联网上拥有一个完全属于自己的角落。</description>
+      <pubDate>Sat, 24 Oct 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>为什么我要开始写博客</title>
+      <link>https://cxjcom.github.io/myblog/posts/why-i-write.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/why-i-write.html</guid>
+      <description>写作是思考的显影液。聊聊输出如何倒逼输入，以及我希望坚持写作能带来的三个变化。</description>
+      <pubDate>Sun, 18 Oct 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>2026 前端学习路线（个人重制版）</title>
+      <link>https://cxjcom.github.io/myblog/posts/frontend-roadmap.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/frontend-roadmap.html</guid>
+      <description>从 HTML/CSS 基础到工程化与 AI 辅助开发，一份我亲测有效、持续更新的前端学习路线图。</description>
+      <pubDate>Sat, 10 Oct 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>我的效率工具箱（2026 版）</title>
+      <link>https://cxjcom.github.io/myblog/posts/productivity-tools.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/productivity-tools.html</guid>
+      <description>覆盖笔记、任务、终端与自动化的个人工具清单，以及我挑选工具时遵循的三条原则。</description>
+      <pubDate>Wed, 28 Sep 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>秋日读书笔记：最近读完的三本书</title>
+      <link>https://cxjcom.github.io/myblog/posts/reading-notes.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/reading-notes.html</guid>
+      <description>《置身事内》《夜晚的潜水艇》《纳瓦尔宝典》——三本气质迥异的书，带来三种不同的收获。</description>
+      <pubDate>Tue, 15 Sep 2026 00:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>写给一年后的自己</title>
+      <link>https://cxjcom.github.io/myblog/posts/letter-to-future.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/letter-to-future.html</guid>
+      <description>一封慢递信：关于健康、创作与勇气的几个约定，明年今日拆封对账。</description>
+      <pubDate>Tue, 01 Sep 2026 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
