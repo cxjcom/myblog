@@ -1154,7 +1154,8 @@ button.chip:hover {
   font-weight: 800;
   scroll-margin-top: 90px;
 }
-.post-body h2 .h-anchor {
+.post-body h2 .h-anchor,
+.post-body h3 .h-anchor {
   margin-left: 8px;
   opacity: 0;
   color: var(--accent);
@@ -1162,7 +1163,8 @@ button.chip:hover {
   font-size: 0.75em;
   transition: opacity 0.2s;
 }
-.post-body h2:hover .h-anchor {
+.post-body h2:hover .h-anchor,
+.post-body h3:hover .h-anchor {
   opacity: 1;
 }
 .post-body h3 {

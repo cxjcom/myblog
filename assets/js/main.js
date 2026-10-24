@@ -302,25 +302,28 @@ function initCursorGlow() {
 }
 
 /* ---------------- 滚动显现 ---------------- */
+let revealIO = null;
+function observeReveals() {
+  if (!revealIO) return;
+  $$(".reveal:not(.visible)").forEach((el) => revealIO.observe(el));
+}
 function initReveal() {
-  const els = $$(".reveal");
-  if (!els.length) return;
   if (reduceMotion || !("IntersectionObserver" in window)) {
-    els.forEach((el) => el.classList.add("visible"));
+    $$(".reveal").forEach((el) => el.classList.add("visible"));
     return;
   }
-  const io = new IntersectionObserver(
+  revealIO = new IntersectionObserver(
     (entries) => {
       entries.forEach((en) => {
         if (en.isIntersecting) {
           en.target.classList.add("visible");
-          io.unobserve(en.target);
+          revealIO.unobserve(en.target);
         }
       });
     },
     { threshold: 0.08 }
   );
-  els.forEach((el) => io.observe(el));
+  observeReveals();
 }
 
 /* ---------------- 返回顶部 ---------------- */
@@ -471,7 +474,7 @@ function initBlog() {
     grid.innerHTML = list.map((p, i) => postCard(p, i * 0.06)).join("");
     if (countEl) countEl.textContent = `共 ${list.length} 篇`;
     if (emptyEl) emptyEl.hidden = list.length > 0;
-    grid.querySelectorAll(".reveal").forEach((el) => el.classList.add("visible"));
+    observeReveals();
   }
   render();
 }
@@ -572,6 +575,10 @@ function initPostPage() {
         a.textContent = h.textContent;
         if (h.tagName === "H3") a.classList.add("lv3");
         toc.appendChild(a);
+        h.insertAdjacentHTML(
+          "beforeend",
+          '<a class="h-anchor" href="#' + h.id + '" aria-label="跳转到此节">#</a>'
+        );
       });
       const links = $$("a", toc);
       const io = new IntersectionObserver(
@@ -699,4 +706,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initBlog();
   initArchive();
   initPostPage();
+  observeReveals();
 });
