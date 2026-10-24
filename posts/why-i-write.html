@@ -6,7 +6,7 @@
   <title>为什么我要开始写博客 · 拾光小栈</title>
   <meta name="description" content="写作是思考的显影液。聊聊输出如何倒逼输入，以及我希望坚持写作能带来的三个变化。">
   <meta name="keywords" content="写作,输出,思考,复利,记录">
-  <meta name="theme-color" content="#f4f6fc">
+  <meta name="theme-color" content="#faf7f2">
   <meta property="og:type" content="article">
   <meta property="og:title" content="为什么我要开始写博客">
   <meta property="og:description" content="写作是思考的显影液。聊聊输出如何倒逼输入，以及我希望坚持写作能带来的三个变化。">
@@ -15,6 +15,7 @@
   {"@context":"https://schema.org","@type":"BlogPosting","headline":"为什么我要开始写博客","datePublished":"2026-10-18","author":{"@type":"Person","name":"拾光"},"description":"写作是思考的显影液。聊聊输出如何倒逼输入，以及我希望坚持写作能带来的三个变化。"}
   </script>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <script>
     (function () {
@@ -32,13 +33,13 @@
 
   <header class="site-header">
     <nav class="nav container">
-      <a class="brand" href="../index.html"><span class="brand-dot"></span>拾光小栈</a>
+      <a class="brand" href="../index.html"><span class="brand-seal">拾</span>拾光小栈</a>
       <ul class="nav-links">
         <li><a href="../index.html" data-page="home">首页</a></li>
-        <li><a href="../blog.html" data-page="blog">博客</a></li>
+        <li><a href="../blog.html" data-page="blog">文章</a></li>
         <li><a href="../archive.html" data-page="archive">归档</a></li>
         <li><a href="../projects.html" data-page="projects">项目</a></li>
-        <li><a href="../links.html" data-page="links">导航</a></li>
+        <li><a href="../links.html" data-page="links">友链</a></li>
         <li><a href="../about.html" data-page="about">关于</a></li>
       </ul>
       <div class="nav-actions">
@@ -65,10 +66,10 @@
         </div>
         <h1>为什么我要开始写博客</h1>
         <div class="article-meta">
-          <span>📅 2026-10-18</span>
-          <span>⏱ 约 5 分钟</span>
-          <span>📝 1900 字</span>
-          <span>✍️ 拾光</span>
+          <span>2026-10-18</span><span class="sep">·</span>
+          <span>约 5 分钟</span><span class="sep">·</span>
+          <span>1900 字</span><span class="sep">·</span>
+          <span>拾光</span>
         </div>
 
         <div class="post-body">
@@ -131,42 +132,38 @@
         <div class="post-nav" id="prevNext"></div>
 
         <section id="relatedSection">
-          <div class="section-head">
-            <div>
-              <span class="kicker">Related</span>
-              <h2>相关文章</h2>
-            </div>
-          </div>
-          <div class="grid-cards" id="relatedGrid"></div>
+          <h2 class="related-title">相关文章</h2>
+          <div id="relatedList"></div>
         </section>
 
         <div class="comments" id="giscusBox">
-          💬 评论区尚未开启 —— 在 <code>assets/js/main.js</code> 的 SITE.giscus 中填入配置即可启用（见 README「开启评论」一节）。
+          评论区尚未开启 —— 在 <code>assets/js/main.js</code> 的 SITE.giscus 中填入配置即可启用（见 README「开启评论」一节）。
         </div>
       </article>
 
       <aside class="post-toc">
-        <div class="post-toc-title">目录 · TOC</div>
+        <div class="post-toc-title">目录</div>
         <nav id="toc"></nav>
       </aside>
     </div>
   </main>
 
-  <footer class="site-footer">
+    <footer class="site-footer">
     <div class="footer-inner container">
+      <span>© <span data-year>2026</span> 拾光小栈</span>
+      <span class="spacer"></span>
       <div class="footer-socials">
         <a class="icon-btn" href="https://github.com/cxjcom" target="_blank" rel="noopener" aria-label="GitHub 主页">
-          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.9 10.9c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.6.8.5A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+          <svg viewBox="0 0 24 24" class="fill"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.9 10.9c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.6.8.5A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
         </a>
         <a class="icon-btn" href="mailto:hello@example.com" aria-label="发邮件">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
         </a>
         <a class="icon-btn" href="../feed.xml" aria-label="RSS 订阅">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
         </a>
       </div>
-      <p>© <span data-year>2026</span> 拾光小栈 · 由 <span class="heart">♥</span> 与好奇心驱动</p>
-      <p>零依赖静态站点 · 托管于 GitHub Pages</p>
+      <a href="../about.html">关于本站</a>
     </div>
   </footer>
 

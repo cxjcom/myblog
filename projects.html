@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>项目 · 拾光小栈</title>
-  <meta name="description" content="拾光在做的与做过的小项目：玩具也好，工具也罢，动手做出来才有意思。">
-  <meta name="theme-color" content="#f4f6fc">
+  <meta name="description" content="拾光在做的与做过的小项目。">
+  <meta name="theme-color" content="#faf7f2">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/fonts.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <script>
     (function () {
@@ -24,13 +25,13 @@
 
   <header class="site-header">
     <nav class="nav container">
-      <a class="brand" href="index.html"><span class="brand-dot"></span>拾光小栈</a>
+      <a class="brand" href="index.html"><span class="brand-seal">拾</span>拾光小栈</a>
       <ul class="nav-links">
         <li><a href="index.html" data-page="home">首页</a></li>
-        <li><a href="blog.html" data-page="blog">博客</a></li>
+        <li><a href="blog.html" data-page="blog">文章</a></li>
         <li><a href="archive.html" data-page="archive">归档</a></li>
         <li><a href="projects.html" data-page="projects">项目</a></li>
-        <li><a href="links.html" data-page="links">导航</a></li>
+        <li><a href="links.html" data-page="links">友链</a></li>
         <li><a href="about.html" data-page="about">关于</a></li>
       </ul>
       <div class="nav-actions">
@@ -50,80 +51,50 @@
 
   <main id="main" class="container">
     <div class="page-head">
-      <span class="kicker">Projects</span>
-      <h1>我的<span class="gradient-text">项目</span></h1>
-      <p>玩具也好，工具也罢——做出来，才算学会了。以下是正在维护和曾经折腾过的小项目（示例卡片，替换成你自己的）。</p>
+      <h1>项目</h1>
+      <p>做出来，才算学会了。下面是正在维护和曾经折腾过的东西（示例条目，替换成你自己的）。</p>
     </div>
 
     <section class="section">
-      <div class="grid-cards">
-        <div class="glass-card project-card reveal">
-          <div class="project-icon g1">🏠</div>
-          <h3>拾光小栈（本站）</h3>
-          <p>零依赖纯静态个人博客：明暗双主题、全站搜索、标签筛选、归档时间线，托管在 GitHub Pages 上。</p>
-          <div class="project-tech"><span>HTML</span><span>CSS</span><span>JavaScript</span><span>GitHub Pages</span></div>
-          <div class="project-links">
-            <a href="https://github.com/cxjcom/myblog" target="_blank" rel="noopener">⭐ 源码</a>
-            <a href="index.html">🔗 在线访问</a>
-          </div>
-        </div>
-
-        <div class="glass-card project-card reveal" style="--d:.08s">
-          <div class="project-icon g2">🧰</div>
-          <h3>Dev Toolbox（示例）</h3>
-          <p>一个浏览器端的开发者小工具集：JSON 格式化、正则测试、时间戳转换……纯前端实现，离线可用。</p>
-          <div class="project-tech"><span>TypeScript</span><span>Vite</span><span>PWA</span></div>
-          <div class="project-links">
-            <a href="https://github.com/cxjcom" target="_blank" rel="noopener">⭐ 源码</a>
-            <a href="#" onclick="return false">🔗 占位链接</a>
-          </div>
-        </div>
-
-        <div class="glass-card project-card reveal" style="--d:.16s">
-          <div class="project-icon g4">🤖</div>
-          <h3>自动化脚本合集（示例）</h3>
-          <p>让重复劳动消失的 Python 脚本仓库：批量重命名、账单汇总、定时备份，配上 GitHub Actions 定时跑。</p>
-          <div class="project-tech"><span>Python</span><span>GitHub Actions</span></div>
-          <div class="project-links">
-            <a href="https://github.com/cxjcom" target="_blank" rel="noopener">⭐ 源码</a>
-          </div>
-        </div>
-
-        <div class="glass-card project-card reveal" style="--d:.24s">
-          <div class="project-icon g6">🎨</div>
-          <h3>CSS 灵感速查（示例）</h3>
-          <p>收集我在各处看到的惊艳 CSS 效果，每个都配可直接复制的最小实现，从毛玻璃到视差滚动。</p>
-          <div class="project-tech"><span>CSS</span><span>CodePen</span></div>
-          <div class="project-links">
-            <a href="https://github.com/cxjcom" target="_blank" rel="noopener">⭐ 源码</a>
-          </div>
-        </div>
+      <div class="entry">
+        <h3><a href="https://github.com/cxjcom/myblog" target="_blank" rel="noopener">拾光小栈（本站）</a></h3>
+        <span class="entry-side">2026 · HTML / CSS / JS</span>
+        <p class="entry-desc">零依赖纯静态个人博客：明暗双主题、全站搜索、标签筛选，托管在 GitHub Pages 上。</p>
       </div>
-    </section>
-
-    <section class="section">
-      <div class="hitokoto reveal">
-        <p>想法 → 半成品 → 丢进仓库：项目页就是这个循环的纪念碑。</p>
-        <footer>下一个项目在酝酿中，敬请期待 🚧</footer>
+      <div class="entry">
+        <h3><a href="https://github.com/cxjcom" target="_blank" rel="noopener">Dev Toolbox</a></h3>
+        <span class="entry-side">2026 · TypeScript / Vite</span>
+        <p class="entry-desc">浏览器端的开发者小工具集：JSON 格式化、正则测试、时间戳转换，纯前端离线可用。（示例占位）</p>
+      </div>
+      <div class="entry">
+        <h3><a href="https://github.com/cxjcom" target="_blank" rel="noopener">自动化脚本合集</a></h3>
+        <span class="entry-side">2025 · Python</span>
+        <p class="entry-desc">让重复劳动消失的小脚本：批量重命名、账单汇总、定时备份，配 GitHub Actions 定时跑。（示例占位）</p>
+      </div>
+      <div class="entry">
+        <h3><a href="https://github.com/cxjcom" target="_blank" rel="noopener">CSS 灵感速查</a></h3>
+        <span class="entry-side">2025 · CSS</span>
+        <p class="entry-desc">收集各处看到的 CSS 效果，每个都配可直接复制的最小实现。（示例占位）</p>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="footer-inner container">
+      <span>© <span data-year>2026</span> 拾光小栈</span>
+      <span class="spacer"></span>
       <div class="footer-socials">
         <a class="icon-btn" href="https://github.com/cxjcom" target="_blank" rel="noopener" aria-label="GitHub 主页">
-          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.9 10.9c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.6.8.5A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+          <svg viewBox="0 0 24 24" class="fill"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.9 10.9c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.6.8.5A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
         </a>
         <a class="icon-btn" href="mailto:hello@example.com" aria-label="发邮件">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
         </a>
         <a class="icon-btn" href="feed.xml" aria-label="RSS 订阅">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
         </a>
       </div>
-      <p>© <span data-year>2026</span> 拾光小栈 · 由 <span class="heart">♥</span> 与好奇心驱动</p>
-      <p>零依赖静态站点 · 托管于 GitHub Pages</p>
+      <a href="about.html">关于本站</a>
     </div>
   </footer>
 
