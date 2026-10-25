@@ -1952,11 +1952,6 @@ html[data-photo="dark"] .icon-btn:hover {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
 }
-html[data-photo="dark"] .hitokoto,
-html[data-photo="dark"] .glass-card,
-html[data-photo="dark"] .post-card {
-  background: rgba(10, 14, 24, 0.45);
-}
 html[data-photo="dark"] .float-chip {
   background: rgba(10, 14, 24, 0.45);
   border-color: rgba(255, 255, 255, 0.2);
