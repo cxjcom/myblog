@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.4.4";
+const BG_VER = "1.4.5";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -97,11 +97,11 @@ function makeCover(file) {
     draw(ctx, w, h, t) {
       if (!ok) return;
       if (!REDUCE_BG) alpha = Math.min(1, alpha + 0.02);
-      const z = REDUCE_BG ? 1.04 : 1.05 + 0.03 * Math.sin(t * 0.0022);
+      const z = REDUCE_BG ? 1.02 : 1.02 + 0.015 * Math.sin(t * 0.0022);
       const scale = Math.max(w / img.width, h / img.height) * z;
       const dw = img.width * scale, dh = img.height * scale;
-      const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.012);
-      const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.012);
+      const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.007);
+      const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.007);
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.drawImage(img, dx, dy, dw, dh);
@@ -114,17 +114,6 @@ function makeCover(file) {
 /* 亮星十字星芒 */
 
 
-/* ---------------- 全页轻纱：按主题调整壁纸亮度，保证文字可读 ---------------- */
-const BG_VEILS = {
-  aurora: [0.07, 0.45], matrix: [0.07, 0.42], synth: [0.06, 0.42], circuit: [0.07, 0.45],
-  sakura: [0.05, 0.48], fireflies: [0.07, 0.48], clouds: [0.05, 0.45],
-  stars: [0.07, 0.45], nebula: [0.06, 0.42], planet: [0.06, 0.42],
-};
-function drawVeil(ctx, w, h) {
-  const pair = BG_VEILS[document.documentElement.dataset.bg] || [0.35, 0.33];
-  ctx.fillStyle = isDarkBg() ? `rgba(8, 11, 20, ${pair[1]})` : `rgba(247, 249, 252, ${pair[0]})`;
-  ctx.fillRect(0, 0, w, h);
-}
 
 /* ---------------- 主题清单（主题页数据源） ---------------- */
 window.BG_THEMES = [
@@ -178,7 +167,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       vignette(ctx, w, h, dark ? 0.34 : 0.14);
       const p = ptr(canvas);
       const tone = dark ? "226, 232, 240" : "255, 255, 255";
@@ -241,7 +229,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       ctx.font = `${FONT}px ui-monospace, Consolas, monospace`;
       const headA = dark ? 0.9 : 0.55;
       if (tick % 2 === 0) {
@@ -291,7 +278,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       const hy = h * 0.62;
       /* 地平线辉光呼吸 */
       ctx.save();
@@ -375,7 +361,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       const tone = dark ? "56, 189, 248" : "2, 132, 199";
       for (const b of blinks) {
         const a = 0.25 + 0.3 * Math.sin(t * 0.03 + b.ph);
@@ -444,7 +429,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       for (const p of far) {
         p.y += p.vy * 0.55; p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.4;
         if (p.y > h + 12) { p.y = -12; p.x = Math.random() * w; }
@@ -489,7 +473,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       const p = ptr(canvas);
       const step = (f, size, base) => {
         if (p.ok) {
@@ -536,7 +519,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       for (const b of birds) {
         b.x += b.v;
         if (b.x > w + 30) { b.x = -30; b.y = rand(h * 0.12, h * 0.38); }
@@ -575,7 +557,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       for (const b of bright) {
         const a = 0.35 + 0.5 * Math.abs(Math.sin(t * 0.015 + b.ph));
         flare(ctx, b.x, b.y, b.r * 4, "224, 242, 254", a * (dark ? 0.85 : 0.5));
@@ -628,7 +609,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       for (const b of blobs) {
@@ -666,7 +646,6 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
       cover.draw(ctx, w, h, t);
-      drawVeil(ctx, w, h);
       const ma = t * 0.011;
       const px0 = w * 0.72, py0 = h * 0.62;
       const mx = px0 + Math.cos(ma) * w * 0.34;
