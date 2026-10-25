@@ -1868,3 +1868,97 @@ button.chip:hover {
 }
 
 
+
+/* ---------- 暗色壁纸主题：文字自动切换为浅色（纯色无发光） ---------- */
+html[data-photo="dark"] .hero h1,
+html[data-photo="dark"] .page-head h1,
+html[data-photo="dark"] .section-head h2,
+html[data-photo="dark"] .error-page h1 {
+  color: #eef2fa;
+}
+html[data-photo="dark"] .hero-intro,
+html[data-photo="dark"] .hero-motto,
+html[data-photo="dark"] .hero-typed,
+html[data-photo="dark"] .page-head p,
+html[data-photo="dark"] .section-head .more,
+html[data-photo="dark"] .result-count,
+html[data-photo="dark"] .timeline-item a,
+html[data-photo="dark"] .timeline-item time,
+html[data-photo="dark"] .entry .entry-desc,
+html[data-photo="dark"] .entry .entry-side,
+html[data-photo="dark"] .link-card p,
+html[data-photo="dark"] .project-card p,
+html[data-photo="dark"] .about-section p,
+html[data-photo="dark"] .about-list li,
+html[data-photo="dark"] .error-page p {
+  color: #c6cfdd;
+}
+html[data-photo="dark"] .hero h1 .gradient-text,
+html[data-photo="dark"] .page-head h1 .gradient-text,
+html[data-photo="dark"] .gradient-text {
+  background: linear-gradient(135deg, #b7c6ff, #7ee7f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+html[data-photo="dark"] .hero-kicker,
+html[data-photo="dark"] .page-head .kicker,
+html[data-photo="dark"] .kicker {
+  color: #9fb4ff;
+}
+html[data-photo="dark"] .hero-typed #typed {
+  color: #9fd8ff;
+}
+html[data-photo="dark"] .hero-links a,
+html[data-photo="dark"] .error-links a {
+  color: #eef2fa;
+  border-bottom-color: rgba(255, 255, 255, 0.35);
+}
+html[data-photo="dark"] .hero-links a:hover,
+html[data-photo="dark"] .error-links a:hover {
+  color: #9fd8ff;
+  border-bottom-color: #9fd8ff;
+}
+html[data-photo="dark"] .stat b {
+  color: #c8d6ff;
+}
+
+/* ---------- 暗色壁纸主题：玻璃组件改暗色调 ---------- */
+html[data-photo="dark"] .hero-kicker {
+  background: rgba(10, 14, 24, 0.45);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #cdd7e8;
+}
+html[data-photo="dark"] .stat {
+  background: rgba(10, 14, 24, 0.45);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+html[data-photo="dark"] .stat span {
+  color: #aeb9cc;
+}
+html[data-photo="dark"] .btn:not(.btn-primary) {
+  background: rgba(10, 14, 24, 0.45);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #e6ecf5;
+}
+html[data-photo="dark"] .btn:not(.btn-primary):hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+html[data-photo="dark"] .icon-btn {
+  background: rgba(10, 14, 24, 0.45);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #cdd7e8;
+}
+html[data-photo="dark"] .icon-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+html[data-photo="dark"] .hitokoto,
+html[data-photo="dark"] .glass-card,
+html[data-photo="dark"] .post-card {
+  background: rgba(10, 14, 24, 0.45);
+}
+html[data-photo="dark"] .float-chip {
+  background: rgba(10, 14, 24, 0.45);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #cdd7e8;
+}
