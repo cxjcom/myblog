@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.5.2";
+const BG_VER = "1.4.7";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -20,8 +20,6 @@ addEventListener("mouseout", (e) => { if (!e.relatedTarget) { BG_MOUSE.x = -9999
 /* 固定定位的整页画布直接用视口尺寸，不依赖布局时序；
    主题页卡片里的小画布按自身元素测量 */
 function bgSize(canvas) {
-  /* 按设备像素比渲染，高分屏也锐利 */
-  const dpr = Math.min(2, devicePixelRatio || 1);
   let w, h;
   if (getComputedStyle(canvas).position === "fixed") {
     w = innerWidth;
@@ -31,8 +29,8 @@ function bgSize(canvas) {
     w = Math.round(rect.width) || canvas.width || innerWidth;
     h = Math.round(rect.height) || canvas.height || innerHeight;
   }
-  canvas.width = Math.max(1, Math.round(w * dpr));
-  canvas.height = Math.max(1, Math.round(h * dpr));
+  canvas.width = Math.max(1, w);
+  canvas.height = Math.max(1, h);
 }
 const isDarkBg = () => document.documentElement.dataset.theme === "dark";
 function countByArea(w, h, min, max, divisor) {
@@ -119,40 +117,45 @@ function makeCover(file) {
 
 /* ---------------- 主题清单（主题页数据源） ---------------- */
 window.BG_THEMES = [
-  { id: "aurora",  cat: "默认", name: "极光 · 极夜之光", desc: "国际空间站实拍：极光洒在地球夜面上", swatch: "linear-gradient(135deg,#1a2a4a,#4a7a5a)" },
-  { id: "nebula",  cat: "深空", name: "星云 · 恒星摇篮", desc: "哈勃望远镜实拍：猎户座星云的红外色彩", swatch: "linear-gradient(135deg,#3a1a2a,#7a4a3a)" },
-  { id: "planet",  cat: "深空", name: "巨行星 · 朱诺号视角", desc: "朱诺号实拍：木星暗面与高层大气辉光", swatch: "linear-gradient(135deg,#2a1a0a,#7a5a2a)" },
-  { id: "galaxy",  cat: "深空", name: "银河 · 万星之心", desc: "NASA 实拍：银心尘埃在红外波段发光", swatch: "linear-gradient(135deg,#2a1a0a,#8a4a1a)" },
-  { id: "earth",   cat: "深空", name: "蓝星 · 家园俯瞰", desc: "空间站实拍：从 400 公里高空俯瞰地球", swatch: "linear-gradient(135deg,#0a1a2a,#2a6a8a)" },
-  { id: "forest",  cat: "自然", name: "雾林 · 晨雾湖畔", desc: "实景摄影：晨雾漫过森林与静谧湖面", swatch: "linear-gradient(135deg,#4a5a6a,#8a9aaa)" },
-  { id: "clouds",  cat: "自然", name: "云海 · 山巅之上", desc: "实景摄影：立于山巅，云海在脚下流动", swatch: "linear-gradient(135deg,#8aa4ba,#dfe8f0)" },
-  { id: "valley",  cat: "自然", name: "山谷 · 光之峡谷", desc: "实景摄影：光与雾在峡谷间层层晕染", swatch: "linear-gradient(135deg,#6a7a9a,#c8b0c8)" },
-  { id: "autumn",  cat: "自然", name: "秋湖 · 一叶知秋", desc: "实景摄影：秋叶飘落在宁静湖面", swatch: "linear-gradient(135deg,#4a5a3a,#9a8a4a)" },
-  { id: "drops",   cat: "微距", name: "水珠 · 雨后微光", desc: "微距摄影：雨后水珠里的光", swatch: "linear-gradient(135deg,#3a4a5a,#7a8a9a)" },
+  { id: "aurora",    cat: "默认",     name: "极光",       desc: "冰岛镜面湖上的极光实景，星尘随光标轻拂", swatch: "linear-gradient(135deg,#0f172a,#134e4a 55%,#a21caf)" },
+  { id: "matrix",    cat: "科技未来", name: "数字雨",     desc: "代码瀑布实景 + 双层字符流持续下落",     swatch: "linear-gradient(160deg,#010f08,#14532d 70%,#22c55e)" },
+  { id: "synth",     cat: "科技未来", name: "霓虹地平线", desc: "条纹落日壁纸之上，网格地面持续流动",   swatch: "linear-gradient(180deg,#1e1b4b,#7c3aed 42%,#ec4899 62%,#111827 62.5%)" },
+  { id: "circuit",   cat: "科技未来", name: "电路脉冲",   desc: "电路板微距实景，光信号沿走线疾驰",     swatch: "linear-gradient(135deg,#020c1b,#0f2a4a 60%,#38bdf8)" },
+  { id: "sakura",    cat: "自然",     name: "樱花雨",     desc: "春樱实景，两层花瓣翻滚飘落",           swatch: "linear-gradient(135deg,#fff1f5,#f9a8d4 60%,#fb7185)" },
+  { id: "fireflies", cat: "自然",     name: "萤火虫",     desc: "夏夜森林实景，光点呼吸明灭、聚向光标", swatch: "linear-gradient(135deg,#02120a,#14532d 55%,#a3e635)" },
+  { id: "clouds",    cat: "自然",     name: "云海",       desc: "日出云海全景缓推，偶有飞鸟掠过",       swatch: "linear-gradient(135deg,#7dd3fc,#e0f2fe 60%,#f8fafc)" },
+  { id: "stars",     cat: "宇宙",     name: "星野",       desc: "银河夜景壁纸，亮星闪耀、流星 Regular", swatch: "linear-gradient(135deg,#010409,#0f1c3f 60%,#475569)" },
+  { id: "nebula",    cat: "宇宙",     name: "星云",       desc: "深空星云壁纸，云气呼吸、亮星星芒",     swatch: "linear-gradient(135deg,#1e1b4b,#7c3aed 45%,#db2777 80%,#020617)" },
+  { id: "planet",    cat: "宇宙",     name: "深空行星",   desc: "带环行星壁纸，一颗小月亮缓缓绕行",     swatch: "linear-gradient(135deg,#010409,#1d4ed8 88%,#93c5fd)" },
 ];
 
 window.BG_PRESETS = {
   aurora: { canvas: "aurora" },
+  matrix: { canvas: "matrix" },
+  synth: { canvas: "synth" },
+  circuit: { canvas: "circuit" },
+  sakura: { canvas: "sakura" },
+  fireflies: { canvas: "fireflies" },
+  clouds: { canvas: "clouds" },
+  stars: { canvas: "stars" },
   nebula: { canvas: "nebula" },
   planet: { canvas: "planet" },
-  galaxy: { canvas: "galaxy" },
-  earth: { canvas: "earth" },
-  forest: { canvas: "mist", strength: 0.17 },
-  clouds: { canvas: "mist", strength: 0.28 },
-  valley: { canvas: "mist", strength: 0.1 },
-  drops: { canvas: "glow" },
-  autumn: { canvas: "leaves" },
 };
 
 /* ---------------- 画师们：壁纸底层 + 动态层 ---------------- */
 window.BG_PAINTERS = {
-  /* —— 极光：星尘粒子，随光标轻拂 —— */
+  /* —— 极光：实景壁纸 + 星尘连线（受光标扰动） —— */
   aurora(canvas, ctx) {
     let w, h, raf, t = 0, dots = [];
     const cover = makeCover("aurora.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark
+        ? [[0, "#0a0e24"], [0.55, "#141a3a"], [1, "#1b1f4a"]]
+        : [[0, "#eef3ff"], [0.6, "#f6f0ff"], [1, "#fdeffb"]]);
+    });
     const resize = () => { bgSize(canvas); w = canvas.width; h = canvas.height; };
     const seed = () => {
-      dots = Array.from({ length: countByArea(w, h, 12, 46, 32000) }, () => ({
+      dots = Array.from({ length: countByArea(w, h, 12, 44, 34000) }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         vx: 0, vy: 0, bvx: (Math.random() - 0.5) * 0.3, bvy: (Math.random() - 0.5) * 0.3,
         r: Math.random() * 1.5 + 0.5,
@@ -162,36 +165,11 @@ window.BG_PAINTERS = {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
-      /* 流动的极光光带：让真实照片里的极光「舞动」起来 */
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      const ribbons = [
-        { c: "80, 250, 170", base: 0.3, ph: 0, f: 0.008, amp: 0.1 },
-        { c: "150, 120, 250", base: 0.42, ph: 2.4, f: 0.006, amp: 0.08 },
-      ];
-      for (const cur of ribbons) {
-        const stepX = Math.max(30, w / 40);
-        for (let px = 0; px <= w; px += stepX) {
-          const yTop = h * (cur.base + cur.amp) + Math.sin(px * cur.f + t * 0.01 + cur.ph) * h * 0.08;
-          const len = h * (0.26 + 0.08 * Math.sin(px * 0.016 - t * 0.008 + cur.ph));
-          const fade = 0.5 + 0.5 * Math.sin(px * 0.005 - t * 0.006 + cur.ph * 2);
-          const a = (dark ? 0.16 : 0.1) * (0.3 + fade);
-          const g = ctx.createLinearGradient(px, yTop, px, yTop + len);
-          g.addColorStop(0, `rgba(${cur.c},0)`);
-          g.addColorStop(0.4, `rgba(${cur.c},${a})`);
-          g.addColorStop(1, `rgba(${cur.c},0)`);
-          ctx.strokeStyle = g;
-          ctx.lineWidth = 26;
-          ctx.beginPath();
-          ctx.moveTo(px, yTop);
-          ctx.lineTo(px, yTop + len);
-          ctx.stroke();
-        }
-      }
-      ctx.restore();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      vignette(ctx, w, h, dark ? 0.34 : 0.14);
       const p = ptr(canvas);
-      const tone = dark ? "214, 226, 240" : "255, 255, 255";
+      const tone = dark ? "226, 232, 240" : "255, 255, 255";
       for (const d of dots) {
         if (p.ok) {
           const dx = d.x - p.x, dy = d.y - p.y;
@@ -208,7 +186,7 @@ window.BG_PAINTERS = {
         for (let j = i + 1; j < dots.length; j++) {
           const dist = Math.hypot(dots[i].x - dots[j].x, dots[i].y - dots[j].y);
           if (dist < 100) {
-            ctx.strokeStyle = `rgba(${tone}, ${0.16 * (1 - dist / 100)})`;
+            ctx.strokeStyle = `rgba(${tone}, ${0.18 * (1 - dist / 100)})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(dots[i].x, dots[i].y);
@@ -216,9 +194,8 @@ window.BG_PAINTERS = {
             ctx.stroke();
           }
         }
-        glowDot(ctx, dots[i].x, dots[i].y, dots[i].r * 4, tone, dark ? 0.5 : 0.5);
+        glowDot(ctx, dots[i].x, dots[i].y, dots[i].r * 4, "165, 243, 252", dark ? 0.5 : 0.55);
       }
-      vignette(ctx, w, h, dark ? 0.32 : 0.1);
       raf = requestAnimationFrame(frame);
     }
     addEventListener("resize", () => { resize(); seed(); });
@@ -228,30 +205,53 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 星云：亮星星芒 + 缓慢流光 —— */
-  nebula(canvas, ctx) {
-    let w, h, raf, t = 0, bright = [];
-    const cover = makeCover("nebula.jpg");
+  /* —— 数字雨：壁纸 + 持续下落的近景字符流 —— */
+  matrix(canvas, ctx) {
+    const FONT = 15, TRAIL = 12;
+    const GLYPHS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789<>/{}[]=+*#";
+    let w, h, raf, tick = 0, cols = [];
+    const cover = makeCover("matrix.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark
+        ? [[0, "#010a04"], [0.6, "#03170b"], [1, "#05240f"]]
+        : [[0, "#f0fbf3"], [0.6, "#e2f6e9"], [1, "#d5f0de"]]);
+    });
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      bright = Array.from({ length: 9 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 1.8 + Math.random() * 1.6, ph: rand(0, 6.28) }));
+      const n = Math.ceil(w / (FONT + 6) / 1.6);
+      cols = Array.from({ length: n }, (_, i) => ({
+        x: i * (FONT + 6) * 1.6 + 6, y: rand(-h, h), v: rand(1.8, 4), trail: [],
+      }));
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
-      t += 1;
+      tick++;
       const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      for (let i = 0; i < 2; i++) {
-        const px = w * (0.3 + i * 0.4) + Math.sin(t * 0.002 + i * 2.5) * w * 0.05;
-        const py = h * (0.4 + i * 0.2) + Math.cos(t * 0.0016 + i * 1.8) * h * 0.04;
-        glowDot(ctx, px, py, Math.min(w, h) * 0.26, "255, 220, 245", (dark ? 0.2 : 0.12) * (0.6 + 0.4 * Math.sin(t * 0.005 + i * 2)));
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      ctx.font = `${FONT}px ui-monospace, Consolas, monospace`;
+      const headA = dark ? 0.9 : 0.55;
+      if (tick % 2 === 0) {
+        for (const col of cols) {
+          col.trail.push({ y: col.y, ch: GLYPHS[(Math.random() * GLYPHS.length) | 0] });
+          while (col.trail.length > TRAIL) col.trail.shift();
+          col.y += col.v * 3;
+          if (col.y > h + TRAIL * FONT) { col.y = rand(-300, -20); col.trail = []; col.v = rand(1.8, 4); }
+        }
       }
-      ctx.restore();
-      for (const b of bright) {
-        const a = 0.3 + 0.45 * Math.abs(Math.sin(t * 0.014 + b.ph));
-        flare(ctx, b.x, b.y, b.r * 4, "255, 245, 230", a * (dark ? 0.8 : 0.55));
+      for (const col of cols) {
+        const n = col.trail.length;
+        for (let i = 0; i < n; i++) {
+          const g = col.trail[i];
+          ctx.fillStyle = `rgba(134, 239, 172, ${((i + 1) / n) ** 1.5 * (dark ? 0.4 : 0.3)})`;
+          ctx.fillText(g.ch, col.x, g.y);
+        }
+        if (n) {
+          const head = col.trail[n - 1];
+          glowDot(ctx, col.x + FONT / 2, head.y - FONT / 2, FONT * 1.5, "134, 239, 172", headA * 0.4);
+          ctx.fillStyle = `rgba(${dark ? "220, 252, 231" : "22, 128, 61"}, ${headA})`;
+          ctx.fillText(head.ch, col.x, head.y);
+        }
       }
       vignette(ctx, w, h, dark ? 0.3 : 0.1);
       raf = requestAnimationFrame(frame);
@@ -263,27 +263,124 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 行星：静谧星光微闪 —— */
-  planet(canvas, ctx) {
-    let w, h, raf, t = 0, stars = [];
-    const cover = makeCover("planet.jpg");
+  /* —— 霓虹地平线：壁纸 + 流动的网格扫描线 —— */
+  synth(canvas, ctx) {
+    let w, h, raf, t = 0;
+    const cover = makeCover("synth.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark
+        ? [[0, "#050112"], [0.45, "#2d0a52"], [0.62, "#7a1a5e"], [0.6201, "#12051f"], [1, "#1c0a2e"]]
+        : [[0, "#ffe9f3"], [0.45, "#ffd0e4"], [0.62, "#ffb3c8"], [0.6201, "#fbe6f2"], [1, "#f3d9ee"]]);
+    });
+    function frame() {
+      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
+      const dark = isDarkBg();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      const hy = h * 0.62;
+      /* 地平线辉光呼吸 */
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      glowDot(ctx, w / 2, hy, w * 0.3, "236, 72, 153", (dark ? 0.14 : 0.1) * (0.75 + 0.25 * Math.sin(t * 0.02)));
+      ctx.restore();
+      /* 网格地面上的流动扫描线（让壁纸的地面「动」起来） */
+      const lineA = dark ? 0.4 : 0.3;
+      for (let i = 0; i < 12; i++) {
+        const p = ((i + t / 52) % 12) / 12;
+        const y = hy + Math.pow(p, 2.3) * (h - hy);
+        ctx.strokeStyle = `rgba(240, 171, 252, ${lineA * (0.15 + p * 0.85)})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+      vignette(ctx, w, h, dark ? 0.34 : 0.12);
+      raf = requestAnimationFrame(frame);
+    }
+    addEventListener("resize", () => { bgSize(canvas); w = canvas.width; h = canvas.height; });
+    bgSize(canvas); w = canvas.width; h = canvas.height;
+    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
+    else frame();
+    return () => cancelAnimationFrame(raf);
+  },
+
+  /* —— 电路脉冲：壁纸 + 沿走线疾驰的光信号 —— */
+  circuit(canvas, ctx) {
+    let w, h, raf, t = 0, paths = [], pulses = [], blinks = [];
+    const cover = makeCover("circuit.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark ? [[0, "#020c1b"], [1, "#07182e"]] : [[0, "#eef5fc"], [1, "#ddeafc"]]);
+    });
+    const genPaths = () => {
+      const list = [];
+      const GAP = 26;
+      for (let i = 0; i < 26; i++) {
+        let px = Math.round(rand(0, w) / GAP) * GAP + 13;
+        let py = Math.round(rand(0, h) / GAP) * GAP + 13;
+        let ang = Math.random() < 0.5 ? 0 : Math.PI / 2;
+        const pts = [[px, py]];
+        const segs = 2 + (Math.random() * 3 | 0);
+        for (let sgi = 0; sgi < segs; sgi++) {
+          const len = GAP * (2 + (Math.random() * 5 | 0)) * (Math.random() < 0.5 ? 1 : -1);
+          if (ang === 0) px += len; else py += len;
+          pts.push([px, py]);
+          px = Math.round(px / GAP) * GAP + 13;
+          py = Math.round(py / GAP) * GAP + 13;
+          pts.push([px, py]);
+          ang = Math.random() < 0.5 ? 0 : Math.PI / 2;
+        }
+        list.push({ pts });
+      }
+      return list;
+    };
+    const pathLen = (pts) => {
+      let L = 0;
+      for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      return L;
+    };
+    const pointAt = (pts, dist) => {
+      let acc = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const sl = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+        if (acc + sl >= dist) {
+          const k = (dist - acc) / sl;
+          return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * k, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k];
+        }
+        acc += sl;
+      }
+      return pts[pts.length - 1];
+    };
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      stars = Array.from({ length: countByArea(w, h, 30, 90, 18000) }, () => ({
-        x: Math.random() * w, y: Math.random() * h, r: 0.4 + Math.random() * 1, ph: rand(0, 6.28), sp: rand(0.5, 1.4),
-      }));
+      paths = genPaths();
+      pulses = Array.from({ length: 12 }, () => ({ p: paths[(Math.random() * paths.length) | 0], d: rand(0, 400), v: rand(1.4, 3.2) }));
+      blinks = paths.filter(() => Math.random() < 0.4).map((p) => ({ p, ph: rand(0, 6.28) }));
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
-      for (const s of stars) {
-        const a = 0.15 + 0.4 * (0.5 + 0.5 * Math.sin(t * 0.02 * s.sp + s.ph));
-        ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      const tone = dark ? "56, 189, 248" : "2, 132, 199";
+      for (const b of blinks) {
+        const a = 0.25 + 0.3 * Math.sin(t * 0.03 + b.ph);
+        const [ex, ey] = b.p.pts[b.p.pts.length - 1];
+        glowDot(ctx, ex, ey, 10, tone, dark ? a : a * 0.7);
       }
-      vignette(ctx, w, h, dark ? 0.28 : 0.1);
+      for (const pu of pulses) {
+        const L = pathLen(pu.p.pts);
+        pu.d += pu.v;
+        if (pu.d > L + 30) pu.d = -10;
+        if (pu.d < 0 || pu.d > L) continue;
+        const [hx, hy] = pointAt(pu.p.pts, pu.d);
+        for (let k = 1; k <= 4; k++) {
+          const [tx2, ty2] = pointAt(pu.p.pts, Math.max(0, pu.d - k * 9));
+          ctx.fillStyle = `rgba(${tone}, ${(0.5 - k * 0.11) * (dark ? 1 : 0.8)})`;
+          ctx.beginPath(); ctx.arc(tx2, ty2, 2.2 - k * 0.3, 0, 7); ctx.fill();
+        }
+        glowDot(ctx, hx, hy, 13, tone, dark ? 0.9 : 0.7);
+      }
+      vignette(ctx, w, h, dark ? 0.3 : 0.1);
       raf = requestAnimationFrame(frame);
     }
     addEventListener("resize", resize);
@@ -293,38 +390,189 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 银河：流星划过 —— */
-  galaxy(canvas, ctx) {
-    let w, h, raf, t = 0, meteor = { m: null, next: 90 }, shimmer = [];
-    const cover = makeCover("galaxy.jpg");
+  /* —— 樱花雨：壁纸 + 两层翻滚花瓣 —— */
+  sakura(canvas, ctx) {
+    let w, h, raf, t = 0, near = [], far = [];
+    const cover = makeCover("sakura.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark
+        ? [[0, "#241426"], [0.6, "#3d1f38"], [1, "#5c2a44"]]
+        : [[0, "#fff7f8"], [0.55, "#ffeaf0"], [1, "#fdeee6"]]);
+    });
+    const petal = (s) => ({
+      x: Math.random() * w, y: Math.random() * h, s,
+      rot: rand(0, 6.28), vr: rand(-0.03, 0.03),
+      vy: rand(0.35, 0.9) * (s / 7), ph: rand(0, 6.28), amp: rand(0.4, 1),
+      fs: rand(0.02, 0.05),
+    });
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      shimmer = Array.from({ length: 5 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 40 + Math.random() * 70, ph: rand(0, 6.28) }));
+      near = Array.from({ length: countByArea(w, h, 8, 26, 50000) }, () => petal(rand(5, 9)));
+      far = Array.from({ length: countByArea(w, h, 6, 20, 70000) }, () => petal(rand(2.5, 4)));
+    };
+    const drawPetal = (p, alpha) => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(Math.max(0.15, Math.abs(Math.sin(t * p.fs + p.ph))), 1);
+      ctx.beginPath();
+      ctx.moveTo(0, -p.s);
+      ctx.bezierCurveTo(p.s * 0.9, -p.s * 0.4, p.s * 0.7, p.s * 0.7, 0, p.s);
+      ctx.bezierCurveTo(-p.s * 0.7, p.s * 0.7, -p.s * 0.9, -p.s * 0.4, 0, -p.s);
+      ctx.fillStyle = `rgba(255, 214, 231, ${alpha})`;
+      ctx.fill();
+      ctx.restore();
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      for (const sp of shimmer) {
-        const a = (dark ? 0.1 : 0.06) * (0.5 + 0.5 * Math.sin(t * 0.006 + sp.ph));
-        glowDot(ctx, sp.x + Math.sin(t * 0.001 + sp.ph) * 30, sp.y, sp.r, "255, 220, 170", a);
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      for (const p of far) {
+        p.y += p.vy * 0.55; p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.4;
+        if (p.y > h + 12) { p.y = -12; p.x = Math.random() * w; }
+        drawPetal(p, dark ? 0.5 : 0.65);
       }
-      ctx.restore();
+      for (const p of near) {
+        p.y += p.vy; p.x += Math.sin(t * 0.01 * p.amp + p.ph) * 0.7;
+        p.rot += p.vr;
+        if (p.y > h + 16) { p.y = -16; p.x = Math.random() * w; }
+        drawPetal(p, dark ? 0.85 : 0.9);
+      }
+      vignette(ctx, w, h, dark ? 0.34 : 0.1);
+      raf = requestAnimationFrame(frame);
+    }
+    addEventListener("resize", resize);
+    resize();
+    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
+    else frame();
+    return () => cancelAnimationFrame(raf);
+  },
+
+  /* —— 萤火虫：壁纸 + 呼吸明灭、聚向光标的光点 —— */
+  fireflies(canvas, ctx) {
+    let w, h, raf, t = 0, flies = [], blur = [];
+    const cover = makeCover("fireflies.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark ? [[0, "#050d05"], [1, "#0f2409"]] : [[0, "#f3f8e8"], [1, "#d5e6c3"]]);
+    });
+    const mkFly = () => ({
+      x: Math.random() * w, y: Math.random() * h * 0.9,
+      ang: rand(0, 6.28), sp: rand(0.15, 0.45),
+      ph: rand(0, 6.28), bl: rand(0.015, 0.045),
+    });
+    const resize = () => {
+      bgSize(canvas); w = canvas.width; h = canvas.height;
+      flies = Array.from({ length: countByArea(w, h, 8, 20, 50000) }, mkFly);
+      blur = Array.from({ length: countByArea(w, h, 5, 10, 90000) }, mkFly);
+    };
+    function frame() {
+      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
+      const dark = isDarkBg();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      const p = ptr(canvas);
+      const step = (f, size, base) => {
+        if (p.ok) {
+          const dx = p.x - f.x, dy = p.y - f.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 260 && dist > 40) f.ang += Math.atan2(dy, dx) * 0.002 * (1 - dist / 260);
+        }
+        f.ang += rand(-0.06, 0.06);
+        f.x += Math.cos(f.ang) * f.sp;
+        f.y += Math.sin(f.ang) * f.sp * 0.7;
+        if (f.x < -20) f.x = w + 20; else if (f.x > w + 20) f.x = -20;
+        if (f.y < -20) f.y = h + 20; else if (f.y > h * 0.96) f.y = -20;
+        const a = base + (dark ? 0.55 : 0.45) * Math.abs(Math.sin(t * f.bl + f.ph));
+        glowDot(ctx, f.x, f.y, size * 2.8, "250, 204, 21", a * 0.55);
+        ctx.fillStyle = `rgba(254, 249, 195, ${Math.min(1, a + 0.2)})`;
+        ctx.beginPath(); ctx.arc(f.x, f.y, size * 0.26, 0, 7); ctx.fill();
+      };
+      for (const f of blur) step(f, 7, 0.12);
+      for (const f of flies) step(f, 3.4, 0.2);
+      vignette(ctx, w, h, dark ? 0.34 : 0.12);
+      raf = requestAnimationFrame(frame);
+    }
+    addEventListener("resize", resize);
+    resize();
+    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
+    else frame();
+    return () => cancelAnimationFrame(raf);
+  },
+
+  /* —— 云海：壁纸缓推 + 掠过的飞鸟 —— */
+  clouds(canvas, ctx) {
+    let w, h, raf, t = 0, birds = [];
+    const cover = makeCover("clouds.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark ? [[0, "#0d1730"], [1, "#1d2c4d"]] : [[0, "#8ecdf8"], [1, "#f2fafe"]]);
+    });
+    const resize = () => {
+      bgSize(canvas); w = canvas.width; h = canvas.height;
+      birds = Array.from({ length: 3 }, () => ({ x: rand(0, w), y: rand(h * 0.12, h * 0.38), v: rand(0.5, 0.9), ph: rand(0, 6.28), s: rand(4, 7) }));
+    };
+    function frame() {
+      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
+      const dark = isDarkBg();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      for (const b of birds) {
+        b.x += b.v;
+        if (b.x > w + 30) { b.x = -30; b.y = rand(h * 0.12, h * 0.38); }
+        const flap = Math.abs(Math.sin(t * 0.09 + b.ph));
+        ctx.strokeStyle = dark ? "rgba(15, 23, 42, 0.8)" : "rgba(51, 65, 85, 0.7)";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(b.x - b.s, b.y + flap * b.s * 0.5);
+        ctx.quadraticCurveTo(b.x, b.y - flap * b.s * 0.6, b.x + b.s, b.y + flap * b.s * 0.5);
+        ctx.stroke();
+      }
+      vignette(ctx, w, h, dark ? 0.32 : 0.1);
+      raf = requestAnimationFrame(frame);
+    }
+    addEventListener("resize", resize);
+    resize();
+    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
+    else frame();
+    return () => cancelAnimationFrame(raf);
+  },
+
+  /* —— 星野：壁纸 + 亮星星芒 + 流星 —— */
+  stars(canvas, ctx) {
+    let w, h, raf, t = 0, bright = [], meteor = { m: null, next: 60 };
+    const cover = makeCover("stars.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark ? [[0, "#010309"], [1, "#12204a"]] : [[0, "#c9dcff"], [1, "#f6f9ff"]]);
+    });
+    const resize = () => {
+      bgSize(canvas); w = canvas.width; h = canvas.height;
+      bright = Array.from({ length: 6 }, () => ({ x: Math.random() * w, y: Math.random() * h * 0.7, r: rand(1.6, 2.6), ph: rand(0, 6.28) }));
+    };
+    function frame() {
+      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
+      const dark = isDarkBg();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      for (const b of bright) {
+        const a = 0.35 + 0.5 * Math.abs(Math.sin(t * 0.015 + b.ph));
+        flare(ctx, b.x, b.y, b.r * 4, "224, 242, 254", a * (dark ? 0.85 : 0.5));
+      }
       if (!meteor.m && --meteor.next <= 0) {
-        meteor.m = { x: w * 0.2 + Math.random() * w * 0.6, y: Math.random() * h * 0.3, vx: -(4 + Math.random() * 3), vy: 2 + Math.random() * 1.4, life: 40 };
-        meteor.next = 90 + Math.random() * 160;
+        meteor.m = { x: w * 0.2 + Math.random() * w * 0.6, y: Math.random() * h * 0.28, vx: -(4.5 + Math.random() * 3), vy: 2 + Math.random() * 1.6, life: 42 };
+        meteor.next = rand(150, 400);
       }
       if (meteor.m) {
         const m = meteor.m;
         const tx = m.x - m.vx * 10, ty = m.y - m.vy * 10;
         const g = ctx.createLinearGradient(tx, ty, m.x, m.y);
-        g.addColorStop(0, "rgba(255, 250, 240, 0)");
-        g.addColorStop(1, `rgba(255, 250, 240, ${dark ? 0.85 : 0.5})`);
+        g.addColorStop(0, "rgba(224, 242, 254, 0)");
+        g.addColorStop(1, `rgba(224, 242, 254, ${dark ? 0.9 : 0.6})`);
         ctx.strokeStyle = g;
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.7;
         ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(m.x, m.y); ctx.stroke();
         m.x += m.vx; m.y += m.vy;
         if (--meteor.life <= 0) meteor.m = null;
@@ -339,100 +587,42 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 蓝星：细小星光微闪 —— */
-  earth(canvas, ctx) {
-    let w, h, raf, t = 0, stars = [], drift = [];
-    const cover = makeCover("earth.jpg");
+  /* —— 星云：壁纸 + 呼吸云气 + 星芒 —— */
+  nebula(canvas, ctx) {
+    let w, h, raf, t = 0, bright = [];
+    const cover = makeCover("nebula.jpg");
+    const blobs = [
+      { c: "124, 58, 237", bx: 0.28, by: 0.32, r: 0.36, sp: 0.9, ph: 0 },
+      { c: "219, 39, 119", bx: 0.68, by: 0.4, r: 0.32, sp: 0.7, ph: 1.8 },
+      { c: "34, 211, 238", bx: 0.5, by: 0.66, r: 0.3, sp: 0.8, ph: 3.1 },
+    ];
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark ? [[0, "#040210"], [1, "#0b0620"]] : [[0, "#f6efff"], [1, "#fdeef7"]]);
+    });
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      stars = Array.from({ length: countByArea(w, h, 16, 56, 34000) }, () => ({
-        x: Math.random() * w, y: Math.random() * h, r: 0.3 + Math.random() * 0.9, ph: rand(0, 6.28), sp: 0.5 + Math.random() * 1.4,
-      }));
-      drift = Array.from({ length: 3 }, () => ({ x: Math.random() * w, y: h * (0.3 + Math.random() * 0.4), r: Math.min(w, h) * 0.2, v: rand(0.15, 0.35) }));
-    };
-    function frame() {
-      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
-      t += 1;
-      cover.draw(ctx, w, h, 0);
-      for (const c of drift) {
-        c.x += c.v;
-        if (c.x - c.r > w) c.x = -c.r;
-        glowDot(ctx, c.x, c.y, c.r, "235, 245, 255", dark ? 0.1 : 0.07);
-      }
-      for (const s of stars) {
-        const a = 0.12 + 0.35 * (0.5 + 0.5 * Math.sin(t * 0.02 * s.sp + s.ph));
-        ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
-      }
-      vignette(ctx, w, h, 0.24);
-      raf = requestAnimationFrame(frame);
-    }
-    addEventListener("resize", resize);
-    resize();
-    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
-    else frame();
-    return () => cancelAnimationFrame(raf);
-  },
-
-  /* —— 雾气漂移（雾林 / 云海 / 山谷共用，强度由预设控制） —— */
-  mist(canvas, ctx, preset) {
-    const strength = (preset && preset.strength) || 0.09;
-    let w, h, raf, t = 0, blobs = [];
-    const cover = makeCover(currentId() + ".jpg");
-    const resize = () => {
-      bgSize(canvas); w = canvas.width; h = canvas.height;
-      blobs = Array.from({ length: 8 }, () => ({
-        x: Math.random() * w, y: rand(h * 0.15, h * 0.95),
-        r: rand(Math.min(w, h) * 0.16, Math.min(w, h) * 0.3),
-        v: rand(0.12, 0.3), ph: rand(0, 6.28),
-      }));
+      bright = Array.from({ length: 6 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: rand(1.8, 3), ph: rand(0, 6.28) }));
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
-      const tone = dark ? "180, 195, 215" : "255, 255, 255";
-      for (const b of blobs) {
-        b.x += b.v;
-        if (b.x - b.r > w) b.x = -b.r;
-        const a = strength * (0.7 + 0.3 * Math.sin(t * 0.004 + b.ph));
-        glowDot(ctx, b.x, b.y + Math.sin(t * 0.003 + b.ph) * 12, b.r, tone, a);
-      }
-      vignette(ctx, w, h, dark ? 0.3 : 0.08);
-      raf = requestAnimationFrame(frame);
-    }
-    addEventListener("resize", resize);
-    resize();
-    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
-    else frame();
-    return () => cancelAnimationFrame(raf);
-  },
-
-  /* —— 水珠：光斑呼吸 —— */
-  glow(canvas, ctx) {
-    let w, h, raf, t = 0, spots = [];
-    const cover = makeCover("drops.jpg");
-    const resize = () => {
-      bgSize(canvas); w = canvas.width; h = canvas.height;
-      spots = Array.from({ length: 7 }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        r: rand(45, 90), ph: rand(0, 6.28), sp: rand(0.008, 0.016),
-      }));
-    };
-    function frame() {
-      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
-      t += 1;
-      const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      for (const s of spots) {
-        const a = (dark ? 0.22 : 0.16) * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
-        glowDot(ctx, s.x, s.y, s.r, "220, 235, 250", a);
+      for (const b of blobs) {
+        const breath = 1 + 0.14 * Math.sin(t * 0.004 * b.sp + b.ph);
+        const px = w * b.bx + Math.sin(t * 0.0016 * b.sp + b.ph) * w * 0.04;
+        const py = h * b.by + Math.cos(t * 0.0013 * b.sp + b.ph) * h * 0.04;
+        glowDot(ctx, px, py, Math.min(w, h) * b.r * breath, b.c, (dark ? 0.16 : 0.1) * (0.75 + 0.25 * Math.sin(t * 0.005 * b.sp + b.ph)));
       }
       ctx.restore();
-      vignette(ctx, w, h, dark ? 0.28 : 0.08);
+      for (const b of bright) {
+        const a = 0.35 + 0.5 * Math.abs(Math.sin(t * 0.016 + b.ph));
+        flare(ctx, b.x, b.y, b.r * 4.2, "224, 242, 254", a * (dark ? 0.85 : 0.55));
+      }
+      vignette(ctx, w, h, dark ? 0.32 : 0.1);
       raf = requestAnimationFrame(frame);
     }
     addEventListener("resize", resize);
@@ -442,41 +632,28 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 秋叶：金色落叶飘落 —— */
-  leaves(canvas, ctx) {
-    let w, h, raf, t = 0, leaves = [];
-    const cover = makeCover("autumn.jpg");
-    const resize = () => {
-      bgSize(canvas); w = canvas.width; h = canvas.height;
-      leaves = Array.from({ length: countByArea(w, h, 12, 30, 38000) }, () => ({
-        x: Math.random() * w, y: Math.random() * h, s: rand(3, 6.5),
-        rot: rand(0, 6.28), vr: rand(-0.02, 0.02), vy: rand(0.3, 0.7),
-        ph: rand(0, 6.28), amp: rand(0.4, 0.9), fs: rand(0.015, 0.04),
-      }));
-    };
+  /* —— 深空行星：壁纸 + 绕行的小月亮 —— */
+  planet(canvas, ctx) {
+    let w, h, raf, t = 0;
+    const cover = makeCover("planet.jpg");
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark ? [[0, "#010309"], [1, "#0a1533"]] : [[0, "#bcd7ff"], [1, "#fdf3e3"]]);
+    });
+    const resize = () => { bgSize(canvas); w = canvas.width; h = canvas.height; };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       const dark = isDarkBg();
-      cover.draw(ctx, w, h, 0);
-      for (const p of leaves) {
-        p.y += p.vy;
-        p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.6;
-        p.rot += p.vr;
-        if (p.y > h + 14) { p.y = -14; p.x = Math.random() * w; }
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.scale(Math.max(0.2, Math.abs(Math.sin(t * p.fs + p.ph))), 1);
-        ctx.beginPath();
-        ctx.moveTo(0, -p.s * 1.4);
-        ctx.bezierCurveTo(p.s, -p.s * 0.5, p.s * 0.7, p.s, 0, p.s * 1.2);
-        ctx.bezierCurveTo(-p.s * 0.7, p.s, -p.s, -p.s * 0.5, 0, -p.s * 1.4);
-        ctx.fillStyle = `rgba(222, 184, 100, ${dark ? 0.6 : 0.65})`;
-        ctx.fill();
-        ctx.restore();
-      }
-      vignette(ctx, w, h, dark ? 0.28 : 0.08);
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      const ma = t * 0.011;
+      const px0 = w * 0.72, py0 = h * 0.62;
+      const mx = px0 + Math.cos(ma) * w * 0.34;
+      const my = py0 + Math.sin(ma) * h * 0.2;
+      glowDot(ctx, mx, my, 16, "226, 232, 240", dark ? 0.9 : 0.7);
+      ctx.fillStyle = dark ? "#e8edf4" : "#64748b";
+      ctx.beginPath(); ctx.arc(mx, my, 5, 0, 7); ctx.fill();
+      vignette(ctx, w, h, dark ? 0.32 : 0.12);
       raf = requestAnimationFrame(frame);
     }
     addEventListener("resize", resize);
@@ -486,8 +663,3 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 };
-
-/* 当前主题 id（雾气画师按主题读对应壁纸） */
-function currentId() {
-  return document.documentElement.dataset.bg || "aurora";
-}

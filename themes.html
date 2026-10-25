@@ -7,7 +7,7 @@
   <meta name="description" content="为博客挑选一套背景：科技未来、自然风光、宇宙景观，点击卡片即时切换。">
   <meta name="theme-color" content="#f4f6fc">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=1.5.2">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.4.5">
   <script>
     (function () {
       try {
@@ -79,13 +79,13 @@
     </div>
   </footer>
 
-  <script src="assets/js/posts.js?v=1.5.2"></script>
-  <script src="assets/js/backgrounds.js?v=1.5.2"></script>
-  <script src="assets/js/main.js?v=1.5.2"></script>
+  <script src="assets/js/posts.js?v=1.4.5"></script>
+  <script src="assets/js/backgrounds.js?v=1.4.5"></script>
+  <script src="assets/js/main.js?v=1.4.5"></script>
   <script>
     (function () {
       const groupsBox = document.getElementById("themeGroups");
-      const cats = ["默认", "深空", "自然", "微距"];
+      const cats = ["默认", "科技未来", "自然", "宇宙"];
       const minis = [];
 
       function render() {
@@ -101,7 +101,7 @@
                 ${items
                   .map(
                     (t) => `<button class="theme-card ${t.id === active ? "active" : ""}" data-id="${t.id}" type="button" aria-pressed="${t.id === active}">
-                      <div class="theme-swatch" style="background:url('assets/img/bg/${t.id}.jpg?v=1.5.2') center/cover, ${t.swatch}"></div>
+                      <div class="theme-swatch" style="background:url('assets/img/bg/${t.id}.jpg?v=1.4.5') center/cover, ${t.swatch}"></div>
                       <div class="theme-card-body">
                         <h3>${t.name}${t.id === active ? '<span class="theme-badge">使用中</span>' : ""}</h3>
                         <p>${t.desc}</p>

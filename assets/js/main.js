@@ -81,8 +81,6 @@ function applyBackground(id) {
     localStorage.setItem("bg", id);
   } catch (e) {}
   document.documentElement.dataset.bg = id;
-  document.documentElement.dataset.photo =
-    ["aurora", "nebula", "planet", "galaxy"].includes(id) ? "dark" : "bright";
   if (typeof bgStop === "function") bgStop();
   bgStop = null;
   $$(".aurora, .particles").forEach((el) => el.remove());
