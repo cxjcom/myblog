@@ -405,13 +405,15 @@ function initHome() {
         : window.POSTS.reduce((s, p) => s + p.words, 0);
 }
 
-/* ---------------- 首页：星系光环动态（星核呼吸 / 环带彗星 / 星尘闪烁） ---------------- */
+/* ---------------- 首页：星系动态（星核呼吸 / 内外双环：彗星·星尘·星体） ---------------- */
 function initGalaxyHalo() {
   const host = document.querySelector(".galaxy-float");
   if (!host || reduceMotion) return;
-  /* 轨迹参数由星系照片量得：环心、长短轴（占容器比例）、倾角 */
-  const CX = 0.456, CY = 0.484, A = 0.352, B = 0.19, TILT = (40 * Math.PI) / 180;
-  const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+  /* 两条环带轨迹参数均由照片实测：[0] 内环 [1] 外环 */
+  const RINGS = [
+    { CX: 0.462, CY: 0.489, A: 0.162, B: 0.111, TILT: (38 * Math.PI) / 180 },
+    { CX: 0.505, CY: 0.512, A: 0.442, B: 0.333, TILT: (32 * Math.PI) / 180 },
+  ].map((r) => ({ ...r, cosT: Math.cos(r.TILT), sinT: Math.sin(r.TILT) }));
   const W = () => host.clientWidth;
 
   /* 星核呼吸光晕 */
@@ -419,11 +421,11 @@ function initGalaxyHalo() {
   glow.className = "galaxy-core-glow";
   host.appendChild(glow);
 
-  /* 环带彗星：头 + 7 节渐隐拖尾 */
+  /* 环带彗星：外环金色 / 内环青色，头 + 7 节渐隐拖尾 */
   const comets = [];
   [
-    { color: "gold", loop: 46000, phase: 0 },
-    { color: "cyan", loop: 61000, phase: 0.42 },
+    { ring: 1, color: "gold", loop: 92000, phase: 0 },
+    { ring: 0, color: "cyan", loop: 52000, phase: 0.42 },
   ].forEach((c) => {
     const parts = [];
     for (let k = 0; k < 8; k++) {
@@ -432,30 +434,36 @@ function initGalaxyHalo() {
       host.appendChild(s);
       parts.push(s);
     }
-    comets.push({ color: c.color, loop: c.loop, phase: c.phase, parts });
+    comets.push({ ring: c.ring, color: c.color, loop: c.loop, phase: c.phase, parts });
   });
 
-  /* 环带星尘：沿轨迹散布、按各自节奏闪烁 */
+  /* 环带星尘：两条环带上各撒 6 颗，按各自节奏闪烁 */
   const TINTS = ["#ffffff", "#ffe6b8", "#bcd9ff", "#e6c9ff"];
-  for (let i = 0; i < 12; i++) {
-    const s = document.createElement("span");
-    const th = (i / 12) * Math.PI * 2 + 0.35;
-    const rs = 0.72 + 0.38 * ((i * 7919) % 100) / 100;
-    const x = A * rs * Math.cos(th), y = B * rs * Math.sin(th);
-    s.className = "halo-star" + (i % 4 === 0 ? " halo-star--flare" : "");
-    s.style.left = (CX * W() + x * cosT - y * sinT).toFixed(1) + "px";
-    s.style.top = (CY * host.clientHeight + x * sinT + y * cosT).toFixed(1) + "px";
-    s.style.setProperty("--dur", (2.6 + ((i * 13) % 30) / 10).toFixed(2) + "s");
-    s.style.setProperty("--delay", (-((i * 7) % 40) / 10).toFixed(2) + "s");
-    s.style.setProperty("--tint", TINTS[i % 4]);
-    host.appendChild(s);
-  }
+  RINGS.forEach((R, ri) => {
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement("span");
+      const th = (i / 6) * Math.PI * 2 + 0.35 + ri * 0.5;
+      const rs = 0.9 + 0.2 * ((i * 7919 + ri * 37) % 100) / 100;
+      const x = R.A * rs * Math.cos(th), y = R.B * rs * Math.sin(th);
+      s.className = "halo-star" + ((i + ri) % 4 === 0 ? " halo-star--flare" : "");
+      s.style.left = (R.CX * W() + x * R.cosT - y * R.sinT).toFixed(1) + "px";
+      s.style.top = (R.CY * host.clientHeight + x * R.sinT + y * R.cosT).toFixed(1) + "px";
+      s.style.setProperty("--dur", (2.6 + ((i * 13 + ri * 5) % 30) / 10).toFixed(2) + "s");
+      s.style.setProperty("--delay", (-((i * 7 + ri * 3) % 40) / 10).toFixed(2) + "s");
+      s.style.setProperty("--tint", TINTS[(i + ri) % 4]);
+      host.appendChild(s);
+    }
+  });
 
-  /* 环带星体：带球面明暗的小行星，绕环时前后遮挡模拟立体轨道 */
+  /* 环带星体：外环 4 颗 + 内环 3 颗，绕行时前后遮挡模拟立体轨道 */
   const PLANETS = [
-    { cls: "halo-planet--terra", loop: 74000,  phase: 0.1 },
-    { cls: "halo-planet--azure", loop: 98000,  phase: 0.55 },
-    { cls: "halo-planet--luna",  loop: 121000, phase: 0.82 },
+    { ring: 1, cls: "halo-planet--terra",   loop: 105000, phase: 0.10 },
+    { ring: 1, cls: "halo-planet--azure",   loop: 128000, phase: 0.50 },
+    { ring: 1, cls: "halo-planet--emerald", loop: 152000, phase: 0.80 },
+    { ring: 1, cls: "halo-planet--luna",    loop: 180000, phase: 0.30 },
+    { ring: 0, cls: "halo-planet--rose",    loop: 46000,  phase: 0.20 },
+    { ring: 0, cls: "halo-planet--amber",   loop: 58000,  phase: 0.60 },
+    { ring: 0, cls: "halo-planet--ice",     loop: 71000,  phase: 0.85 },
   ];
   const planets = PLANETS.map((p) => {
     const el = document.createElement("span");
@@ -466,26 +474,31 @@ function initGalaxyHalo() {
 
   const t0 = performance.now();
   function frame(t) {
-    const w = W(), cx = CX * w, cy = CY * host.clientHeight, a = A * w, b = B * w;
+    const w = W(), hgt = host.clientHeight;
+    const geo = RINGS.map((R) => ({
+      cx: R.CX * w, cy: R.CY * hgt, a: R.A * w, b: R.B * w, cosT: R.cosT, sinT: R.sinT,
+    }));
     comets.forEach((c) => {
+      const g = geo[c.ring];
       const th = ((t - t0) / c.loop + c.phase) * Math.PI * 2;
-      const depth = 0.5 + 0.5 * Math.sin(th); /* 转到环后侧时整体变暗 */
+      const depth = 0.5 + 0.5 * Math.sin(th);
       c.parts.forEach((el, k) => {
         const tt = th - k * 0.05;
-        const x = a * Math.cos(tt), y = b * Math.sin(tt);
+        const x = g.a * Math.cos(tt), y = g.b * Math.sin(tt);
         el.style.transform =
-          "translate(" + (cx + x * cosT - y * sinT).toFixed(1) + "px," +
-          (cy + x * sinT + y * cosT).toFixed(1) + "px) scale(" + (1 - k * 0.09).toFixed(2) + ")";
+          "translate(" + (g.cx + x * g.cosT - y * g.sinT).toFixed(1) + "px," +
+          (g.cy + x * g.sinT + y * g.cosT).toFixed(1) + "px) scale(" + (1 - k * 0.09).toFixed(2) + ")";
         el.style.opacity = ((1 - k / c.parts.length) * (0.3 + 0.7 * depth)).toFixed(2);
       });
     });
     planets.forEach((p) => {
+      const g = geo[p.ring];
       const th = ((t - t0) / p.loop + p.phase) * Math.PI * 2;
-      const x = a * Math.cos(th), y = b * Math.sin(th);
+      const x = g.a * Math.cos(th), y = g.b * Math.sin(th);
       const depth = 0.5 + 0.5 * Math.sin(th);
       p.el.style.transform =
-        "translate(" + (cx + x * cosT - y * sinT).toFixed(1) + "px," +
-        (cy + x * sinT + y * cosT).toFixed(1) + "px) translate(-50%, -50%) scale(" +
+        "translate(" + (g.cx + x * g.cosT - y * g.sinT).toFixed(1) + "px," +
+        (g.cy + x * g.sinT + y * g.cosT).toFixed(1) + "px) translate(-50%, -50%) scale(" +
         (0.78 + 0.34 * depth).toFixed(2) + ")";
       p.el.style.opacity = (0.55 + 0.45 * depth).toFixed(2);
       /* 远端从星系背后穿过，近端从星系前面经过 */

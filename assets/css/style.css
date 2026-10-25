@@ -2566,22 +2566,46 @@ html[data-photo="dark"] .float-chip {
   box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.12);
 }
 .halo-planet--terra {
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
   background: radial-gradient(circle at 32% 30%, #ffd9b0 0%, #e8935c 38%, #9c4a2f 78%, #5c2a1c 100%);
-  box-shadow: 0 0 12px 3px rgba(232, 147, 92, 0.35);
+  box-shadow: 0 0 10px 3px rgba(232, 147, 92, 0.35);
 }
 .halo-planet--azure {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
   background: radial-gradient(circle at 32% 30%, #d6f0ff 0%, #6db3f2 40%, #2c5fae 78%, #16336b 100%);
-  box-shadow: 0 0 12px 3px rgba(109, 179, 242, 0.35);
+  box-shadow: 0 0 10px 3px rgba(109, 179, 242, 0.35);
+}
+.halo-planet--emerald {
+  width: 9px;
+  height: 9px;
+  background: radial-gradient(circle at 32% 30%, #d9ffe9 0%, #55c98b 40%, #1f7a4d 78%, #0e472c 100%);
+  box-shadow: 0 0 10px 3px rgba(85, 201, 139, 0.35);
 }
 .halo-planet--luna {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: radial-gradient(circle at 32% 30%, #f4f4f6 0%, #c2c6ce 45%, #8a8f9a 80%, #5c606c 100%);
   box-shadow: 0 0 8px 2px rgba(200, 205, 215, 0.3);
+}
+.halo-planet--rose {
+  width: 7px;
+  height: 7px;
+  background: radial-gradient(circle at 32% 30%, #ffe3ee 0%, #f08bb4 42%, #b34a7c 78%, #6b2447 100%);
+  box-shadow: 0 0 9px 3px rgba(240, 139, 180, 0.4);
+}
+.halo-planet--amber {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle at 32% 30%, #fff3cf 0%, #f2c14e 45%, #b07d1e 80%, #6b4a0e 100%);
+  box-shadow: 0 0 8px 2px rgba(242, 193, 78, 0.4);
+}
+.halo-planet--ice {
+  width: 5px;
+  height: 5px;
+  background: radial-gradient(circle at 32% 30%, #ffffff 0%, #cfe6ff 45%, #7fa8d9 80%, #45688f 100%);
+  box-shadow: 0 0 7px 2px rgba(190, 220, 255, 0.45);
 }
 /* 土星式小光环：套在暖色行星上 */
 .halo-planet--terra::after {
