@@ -405,34 +405,67 @@ function initHome() {
         : window.POSTS.reduce((s, p) => s + p.words, 0);
 }
 
-/* ---------------- 首页：星系光环粒子（沿照片中环带的真实轨迹巡游） ---------------- */
+/* ---------------- 首页：星系光环动态（星核呼吸 / 环带彗星 / 星尘闪烁） ---------------- */
 function initGalaxyHalo() {
   const host = document.querySelector(".galaxy-float");
   if (!host || reduceMotion) return;
   /* 轨迹参数由星系照片量得：环心、长短轴（占容器比例）、倾角 */
   const CX = 0.456, CY = 0.484, A = 0.352, B = 0.19, TILT = (40 * Math.PI) / 180;
-  const N = 3, LOOP = 56000;
-  const beads = [];
-  for (let i = 0; i < N; i++) {
-    const b = document.createElement("span");
-    b.className = "halo-bead halo-bead--" + (i + 1);
-    host.appendChild(b);
-    beads.push(b);
-  }
   const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+  const W = () => host.clientWidth;
+
+  /* 星核呼吸光晕 */
+  const glow = document.createElement("span");
+  glow.className = "galaxy-core-glow";
+  host.appendChild(glow);
+
+  /* 环带彗星：头 + 7 节渐隐拖尾 */
+  const comets = [];
+  [
+    { color: "gold", loop: 46000, phase: 0 },
+    { color: "cyan", loop: 61000, phase: 0.42 },
+  ].forEach((c) => {
+    const parts = [];
+    for (let k = 0; k < 8; k++) {
+      const s = document.createElement("span");
+      s.className = "halo-comet halo-comet--" + c.color;
+      host.appendChild(s);
+      parts.push(s);
+    }
+    comets.push({ color: c.color, loop: c.loop, phase: c.phase, parts });
+  });
+
+  /* 环带星尘：沿轨迹散布、按各自节奏闪烁 */
+  const TINTS = ["#ffffff", "#ffe6b8", "#bcd9ff", "#e6c9ff"];
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement("span");
+    const th = (i / 12) * Math.PI * 2 + 0.35;
+    const rs = 0.72 + 0.38 * ((i * 7919) % 100) / 100;
+    const x = A * rs * Math.cos(th), y = B * rs * Math.sin(th);
+    s.className = "halo-star" + (i % 4 === 0 ? " halo-star--flare" : "");
+    s.style.left = (CX * W() + x * cosT - y * sinT).toFixed(1) + "px";
+    s.style.top = (CY * host.clientHeight + x * sinT + y * cosT).toFixed(1) + "px";
+    s.style.setProperty("--dur", (2.6 + ((i * 13) % 30) / 10).toFixed(2) + "s");
+    s.style.setProperty("--delay", (-((i * 7) % 40) / 10).toFixed(2) + "s");
+    s.style.setProperty("--tint", TINTS[i % 4]);
+    host.appendChild(s);
+  }
+
   const t0 = performance.now();
   function frame(t) {
-    const w = host.clientWidth;
-    const cx = CX * w, cy = CY * host.clientHeight, a = A * w, b = B * w;
-    for (let i = 0; i < N; i++) {
-      const th = ((t - t0) / LOOP + i / N) * Math.PI * 2;
-      const x = a * Math.cos(th), y = b * Math.sin(th);
-      const px = cx + x * cosT - y * sinT;
-      const py = cy + x * sinT + y * cosT;
-      beads[i].style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px)";
-      /* 环的后侧（远离观察者）稍暗，制造远近层次 */
-      beads[i].style.opacity = (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(th))).toFixed(2);
-    }
+    const w = W(), cx = CX * w, cy = CY * host.clientHeight, a = A * w, b = B * w;
+    comets.forEach((c) => {
+      const th = ((t - t0) / c.loop + c.phase) * Math.PI * 2;
+      const depth = 0.5 + 0.5 * Math.sin(th); /* 转到环后侧时整体变暗 */
+      c.parts.forEach((el, k) => {
+        const tt = th - k * 0.05;
+        const x = a * Math.cos(tt), y = b * Math.sin(tt);
+        el.style.transform =
+          "translate(" + (cx + x * cosT - y * sinT).toFixed(1) + "px," +
+          (cy + x * sinT + y * cosT).toFixed(1) + "px) scale(" + (1 - k * 0.09).toFixed(2) + ")";
+        el.style.opacity = ((1 - k / c.parts.length) * (0.3 + 0.7 * depth)).toFixed(2);
+      });
+    });
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
