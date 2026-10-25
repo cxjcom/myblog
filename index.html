@@ -11,7 +11,7 @@
   <meta property="og:description" content="拾光的个人博客：技术笔记、读书心得、效率工具与生活碎片。">
   <meta property="og:type" content="website">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=1.7.4">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.8.0">
   <script>
     (function () {
       try {
@@ -36,6 +36,8 @@
         <li><a href="projects.html" data-page="projects">项目</a></li>
         <li><a href="links.html" data-page="links">导航</a></li>
         <li><a href="about.html" data-page="about">关于</a></li>
+        <li><a href="album.html" data-page="album">相册</a></li>
+        <li><a href="music.html" data-page="music">音乐</a></li>
         <li><a href="profile.html" data-page="me">我的</a></li>
       </ul>
       <div class="nav-actions">
@@ -128,6 +130,34 @@
         <a class="more" href="archive.html">时光机 →</a>
       </div>
       <div class="grid-cards" id="latestGrid"></div>
+    </section>
+
+    <!-- 我的空间 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">My Space</span>
+          <h2>我的空间</h2>
+        </div>
+      </div>
+      <div class="space-grid">
+        <a class="space-card glass-card reveal" style="--d:.05s" href="album.html">
+          <span class="space-icon" aria-hidden="true">📸</span>
+          <div>
+            <h3>相册空间</h3>
+            <p>生活的快门瞬间，照片都会收进这道光里。</p>
+          </div>
+          <span class="space-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="space-card glass-card reveal" style="--d:.1s" href="music.html">
+          <span class="space-icon" aria-hidden="true">🎵</span>
+          <div>
+            <h3>音乐空间</h3>
+            <p>循环中的旋律与心情，收藏喜欢的每一首歌。</p>
+          </div>
+          <span class="space-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
     </section>
 
     <!-- 一言 -->
