@@ -14,10 +14,20 @@ addEventListener("mousemove", (e) => { BG_MOUSE.x = e.clientX; BG_MOUSE.y = e.cl
 addEventListener("mouseout", (e) => { if (!e.relatedTarget) { BG_MOUSE.x = -99999; } }, { passive: true });
 
 /* ---------------- 工具 ---------------- */
+/* 固定定位的整页画布直接用视口尺寸，不依赖布局时序；
+   主题页卡片里的小画布按自身元素测量 */
 function bgSize(canvas) {
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = Math.max(1, Math.round(rect.width));
-  canvas.height = Math.max(1, Math.round(rect.height));
+  let w, h;
+  if (getComputedStyle(canvas).position === "fixed") {
+    w = innerWidth;
+    h = innerHeight;
+  } else {
+    const rect = canvas.getBoundingClientRect();
+    w = Math.round(rect.width) || canvas.width || innerWidth;
+    h = Math.round(rect.height) || canvas.height || innerHeight;
+  }
+  canvas.width = Math.max(1, w);
+  canvas.height = Math.max(1, h);
 }
 const isDarkBg = () => document.documentElement.dataset.theme === "dark";
 function countByArea(w, h, min, max, divisor) {
