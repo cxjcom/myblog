@@ -2619,3 +2619,8 @@ html[data-photo="dark"] .float-chip {
   border-radius: 50%;
   transform: translate(-50%, -50%) rotate(-24deg);
 }
+.about-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

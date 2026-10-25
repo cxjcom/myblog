@@ -36,7 +36,7 @@ function profileAvatarHTML(p, cls) {
   return escapeHTML((p.name || "拾").charAt(0));
 }
 
-/* 把资料应用到全站（首页问候 / 星球头像 / 品牌印章首字） */
+/* 把资料应用到全站（首页问候 / 星球头像 / 品牌印章首字 / 关于页） */
 function applyProfileToSite(p) {
   const name = p.name || "拾光";
   $$("[data-profile-name]").forEach((el) => (el.textContent = name));
@@ -50,6 +50,18 @@ function applyProfileToSite(p) {
     }
   }
   $$(".brand-seal").forEach((el) => (el.textContent = name.charAt(0)));
+  /* 关于页：头像字 / 头像图与 GitHub 链接同步 */
+  const aboutAvatar = $(".about-avatar");
+  if (aboutAvatar) {
+    aboutAvatar.innerHTML = p.avatar
+      ? `<img src="${p.avatar}" alt="${name} 的头像">`
+      : escapeHTML(name.charAt(0));
+  }
+  $$("[data-profile-github]").forEach((a) => {
+    const gh = p.github || "";
+    a.textContent = "@" + gh;
+    a.href = "https://github.com/" + gh;
+  });
 }
 
 document.addEventListener("profilechange", (e) => applyProfileToSite(e.detail));
