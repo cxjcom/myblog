@@ -2057,7 +2057,6 @@ html[data-photo="dark"] .float-chip {
   width: 100%;
   height: auto;
   filter: drop-shadow(0 26px 60px rgba(50, 70, 180, 0.5));
-  animation: galaxy-spin 260s linear infinite;
 }
 .galaxy-ring {
   position: absolute;
