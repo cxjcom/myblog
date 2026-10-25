@@ -65,7 +65,9 @@
       <!-- 浏览视图 -->
       <div class="glass-card profile-card" id="profileView">
         <div class="profile-top">
-          <div class="profile-avatar" id="viewAvatar">拾</div>
+          <div class="profile-avatar-ring">
+            <div class="profile-avatar" id="viewAvatar">拾</div>
+          </div>
           <div class="profile-id">
             <h2 id="viewName">拾光</h2>
             <p class="profile-motto" id="viewMotto"></p>
@@ -113,6 +115,122 @@
         <p class="form-note">资料仅保存在本机浏览器（localStorage），不会上传到任何服务器。</p>
       </form>
     </section>
+
+    <!-- 创作数据 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Numbers</span>
+          <h2>创作数据</h2>
+        </div>
+      </div>
+      <div class="me-stats" id="meStats">
+        <div class="me-stat glass-card reveal" style="--d:.05s"><b data-count="0">0</b><span>篇文章</span></div>
+        <div class="me-stat glass-card reveal" style="--d:.1s"><b data-count="0">0</b><span>累计字数</span></div>
+        <div class="me-stat glass-card reveal" style="--d:.15s"><b data-count="0">0</b><span>个标签</span></div>
+        <div class="me-stat glass-card reveal" style="--d:.2s"><b data-count="0">0</b><span>天创作旅程</span></div>
+      </div>
+    </section>
+
+    <!-- 技能与兴趣：百分比值直接改下面的 --w 和文字即可 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Skills</span>
+          <h2>技能与兴趣</h2>
+        </div>
+      </div>
+      <div class="glass-card me-skills reveal">
+        <div class="skill" style="--w:85%">
+          <div class="skill-head"><span>前端开发</span><span>85%</span></div>
+          <div class="skill-track"><div class="skill-fill"></div></div>
+        </div>
+        <div class="skill" style="--w:72%">
+          <div class="skill-head"><span>写作表达</span><span>72%</span></div>
+          <div class="skill-track"><div class="skill-fill"></div></div>
+        </div>
+        <div class="skill" style="--w:78%">
+          <div class="skill-head"><span>读书</span><span>78%</span></div>
+          <div class="skill-track"><div class="skill-fill"></div></div>
+        </div>
+        <div class="skill" style="--w:62%">
+          <div class="skill-head"><span>摄影</span><span>62%</span></div>
+          <div class="skill-track"><div class="skill-fill"></div></div>
+        </div>
+        <div class="skill" style="--w:55%">
+          <div class="skill-head"><span>徒步与户外</span><span>55%</span></div>
+          <div class="skill-track"><div class="skill-fill"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 成就徽章：由文章数据自动解锁 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Achievements</span>
+          <h2>成就徽章</h2>
+        </div>
+        <span class="count-hint" id="badgeHint"></span>
+      </div>
+      <div class="badge-grid" id="meBadges"></div>
+    </section>
+
+    <!-- 最近动态 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Recent</span>
+          <h2>最近动态</h2>
+        </div>
+        <a class="more" href="archive.html">时光机 →</a>
+      </div>
+      <div class="me-recent" id="meRecent"></div>
+    </section>
+
+    <!-- 快捷入口 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Shortcuts</span>
+          <h2>我的空间</h2>
+        </div>
+      </div>
+      <div class="space-grid">
+        <a class="space-card glass-card reveal" style="--d:.05s" href="album.html">
+          <span class="space-icon" aria-hidden="true">📸</span>
+          <div>
+            <h3>相册空间</h3>
+            <p>生活的快门瞬间。</p>
+          </div>
+          <span class="space-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="space-card glass-card reveal" style="--d:.1s" href="music.html">
+          <span class="space-icon" aria-hidden="true">🎵</span>
+          <div>
+            <h3>音乐空间</h3>
+            <p>循环中的旋律。</p>
+          </div>
+          <span class="space-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="space-card glass-card reveal" style="--d:.15s" href="projects.html">
+          <span class="space-icon" aria-hidden="true">🛠️</span>
+          <div>
+            <h3>项目</h3>
+            <p>做出来的才叫学会。</p>
+          </div>
+          <span class="space-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="space-card glass-card reveal" style="--d:.2s" href="archive.html">
+          <span class="space-icon" aria-hidden="true">⏳</span>
+          <div>
+            <h3>归档</h3>
+            <p>写过的每一篇。</p>
+          </div>
+          <span class="space-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -134,7 +252,7 @@
   </footer>
 
   <script src="assets/js/posts.js?v=1.7.0"></script>
-  <script src="assets/js/profile.js?v=1.7.0"></script>
+  <script src="assets/js/profile.js?v=1.8.5"></script>
   <script src="assets/js/main.js?v=1.8.1"></script>
 </body>
 </html>

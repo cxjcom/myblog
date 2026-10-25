@@ -162,8 +162,99 @@ function initProfilePage() {
   render();
 }
 
+/* ---------------- 个人主页：数据统计 / 成就 / 动态 / 动效 ---------------- */
+function initProfileExtras() {
+  if (typeof POSTS === "undefined" || !POSTS.length) return;
+  const esc = escapeHTML;
+  const rm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const n = POSTS.length;
+  const words = POSTS.reduce((s, p) => s + (p.words || 0), 0);
+  const tags = new Set(POSTS.flatMap((p) => p.tags || [])).size;
+  const firstDate = POSTS.reduce((m, p) => (p.date < m ? p.date : m), POSTS[0].date);
+  const days = Math.max(1, Math.round((Date.now() - new Date(firstDate)) / 86400000));
+
+  /* 统计带：数字滚动 */
+  const nums = [n, words, tags, days];
+  $$("#meStats b").forEach((el, i) => (el.dataset.count = nums[i]));
+  function countUp(el) {
+    const target = +el.dataset.count || 0;
+    const fmt = (v) => Math.round(v).toLocaleString("zh-CN");
+    if (rm) { el.textContent = fmt(target); return; }
+    const t0 = performance.now(), dur = 1200;
+    (function step(t) {
+      const p = Math.min(1, (t - t0) / dur);
+      el.textContent = fmt(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+  const statIO = new IntersectionObserver((ents) => {
+    ents.forEach((e) => {
+      if (!e.isIntersecting) return;
+      statIO.unobserve(e.target);
+      countUp(e.target);
+    });
+  }, { threshold: 0.4 });
+  $$("#meStats b").forEach((el) => statIO.observe(el));
+
+  /* 成就徽章：随写作数据自动解锁 */
+  const badges = [
+    { icon: "🌱", name: "初次落笔", desc: "发表第一篇文章", ok: n >= 1, prog: `${n}/1` },
+    { icon: "✍️", name: "笔耕不辍", desc: "累计 5 篇文章", ok: n >= 5, prog: `${n}/5` },
+    { icon: "📚", name: "万字里程碑", desc: "累计写作 1 万字", ok: words >= 10000, prog: `${(words / 10000).toFixed(1)}/1 万` },
+    { icon: "🏷️", name: "多元表达", desc: "用满 6 个标签", ok: tags >= 6, prog: `${tags}/6` },
+    { icon: "🔥", name: "持续更新", desc: "创作旅程满 30 天", ok: days >= 30, prog: `${days}/30 天` },
+    { icon: "🚀", name: "十篇之路", desc: "发表 10 篇文章", ok: n >= 10, prog: `${n}/10` },
+  ];
+  const okCount = badges.filter((b) => b.ok).length;
+  $("#badgeHint").textContent = `已解锁 ${okCount} / ${badges.length}`;
+  $("#meBadges").innerHTML = badges
+    .map(
+      (b, i) => `
+      <div class="badge ${b.ok ? "" : "locked"} reveal" style="--d:${(i * 0.06).toFixed(2)}s">
+        <span class="b-icon" aria-hidden="true">${b.ok ? b.icon : "🔒"}</span>
+        <b>${esc(b.name)}</b>
+        <small>${esc(b.desc)}</small>
+        ${b.ok ? "" : `<span class="b-progress">${esc(b.prog)}</span>`}
+      </div>`
+    )
+    .join("");
+
+  /* 最近动态：最新 3 篇 */
+  const recent = [...POSTS].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  $("#meRecent").innerHTML = recent
+    .map(
+      (p, i) => `
+      <a class="me-recent-item glass-card reveal" style="--d:${(i * 0.08).toFixed(2)}s" href="${postUrl(p.slug)}">
+        <time>${esc(p.date)}</time>
+        <span>发表了《${esc(p.title)}》</span>
+        <em>${esc((p.tags && p.tags[0]) || "博文")}</em>
+      </a>`
+    )
+    .join("");
+
+  /* 签名打字机（首次加载时） */
+  const mottoEl = $("#viewMotto");
+  const motto = mottoEl.textContent;
+  if (motto && !rm) {
+    mottoEl.classList.add("typing");
+    mottoEl.textContent = "";
+    let i = 0;
+    const timer = setInterval(() => {
+      mottoEl.textContent = motto.slice(0, ++i);
+      if (i >= motto.length) {
+        clearInterval(timer);
+        mottoEl.classList.remove("typing");
+      }
+    }, 70);
+  }
+}
+
 /* ---------------- 全站应用（所有页面） ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   applyProfileToSite(loadProfile());
-  if (document.body.dataset.page === "me") initProfilePage();
+  if (document.body.dataset.page === "me") {
+    initProfilePage();
+    initProfileExtras();
+  }
 });
