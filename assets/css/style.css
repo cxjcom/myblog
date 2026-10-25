@@ -2046,46 +2046,52 @@ html[data-photo="dark"] .float-chip {
   letter-spacing: 0.06em;
 }
 
-/* ---------- 首页：真实旋转星系 ---------- */
-.galaxy-orb {
+/* ---------- 首页：真实星系主体 + 环绕轨道 ---------- */
+.galaxy-float {
   position: relative;
-  width: clamp(250px, 26vw, 330px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  overflow: hidden;
-  animation: galaxy-spin 110s linear infinite;
-  box-shadow: 0 34px 90px -26px rgba(18, 22, 48, 0.7),
-    0 0 80px rgba(150, 135, 255, 0.3), 0 0 22px rgba(255, 255, 255, 0.12);
+  width: clamp(300px, 30vw, 395px);
+  aspect-ratio: 1 / 1.06;
+  animation: galaxy-float-y 7.5s ease-in-out infinite;
 }
-.galaxy-orb img {
+.galaxy-body {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 26px 60px rgba(50, 70, 180, 0.5));
+  animation: galaxy-spin 260s linear infinite;
+}
+.galaxy-ring {
   position: absolute;
-  width: 142%; height: 142%;
-  top: -21%; left: -21%;
-  object-fit: cover;
+  inset: -13% -17%;
+  transform: rotateX(64deg) rotateZ(-16deg);
+  pointer-events: none;
 }
-.galaxy-orb::before {
-  content: "";
+.ring-spin {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  z-index: 2;
-  pointer-events: none;
-  box-shadow: inset 0 0 70px rgba(150, 135, 255, 0.4),
-    inset 0 0 14px rgba(255, 255, 255, 0.28);
+  border: 1.5px dashed rgba(165, 195, 255, 0.55);
+  animation: ring-spin 16s linear infinite;
 }
-.galaxy-orb::after {
-  content: "";
+.galaxy-satellite {
   position: absolute;
-  inset: -22px;
+  top: -5px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
   border-radius: 50%;
-  border: 1.5px dashed rgba(150, 135, 255, 0.35);
-  animation: galaxy-spin-rev 160s linear infinite;
+  background: #dcebff;
+  box-shadow: 0 0 16px 5px rgba(150, 195, 255, 0.85);
+}
+@keyframes ring-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes galaxy-float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-11px); }
 }
 @keyframes galaxy-spin {
   to { transform: rotate(360deg); }
-}
-@keyframes galaxy-spin-rev {
-  to { transform: rotate(-360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
   .galaxy-orb, .galaxy-orb::after { animation: none; }
