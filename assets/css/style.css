@@ -6,6 +6,7 @@
 /* ---------- 1. 令牌 ---------- */
 :root {
   color-scheme: light;
+  --sheet: rgba(248, 250, 253, 0.5);
   --bg: #f4f6fc;
   --bg-soft: #eceffa;
   --card: rgba(255, 255, 255, 0.72);
@@ -33,6 +34,7 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
+  --sheet: rgba(13, 17, 30, 0.52);
   --bg: #0a0e1a;
   --bg-soft: #111827;
   --card: rgba(20, 26, 44, 0.66);
@@ -1865,4 +1867,36 @@ button.chip:hover {
   color: #fff;
   font-size: 12px;
   font-weight: 600;
+}
+
+/* ---------- 内容玻璃底板（壁纸之上保证可读性） ---------- */
+.glass-sheet {
+  background: var(--sheet);
+  -webkit-backdrop-filter: blur(7px) saturate(1.55);
+  backdrop-filter: blur(7px) saturate(1.55);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 26px;
+  padding: 26px 34px 30px;
+  margin-top: 26px;
+  box-shadow: var(--shadow);
+}
+[data-theme="dark"] .glass-sheet {
+  border-color: rgba(255, 255, 255, 0.09);
+}
+.glass-sheet .page-head { padding: 22px 0 4px; }
+.glass-sheet .hero { padding: 30px 0 12px; }
+.glass-sheet .section { padding: 26px 0 6px; }
+.glass-sheet .hitokoto {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: 18px 10px 0;
+  margin-top: 10px;
+}
+.glass-sheet.post-layout { padding: 30px 34px 24px; }
+@media (max-width: 640px) {
+  .glass-sheet { padding: 20px 18px 24px; border-radius: 20px; }
+  .glass-sheet.post-layout { padding: 20px 18px; }
 }
