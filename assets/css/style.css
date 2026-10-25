@@ -1146,7 +1146,7 @@ button.chip:hover {
 .post-lead {
   font-size: 18px;
   color: var(--text-soft);
-  border-left: 3px solid var(--accent);
+  border-left: 2px solid var(--text-faint);
   padding: 4px 0 4px 18px;
   margin: 0 0 30px;
 }
@@ -1187,14 +1187,14 @@ button.chip:hover {
   margin: 0.4em 0;
 }
 .post-body li::marker {
-  color: var(--accent);
+  color: var(--text-faint);
 }
 .post-body blockquote {
   margin: 1.4em 0;
   padding: 14px 20px;
-  border-left: 3px solid var(--accent);
+  border-left: 2px solid var(--border);
   border-radius: 0 12px 12px 0;
-  background: var(--accent-soft);
+  background: var(--bg-soft);
   color: var(--text-soft);
 }
 .post-body blockquote p {
@@ -1203,8 +1203,9 @@ button.chip:hover {
 .post-body code {
   padding: 2px 7px;
   border-radius: 6px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: 0.88em;
 }
