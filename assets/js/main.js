@@ -370,7 +370,7 @@ function postCard(p, delay = 0) {
       <h3>${escapeHTML(p.title)}</h3>
       <p class="post-summary">${escapeHTML(p.summary)}</p>
       <div class="post-meta">
-        <span>⏱ 约 ${p.minutes} 分钟</span><span class="dot">·</span><span>${p.words} 字</span>
+        <span>约 ${p.minutes} 分钟</span><span class="dot">·</span><span>${p.words} 字</span>
       </div>
     </div>
   </a>`;
