@@ -457,8 +457,8 @@ button.chip:hover {
   border-color: var(--accent);
 }
 .chip.active {
-  color: #fff;
-  background: var(--gradient);
+  color: var(--card-solid);
+  background: var(--text);
   border-color: transparent;
 }
 .chip .chip-count {
@@ -555,6 +555,13 @@ button.chip:hover {
   font-size: 13px;
   color: var(--text-faint);
   font-family: var(--font-mono);
+}
+.post-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .post-card-body h3 {
   margin: 0;

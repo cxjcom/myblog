@@ -364,9 +364,11 @@ function initTyped() {
 /* ---------------- 卡片渲染 ---------------- */
 function postCard(p, delay = 0) {
   return `<a class="post-card reveal" style="--d:${delay}s" href="${postUrl(p.slug)}">
-    <div class="post-cover ${p.cover}"><span>${escapeHTML(p.tags[0] || "博文")}</span></div>
     <div class="post-card-body">
-      <time class="post-date" datetime="${p.date}">${p.date}</time>
+      <div class="post-card-top">
+        <span class="chip">${escapeHTML(p.tags[0] || "博文")}</span>
+        <time class="post-date" datetime="${p.date}">${p.date}</time>
+      </div>
       <h3>${escapeHTML(p.title)}</h3>
       <p class="post-summary">${escapeHTML(p.summary)}</p>
       <div class="post-meta">
