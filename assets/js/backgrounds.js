@@ -115,9 +115,9 @@ function makeCover(file) {
 
 /* ---------------- 全页轻纱：按主题调整壁纸亮度，保证文字可读 ---------------- */
 const BG_VEILS = {
-  aurora: [0.14, 0.3], matrix: [0.12, 0.26], synth: [0.1, 0.26], circuit: [0.14, 0.28],
-  sakura: [0.08, 0.3], fireflies: [0.1, 0.32], clouds: [0.06, 0.28],
-  stars: [0.12, 0.28], nebula: [0.1, 0.26], planet: [0.1, 0.26],
+  aurora: [0.68, 0.6], matrix: [0.66, 0.58], synth: [0.55, 0.55], circuit: [0.66, 0.6],
+  sakura: [0.4, 0.6], fireflies: [0.55, 0.62], clouds: [0.34, 0.58],
+  stars: [0.62, 0.58], nebula: [0.58, 0.56], planet: [0.58, 0.56],
 };
 function drawVeil(ctx, w, h) {
   const pair = BG_VEILS[document.documentElement.dataset.bg] || [0.35, 0.33];
