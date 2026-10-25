@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.5.3";
+const BG_VER = "1.5.2";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -117,26 +117,11 @@ function makeCover(file) {
 
 
 
-
-/* ---------------- 光尘粒子：所有主题通用的生命感 ---------------- */
-function ambientMotes(ctx, w, h, t, tone, n = 24, alpha = 0.3) {
-  for (let i = 0; i < n; i++) {
-    const s1 = Math.sin(i * 127.1) * 43758.5453;
-    const s2 = Math.cos(i * 311.7) * 12543.8531;
-    const ix = s1 - Math.floor(s1), iy = s2 - Math.floor(s2);
-    const speed = 0.18 + iy * 0.5;
-    const x = ((ix * w) + t * speed * 0.5 + Math.sin(t * 0.008 + i * 2.1) * 22) % (w + 40) - 20;
-    const y = h + 20 - ((iy * h) + t * speed * 0.6) % (h + 40);
-    const a = alpha * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 0.02 + i * 1.7)));
-    glowDot(ctx, ((x % w) + w) % w, ((y % h) + h) % h, 2.2 + iy * 3.2, tone, a);
-  }
-}
-
 /* ---------------- 主题清单（主题页数据源） ---------------- */
 window.BG_THEMES = [
   { id: "aurora",  cat: "默认", name: "极光 · 极夜之光", desc: "国际空间站实拍：极光洒在地球夜面上", swatch: "linear-gradient(135deg,#1a2a4a,#4a7a5a)" },
-  { id: "nebula",  cat: "深空", name: "星云 · 炽热之柱", desc: "哈勃实拍：鹰状星云中炽热的恒星育婴房", swatch: "linear-gradient(135deg,#5a1a1a,#c85a2a)" },
-  { id: "planet",  cat: "深空", name: "木星 · 朱诺号视角", desc: "朱诺号实拍：木星云层的斑斓漩涡", swatch: "linear-gradient(135deg,#8a5a2a,#c8a44a)" },
+  { id: "nebula",  cat: "深空", name: "星云 · 恒星摇篮", desc: "哈勃望远镜实拍：猎户座星云的红外色彩", swatch: "linear-gradient(135deg,#3a1a2a,#7a4a3a)" },
+  { id: "planet",  cat: "深空", name: "巨行星 · 朱诺号视角", desc: "朱诺号实拍：木星暗面与高层大气辉光", swatch: "linear-gradient(135deg,#2a1a0a,#7a5a2a)" },
   { id: "galaxy",  cat: "深空", name: "银河 · 万星之心", desc: "NASA 实拍：银心尘埃在红外波段发光", swatch: "linear-gradient(135deg,#2a1a0a,#8a4a1a)" },
   { id: "earth",   cat: "深空", name: "蓝星 · 家园俯瞰", desc: "空间站实拍：从 400 公里高空俯瞰地球", swatch: "linear-gradient(135deg,#0a1a2a,#2a6a8a)" },
   { id: "forest",  cat: "自然", name: "雾林 · 晨雾湖畔", desc: "实景摄影：晨雾漫过森林与静谧湖面", swatch: "linear-gradient(135deg,#4a5a6a,#8a9aaa)" },
@@ -152,9 +137,9 @@ window.BG_PRESETS = {
   planet: { canvas: "planet" },
   galaxy: { canvas: "galaxy" },
   earth: { canvas: "earth" },
-  forest: { canvas: "mist", strength: 0.3 },
-  clouds: { canvas: "mist", strength: 0.45 },
-  valley: { canvas: "mist", strength: 0.2 },
+  forest: { canvas: "mist", strength: 0.17 },
+  clouds: { canvas: "mist", strength: 0.28 },
+  valley: { canvas: "mist", strength: 0.1 },
   drops: { canvas: "glow" },
   autumn: { canvas: "leaves" },
 };
@@ -191,7 +176,7 @@ window.BG_PAINTERS = {
           const yTop = h * (cur.base + cur.amp) + Math.sin(px * cur.f + t * 0.01 + cur.ph) * h * 0.08;
           const len = h * (0.26 + 0.08 * Math.sin(px * 0.016 - t * 0.008 + cur.ph));
           const fade = 0.5 + 0.5 * Math.sin(px * 0.005 - t * 0.006 + cur.ph * 2);
-          const a = (dark ? 0.22 : 0.14) * (0.3 + fade);
+          const a = (dark ? 0.16 : 0.1) * (0.3 + fade);
           const g = ctx.createLinearGradient(px, yTop, px, yTop + len);
           g.addColorStop(0, `rgba(${cur.c},0)`);
           g.addColorStop(0.4, `rgba(${cur.c},${a})`);
@@ -233,7 +218,6 @@ window.BG_PAINTERS = {
         }
         glowDot(ctx, dots[i].x, dots[i].y, dots[i].r * 4, tone, dark ? 0.5 : 0.5);
       }
-      ambientMotes(ctx, w, h, t, dark ? "214, 226, 240" : "255, 255, 255", 26, 0.4);
       vignette(ctx, w, h, dark ? 0.32 : 0.1);
       raf = requestAnimationFrame(frame);
     }
@@ -262,14 +246,13 @@ window.BG_PAINTERS = {
       for (let i = 0; i < 2; i++) {
         const px = w * (0.3 + i * 0.4) + Math.sin(t * 0.002 + i * 2.5) * w * 0.05;
         const py = h * (0.4 + i * 0.2) + Math.cos(t * 0.0016 + i * 1.8) * h * 0.04;
-        glowDot(ctx, px, py, Math.min(w, h) * 0.3, "255, 210, 250", (dark ? 0.32 : 0.18) * (0.6 + 0.4 * Math.sin(t * 0.005 + i * 2)));
+        glowDot(ctx, px, py, Math.min(w, h) * 0.26, "255, 220, 245", (dark ? 0.2 : 0.12) * (0.6 + 0.4 * Math.sin(t * 0.005 + i * 2)));
       }
       ctx.restore();
       for (const b of bright) {
         const a = 0.3 + 0.45 * Math.abs(Math.sin(t * 0.014 + b.ph));
         flare(ctx, b.x, b.y, b.r * 4, "255, 245, 230", a * (dark ? 0.8 : 0.55));
       }
-      ambientMotes(ctx, w, h, t, "255, 240, 225", 22, 0.35);
       vignette(ctx, w, h, dark ? 0.3 : 0.1);
       raf = requestAnimationFrame(frame);
     }
@@ -286,7 +269,7 @@ window.BG_PAINTERS = {
     const cover = makeCover("planet.jpg");
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      stars = Array.from({ length: countByArea(w, h, 40, 110, 12000) }, () => ({
+      stars = Array.from({ length: countByArea(w, h, 30, 90, 18000) }, () => ({
         x: Math.random() * w, y: Math.random() * h, r: 0.4 + Math.random() * 1, ph: rand(0, 6.28), sp: rand(0.5, 1.4),
       }));
     };
@@ -296,11 +279,10 @@ window.BG_PAINTERS = {
       const dark = isDarkBg();
       cover.draw(ctx, w, h, 0);
       for (const s of stars) {
-        const a = 0.22 + 0.45 * (0.5 + 0.5 * Math.sin(t * 0.02 * s.sp + s.ph));
+        const a = 0.15 + 0.4 * (0.5 + 0.5 * Math.sin(t * 0.02 * s.sp + s.ph));
         ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
         ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
       }
-      ambientMotes(ctx, w, h, t, "200, 220, 255", 20, 0.3);
       vignette(ctx, w, h, dark ? 0.28 : 0.1);
       raf = requestAnimationFrame(frame);
     }
@@ -327,7 +309,7 @@ window.BG_PAINTERS = {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       for (const sp of shimmer) {
-        const a = (dark ? 0.18 : 0.11) * (0.5 + 0.5 * Math.sin(t * 0.006 + sp.ph));
+        const a = (dark ? 0.1 : 0.06) * (0.5 + 0.5 * Math.sin(t * 0.006 + sp.ph));
         glowDot(ctx, sp.x + Math.sin(t * 0.001 + sp.ph) * 30, sp.y, sp.r, "255, 220, 170", a);
       }
       ctx.restore();
@@ -347,7 +329,6 @@ window.BG_PAINTERS = {
         m.x += m.vx; m.y += m.vy;
         if (--meteor.life <= 0) meteor.m = null;
       }
-      ambientMotes(ctx, w, h, t, "255, 245, 230", 22, 0.32);
       vignette(ctx, w, h, dark ? 0.3 : 0.1);
       raf = requestAnimationFrame(frame);
     }
@@ -367,7 +348,7 @@ window.BG_PAINTERS = {
       stars = Array.from({ length: countByArea(w, h, 16, 56, 34000) }, () => ({
         x: Math.random() * w, y: Math.random() * h, r: 0.3 + Math.random() * 0.9, ph: rand(0, 6.28), sp: 0.5 + Math.random() * 1.4,
       }));
-      drift = Array.from({ length: 5 }, () => ({ x: Math.random() * w, y: h * (0.3 + Math.random() * 0.4), r: Math.min(w, h) * 0.2, v: rand(0.15, 0.35) }));
+      drift = Array.from({ length: 3 }, () => ({ x: Math.random() * w, y: h * (0.3 + Math.random() * 0.4), r: Math.min(w, h) * 0.2, v: rand(0.15, 0.35) }));
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
@@ -376,14 +357,13 @@ window.BG_PAINTERS = {
       for (const c of drift) {
         c.x += c.v;
         if (c.x - c.r > w) c.x = -c.r;
-        glowDot(ctx, c.x, c.y, c.r, "235, 245, 255", dark ? 0.16 : 0.11);
+        glowDot(ctx, c.x, c.y, c.r, "235, 245, 255", dark ? 0.1 : 0.07);
       }
       for (const s of stars) {
         const a = 0.12 + 0.35 * (0.5 + 0.5 * Math.sin(t * 0.02 * s.sp + s.ph));
         ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
         ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
       }
-      ambientMotes(ctx, w, h, t, "255, 255, 255", 18, 0.26);
       vignette(ctx, w, h, 0.24);
       raf = requestAnimationFrame(frame);
     }
@@ -448,11 +428,10 @@ window.BG_PAINTERS = {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       for (const s of spots) {
-        const a = (dark ? 0.32 : 0.26) * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
+        const a = (dark ? 0.22 : 0.16) * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
         glowDot(ctx, s.x, s.y, s.r, "220, 235, 250", a);
       }
       ctx.restore();
-      ambientMotes(ctx, w, h, t, "255, 244, 214", 18, 0.24);
       vignette(ctx, w, h, dark ? 0.28 : 0.08);
       raf = requestAnimationFrame(frame);
     }
@@ -469,7 +448,7 @@ window.BG_PAINTERS = {
     const cover = makeCover("autumn.jpg");
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      leaves = Array.from({ length: countByArea(w, h, 14, 34, 30000) }, () => ({
+      leaves = Array.from({ length: countByArea(w, h, 12, 30, 38000) }, () => ({
         x: Math.random() * w, y: Math.random() * h, s: rand(3, 6.5),
         rot: rand(0, 6.28), vr: rand(-0.02, 0.02), vy: rand(0.3, 0.7),
         ph: rand(0, 6.28), amp: rand(0.4, 0.9), fs: rand(0.015, 0.04),
@@ -497,7 +476,6 @@ window.BG_PAINTERS = {
         ctx.fill();
         ctx.restore();
       }
-      ambientMotes(ctx, w, h, t, "255, 240, 200", 16, 0.22);
       vignette(ctx, w, h, dark ? 0.28 : 0.08);
       raf = requestAnimationFrame(frame);
     }
