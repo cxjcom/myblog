@@ -2554,3 +2554,44 @@ html[data-photo="dark"] .float-chip {
 @media (prefers-reduced-motion: reduce) {
   .galaxy-core-glow, .halo-star { animation: none; opacity: 0.35; }
 }
+
+/* ---------- 首页：环带星体 ---------- */
+.halo-planet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.12);
+}
+.halo-planet--terra {
+  width: 13px;
+  height: 13px;
+  background: radial-gradient(circle at 32% 30%, #ffd9b0 0%, #e8935c 38%, #9c4a2f 78%, #5c2a1c 100%);
+  box-shadow: 0 0 12px 3px rgba(232, 147, 92, 0.35);
+}
+.halo-planet--azure {
+  width: 11px;
+  height: 11px;
+  background: radial-gradient(circle at 32% 30%, #d6f0ff 0%, #6db3f2 40%, #2c5fae 78%, #16336b 100%);
+  box-shadow: 0 0 12px 3px rgba(109, 179, 242, 0.35);
+}
+.halo-planet--luna {
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at 32% 30%, #f4f4f6 0%, #c2c6ce 45%, #8a8f9a 80%, #5c606c 100%);
+  box-shadow: 0 0 8px 2px rgba(200, 205, 215, 0.3);
+}
+/* 土星式小光环：套在暖色行星上 */
+.halo-planet--terra::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 210%;
+  height: 64%;
+  border: 1px solid rgba(255, 226, 180, 0.75);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-24deg);
+}

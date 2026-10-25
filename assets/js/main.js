@@ -451,6 +451,19 @@ function initGalaxyHalo() {
     host.appendChild(s);
   }
 
+  /* 环带星体：带球面明暗的小行星，绕环时前后遮挡模拟立体轨道 */
+  const PLANETS = [
+    { cls: "halo-planet--terra", loop: 74000,  phase: 0.1 },
+    { cls: "halo-planet--azure", loop: 98000,  phase: 0.55 },
+    { cls: "halo-planet--luna",  loop: 121000, phase: 0.82 },
+  ];
+  const planets = PLANETS.map((p) => {
+    const el = document.createElement("span");
+    el.className = "halo-planet " + p.cls;
+    host.appendChild(el);
+    return { ...p, el };
+  });
+
   const t0 = performance.now();
   function frame(t) {
     const w = W(), cx = CX * w, cy = CY * host.clientHeight, a = A * w, b = B * w;
@@ -465,6 +478,18 @@ function initGalaxyHalo() {
           (cy + x * sinT + y * cosT).toFixed(1) + "px) scale(" + (1 - k * 0.09).toFixed(2) + ")";
         el.style.opacity = ((1 - k / c.parts.length) * (0.3 + 0.7 * depth)).toFixed(2);
       });
+    });
+    planets.forEach((p) => {
+      const th = ((t - t0) / p.loop + p.phase) * Math.PI * 2;
+      const x = a * Math.cos(th), y = b * Math.sin(th);
+      const depth = 0.5 + 0.5 * Math.sin(th);
+      p.el.style.transform =
+        "translate(" + (cx + x * cosT - y * sinT).toFixed(1) + "px," +
+        (cy + x * sinT + y * cosT).toFixed(1) + "px) translate(-50%, -50%) scale(" +
+        (0.78 + 0.34 * depth).toFixed(2) + ")";
+      p.el.style.opacity = (0.55 + 0.45 * depth).toFixed(2);
+      /* 远端从星系背后穿过，近端从星系前面经过 */
+      p.el.style.zIndex = depth > 0.5 ? "3" : "-1";
     });
     requestAnimationFrame(frame);
   }
