@@ -9,6 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
+const BG_VER = "1.4.4";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -91,7 +92,7 @@ function makeCover(file) {
   let ok = false, failed = false, alpha = REDUCE_BG ? 1 : 0;
   img.onload = () => { ok = true; };
   img.onerror = () => { failed = true; };
-  img.src = `${BG_ROOT}assets/img/bg/${file}`;
+  img.src = `${BG_ROOT}assets/img/bg/${file}?v=${BG_VER}`;
   return {
     draw(ctx, w, h, t) {
       if (!ok) return;
@@ -115,9 +116,9 @@ function makeCover(file) {
 
 /* ---------------- 全页轻纱：按主题调整壁纸亮度，保证文字可读 ---------------- */
 const BG_VEILS = {
-  aurora: [0.68, 0.6], matrix: [0.66, 0.58], synth: [0.55, 0.55], circuit: [0.66, 0.6],
-  sakura: [0.4, 0.6], fireflies: [0.55, 0.62], clouds: [0.34, 0.58],
-  stars: [0.62, 0.58], nebula: [0.58, 0.56], planet: [0.58, 0.56],
+  aurora: [0.07, 0.45], matrix: [0.07, 0.42], synth: [0.06, 0.42], circuit: [0.07, 0.45],
+  sakura: [0.05, 0.48], fireflies: [0.07, 0.48], clouds: [0.05, 0.45],
+  stars: [0.07, 0.45], nebula: [0.06, 0.42], planet: [0.06, 0.42],
 };
 function drawVeil(ctx, w, h) {
   const pair = BG_VEILS[document.documentElement.dataset.bg] || [0.35, 0.33];
