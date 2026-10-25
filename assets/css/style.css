@@ -2069,7 +2069,14 @@ html[data-photo="dark"] .float-chip {
   inset: 0;
   border-radius: 50%;
   border: 1.5px dashed rgba(165, 195, 255, 0.55);
-  animation: ring-spin 16s linear infinite;
+  animation: ring-spin 30s linear infinite;
+}
+.ring-spin--outer {
+  inset: -14% -19%;
+  border-style: dotted;
+  border-color: rgba(165, 195, 255, 0.32);
+  animation-duration: 48s;
+  animation-direction: reverse;
 }
 .galaxy-satellite {
   position: absolute;
@@ -2082,6 +2089,16 @@ html[data-photo="dark"] .float-chip {
   background: #dcebff;
   box-shadow: 0 0 16px 5px rgba(150, 195, 255, 0.85);
 }
+.galaxy-satellite--b {
+  top: 50%;
+  left: -4.5px;
+  margin-left: 0;
+  margin-top: -4.5px;
+  width: 9px;
+  height: 9px;
+  background: #ffe9c9;
+  box-shadow: 0 0 16px 5px rgba(255, 205, 140, 0.8);
+}
 @keyframes ring-spin {
   to { transform: rotate(360deg); }
 }
@@ -2093,5 +2110,5 @@ html[data-photo="dark"] .float-chip {
   to { transform: rotate(360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .galaxy-orb, .galaxy-orb::after { animation: none; }
+  .galaxy-float, .ring-spin { animation: none; }
 }
