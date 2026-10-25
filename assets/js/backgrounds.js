@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.4.7";
+const BG_VER = "1.4.8";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -97,13 +97,15 @@ function makeCover(file) {
     draw(ctx, w, h, t) {
       if (!ok) return;
       if (!REDUCE_BG) alpha = Math.min(1, alpha + 0.02);
-      const z = REDUCE_BG ? 1.02 : 1.02 + 0.015 * Math.sin(t * 0.0022);
+      const z = REDUCE_BG ? 1.01 : 1.01 + 0.01 * Math.sin(t * 0.0022);
       const scale = Math.max(w / img.width, h / img.height) * z;
       const dw = img.width * scale, dh = img.height * scale;
       const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.007);
       const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.007);
       ctx.save();
       ctx.globalAlpha = alpha;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, dx, dy, dw, dh);
       ctx.restore();
     },
