@@ -537,12 +537,6 @@ button.chip:hover {
   font-size: 12.5px;
   letter-spacing: 1px;
 }
-.g1 { background: linear-gradient(135deg, #6366f1, #8b5cf6 55%, #d946ef); }
-.g2 { background: linear-gradient(135deg, #06b6d4, #3b82f6 60%, #6366f1); }
-.g3 { background: linear-gradient(135deg, #f59e0b, #f43f5e 70%, #ec4899); }
-.g4 { background: linear-gradient(135deg, #10b981, #06b6d4 70%, #0ea5e9); }
-.g5 { background: linear-gradient(135deg, #8b5cf6, #ec4899 70%, #f43f5e); }
-.g6 { background: linear-gradient(135deg, #0ea5e9, #6366f1 70%, #8b5cf6); }
 
 .post-card-body {
   display: flex;
@@ -1523,9 +1517,9 @@ button.chip:hover {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  font-size: 26px;
-  color: #fff;
-  box-shadow: var(--shadow);
+  font-size: 24px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
 }
 .project-card h3 {
   margin: 0;
@@ -1543,11 +1537,19 @@ button.chip:hover {
   gap: 6px;
 }
 .project-tech span {
-  padding: 2px 10px;
-  border-radius: 99px;
-  font-size: 12px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  transition: color 0.2s, border-color 0.2s;
+}
+.project-tech span:hover {
+  color: var(--text-soft);
+  border-color: var(--text-faint);
 }
 .project-links {
   display: flex;
@@ -1576,9 +1578,13 @@ button.chip:hover {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #fff;
-  font-weight: 800;
-  font-size: 20px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  font-weight: 700;
+  font-size: 18px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
 }
 .link-card h3 {
   margin: 0;
