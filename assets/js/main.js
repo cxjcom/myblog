@@ -405,6 +405,39 @@ function initHome() {
         : window.POSTS.reduce((s, p) => s + p.words, 0);
 }
 
+/* ---------------- 首页：星系光环粒子（沿照片中环带的真实轨迹巡游） ---------------- */
+function initGalaxyHalo() {
+  const host = document.querySelector(".galaxy-float");
+  if (!host || reduceMotion) return;
+  /* 轨迹参数由星系照片量得：环心、长短轴（占容器比例）、倾角 */
+  const CX = 0.456, CY = 0.484, A = 0.352, B = 0.19, TILT = (40 * Math.PI) / 180;
+  const N = 3, LOOP = 56000;
+  const beads = [];
+  for (let i = 0; i < N; i++) {
+    const b = document.createElement("span");
+    b.className = "halo-bead halo-bead--" + (i + 1);
+    host.appendChild(b);
+    beads.push(b);
+  }
+  const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+  const t0 = performance.now();
+  function frame(t) {
+    const w = host.clientWidth;
+    const cx = CX * w, cy = CY * host.clientHeight, a = A * w, b = B * w;
+    for (let i = 0; i < N; i++) {
+      const th = ((t - t0) / LOOP + i / N) * Math.PI * 2;
+      const x = a * Math.cos(th), y = b * Math.sin(th);
+      const px = cx + x * cosT - y * sinT;
+      const py = cy + x * sinT + y * cosT;
+      beads[i].style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px)";
+      /* 环的后侧（远离观察者）稍暗，制造远近层次 */
+      beads[i].style.opacity = (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(th))).toFixed(2);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
 /* ---------------- 博客列表页 ---------------- */
 function initBlog() {
   const grid = $("#postGrid");
@@ -674,6 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHitokoto();
   initTyped();
   initHome();
+  initGalaxyHalo();
   initBlog();
   initArchive();
   initPostPage();
