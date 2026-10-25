@@ -1,5 +1,5 @@
 /* ============================================================
-   音乐空间：公开歌单数据 + 本地添加（localStorage）+ 播放器渲染
+   音乐空间：公开歌单数据 + 本地添加/删除（localStorage）+ 播放器渲染
    ============================================================ */
 "use strict";
 
@@ -16,7 +16,8 @@ const MUSIC_LIST = [
   },
 ];
 
-const MUSIC_KEY = "music.user.v1";
+const MUSIC_KEY = "music.user.v1";       // 自己添加的歌曲
+const MUSIC_HIDDEN_KEY = "music.hidden.v1"; // 被删除的内置歌曲（type+src 列表）
 
 function loadUserTracks() {
   try {
@@ -27,9 +28,18 @@ function loadUserTracks() {
   }
 }
 
-function saveUserTracks(list) {
+function loadHiddenTracks() {
   try {
-    localStorage.setItem(MUSIC_KEY, JSON.stringify(list));
+    const arr = JSON.parse(localStorage.getItem(MUSIC_HIDDEN_KEY) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveStore(key, val) {
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
     return true;
   } catch (e) {
     alert("保存失败：浏览器本地存储空间不足。");
@@ -63,30 +73,42 @@ function initMusicPage() {
   if (!list) return;
   const esc = escapeHTML;
 
+  /* 兼容旧数据：给用户歌曲补 id */
+  function userTracks() {
+    const arr = loadUserTracks();
+    let dirty = false;
+    arr.forEach((t) => {
+      if (!t.id) { t.id = "u" + Date.now() + Math.random().toString(36).slice(2, 7); dirty = true; }
+    });
+    if (dirty) saveStore(MUSIC_KEY, arr);
+    return arr;
+  }
+
   function allTracks() {
-    return [...loadUserTracks(), ...MUSIC_LIST];
+    const hidden = new Set(loadHiddenTracks());
+    return [...userTracks(), ...MUSIC_LIST.filter((t) => !hidden.has("d:" + t.type + ":" + t.src))]
+      .map((t) => ({ ...t, key: t.user ? "u:" + t.id : "d:" + t.type + ":" + t.src }));
   }
 
   function render() {
     const tracks = allTracks();
+    const hiddenCount = loadHiddenTracks().length;
     $("#musicCount").textContent = "· " + tracks.length + " 首";
+    $("#musicRestore").hidden = hiddenCount === 0;
     $("#musicEmpty").hidden = tracks.length > 0;
     list.innerHTML = tracks
-      .map((t, i) => {
+      .map((t) => {
         const player =
           t.type === "embed"
             ? `<iframe src="${esc(t.src)}" frameborder="no" loading="lazy" allowfullscreen title="${esc(t.title)}"></iframe>`
             : `<audio controls preload="none" src="${esc(t.src)}"></audio>`;
-        const del = t.user
-          ? `<button class="music-del" data-i="${i}" title="删除这首歌" aria-label="删除歌曲">✕</button>`
-          : "";
         return `
-        <article class="music-item glass-card reveal">
+        <article class="music-item glass-card reveal" data-key="${esc(t.key)}">
           <div class="music-item-head">
             <span class="music-dot" aria-hidden="true"></span>
             <h3>${esc(t.title || "未命名")}</h3>
             ${t.artist ? `<span class="chip">${esc(t.artist)}</span>` : ""}
-            ${del}
+            <button class="music-del" title="删除这首歌" aria-label="删除歌曲">✕</button>
           </div>
           ${t.note ? `<p class="music-note">${esc(t.note)}</p>` : ""}
           ${player}
@@ -99,13 +121,30 @@ function initMusicPage() {
   list.addEventListener("click", (e) => {
     const del = e.target.closest(".music-del");
     if (!del) return;
-    const i = +del.dataset.i;
-    const tracks = loadUserTracks();
-    const removed = tracks.splice(i, 1)[0];
-    if (confirm(`删除「${(removed && removed.title) || "未命名"}」？`)) {
-      saveUserTracks(tracks);
-      render();
+    const key = del.closest(".music-item").dataset.key;
+    if (key.startsWith("u:")) {
+      const id = key.slice(2);
+      const tracks = userTracks();
+      const removed = tracks.find((t) => t.id === id);
+      if (removed && confirm(`删除「${removed.title || "未命名"}」？此操作不可恢复。`)) {
+        saveStore(MUSIC_KEY, tracks.filter((t) => t.id !== id));
+        render();
+      }
+    } else {
+      /* 内置歌曲：只在本浏览器隐藏，可随时恢复默认 */
+      const hidden = loadHiddenTracks();
+      if (!hidden.includes(key)) {
+        hidden.push(key);
+        saveStore(MUSIC_HIDDEN_KEY, hidden);
+        render();
+      }
     }
+  });
+
+  /* 恢复默认内容：找回被删除的内置歌曲 */
+  $("#musicRestore").addEventListener("click", () => {
+    saveStore(MUSIC_HIDDEN_KEY, []);
+    render();
   });
 
   $("#musicForm").addEventListener("submit", (e) => {
@@ -118,9 +157,15 @@ function initMusicPage() {
       alert("没有识别出音乐链接：支持网易云音乐歌曲链接/外链代码，或 mp3 等音频直链。");
       return;
     }
-    const tracks = loadUserTracks();
-    tracks.unshift({ user: true, title: title || "未命名", artist, ...parsed });
-    if (saveUserTracks(tracks)) {
+    const tracks = userTracks();
+    tracks.unshift({
+      user: true,
+      id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
+      title: title || "未命名",
+      artist,
+      ...parsed,
+    });
+    if (saveStore(MUSIC_KEY, tracks)) {
       $("#musicForm").reset();
       render();
     }

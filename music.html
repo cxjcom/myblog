@@ -71,7 +71,7 @@
             <input type="text" id="musicLink" placeholder="音乐链接 *：网易云歌曲链接 / 外链代码 / mp3 直链" required aria-label="音乐链接">
             <button class="btn btn-primary" type="submit">添加到歌单</button>
           </form>
-          <p class="form-note">粘贴网易云音乐歌曲页链接会自动变成外链播放器；mp3 等音频直链会用内置播放器。添加的歌保存在当前浏览器（localStorage）。想让所有访客听到：把音频文件放进 <code>assets/music/</code>，或把外链加进 <code>assets/js/music.js</code> 的 <code>MUSIC_LIST</code>。</p>
+          <p class="form-note">粘贴网易云音乐歌曲页链接会自动变成外链播放器；mp3 等音频直链会用内置播放器。歌曲增删都保存在当前浏览器（localStorage）；删除内置歌曲后可点右上角「恢复默认内容」找回。想让所有访客听到：把音频文件放进 <code>assets/music/</code>，或把外链加进 <code>assets/js/music.js</code> 的 <code>MUSIC_LIST</code>。</p>
         </div>
       </section>
 
@@ -81,6 +81,7 @@
             <span class="kicker">Playlist</span>
             <h2>我的歌单 <span id="musicCount" class="count-hint"></span></h2>
           </div>
+          <button class="btn" id="musicRestore" hidden>恢复默认内容</button>
         </div>
         <div class="music-list" id="musicList"></div>
         <div class="empty-state" id="musicEmpty" hidden>
@@ -112,7 +113,7 @@
   <script src="assets/js/posts.js?v=1.7.0"></script>
   <script src="assets/js/backgrounds.js?v=1.7.0"></script>
   <script src="assets/js/profile.js?v=1.7.0"></script>
-  <script src="assets/js/music.js?v=1.8.0"></script>
+  <script src="assets/js/music.js?v=1.8.4"></script>
   <script src="assets/js/main.js?v=1.8.1"></script>
 </body>
 </html>

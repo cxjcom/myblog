@@ -76,7 +76,7 @@
               <button class="btn" type="submit">添加</button>
             </form>
           </div>
-          <p class="form-note">上传的照片保存在当前浏览器（localStorage），换设备或清缓存后不会保留。想让所有访客都看到：把图片放进 <code>assets/img/gallery/</code> 目录，再到 <code>assets/js/album.js</code> 的 <code>ALBUM_PHOTOS</code> 里加一行即可。</p>
+          <p class="form-note">照片增删都保存在当前浏览器（localStorage），换设备或清缓存后不会保留；删除内置照片后可点右上角「恢复默认内容」找回。想让所有访客都看到：把图片放进 <code>assets/img/gallery/</code> 目录，再到 <code>assets/js/album.js</code> 的 <code>ALBUM_PHOTOS</code> 里加一行即可。</p>
         </div>
       </section>
 
@@ -86,6 +86,7 @@
             <span class="kicker">Photos</span>
             <h2>照片墙 <span id="albumCount" class="count-hint"></span></h2>
           </div>
+          <button class="btn" id="albumRestore" hidden>恢复默认内容</button>
         </div>
         <div class="album-grid" id="albumGrid"></div>
         <div class="empty-state" id="albumEmpty" hidden>
@@ -125,7 +126,7 @@
   <script src="assets/js/posts.js?v=1.7.0"></script>
   <script src="assets/js/backgrounds.js?v=1.7.0"></script>
   <script src="assets/js/profile.js?v=1.7.0"></script>
-  <script src="assets/js/album.js?v=1.8.0"></script>
+  <script src="assets/js/album.js?v=1.8.4"></script>
   <script src="assets/js/main.js?v=1.8.1"></script>
 </body>
 </html>
