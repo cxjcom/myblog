@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.4.9";
+const BG_VER = "1.5.4";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -87,7 +87,8 @@ function flare(x, px, py, r, color, a) {
 }
 
 /* ---------------- AI 壁纸层：加载 / 淡入 / Ken Burns 缓推 ---------------- */
-function makeCover(file) {
+function makeCover(file, flow) {
+  flow = flow || { amp: 0, bands: 64, speed: 1, freq: 1 };
   const img = new Image();
   let ok = false, failed = false, alpha = REDUCE_BG ? 1 : 0;
   img.onload = () => { ok = true; };
@@ -97,22 +98,42 @@ function makeCover(file) {
     draw(ctx, w, h, t) {
       if (!ok) return;
       if (!REDUCE_BG) alpha = Math.min(1, alpha + 0.02);
-      const z = REDUCE_BG ? 1.01 : 1.01 + 0.01 * Math.sin(t * 0.0022);
+      const z = REDUCE_BG ? 1.01 : 1.015 + 0.008 * Math.sin(t * 0.0022);
       const scale = Math.max(w / img.width, h / img.height) * z;
-      const dw = img.width * scale, dh = img.height * scale;
-      const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.007);
-      const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.007);
+      const ampPx = (flow.amp || 0) * Math.min(2, devicePixelRatio || 1);
+      const dw = img.width * scale + ampPx * 2;
+      const dh = img.height * scale;
+      const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.006);
+      const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.005);
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, dx, dy, dw, dh);
+      if (REDUCE_BG || !ampPx) {
+        ctx.drawImage(img, dx, dy, dw, dh);
+      } else {
+        /* 分条带流场位移：整幅场景随风轻拂（Plotagraph 式） */
+        const bands = flow.bands || 64;
+        const bh = dh / bands;
+        const destX = dx - ampPx;
+        const destW = dw + ampPx * 2;
+        for (let i = 0; i < bands; i++) {
+          const yy = dy + i * bh;
+          const off =
+            Math.sin(t * 0.006 * flow.speed + (i / bands) * flow.freq * 6.28) * ampPx +
+            Math.sin(t * 0.0037 * flow.speed + i * 0.9) * ampPx * 0.45;
+          const sy = Math.max(0, (yy - dy) / scale);
+          const sh = bh / scale + 0.9;
+          ctx.drawImage(img, 0, sy, img.width, Math.min(img.height - sy, sh), destX + off, yy, destW, bh + 0.9);
+        }
+      }
       ctx.restore();
     },
     get ready() { return ok; },
     get failed() { return failed; },
   };
 }
+
 /* 亮星十字星芒 */
 
 
@@ -149,7 +170,7 @@ window.BG_PAINTERS = {
   /* —— 极光：实景壁纸 + 星尘连线（受光标扰动） —— */
   aurora(canvas, ctx) {
     let w, h, raf, t = 0, dots = [];
-    const cover = makeCover("aurora.jpg");
+    const cover = makeCover("aurora.jpg", { amp: 10, bands: 56, speed: 1.2, freq: 1.1 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark
         ? [[0, "#0a0e24"], [0.55, "#141a3a"], [1, "#1b1f4a"]]
@@ -212,7 +233,7 @@ window.BG_PAINTERS = {
     const FONT = 15, TRAIL = 12;
     const GLYPHS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789<>/{}[]=+*#";
     let w, h, raf, tick = 0, cols = [];
-    const cover = makeCover("matrix.jpg");
+    const cover = makeCover("matrix.jpg", { amp: 4, bands: 48, speed: 1.6, freq: 1.6 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark
         ? [[0, "#010a04"], [0.6, "#03170b"], [1, "#05240f"]]
@@ -268,7 +289,7 @@ window.BG_PAINTERS = {
   /* —— 霓虹地平线：壁纸 + 流动的网格扫描线 —— */
   synth(canvas, ctx) {
     let w, h, raf, t = 0;
-    const cover = makeCover("synth.jpg");
+    const cover = makeCover("synth.jpg", { amp: 7, bands: 56, speed: 0.8, freq: 1.0 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark
         ? [[0, "#050112"], [0.45, "#2d0a52"], [0.62, "#7a1a5e"], [0.6201, "#12051f"], [1, "#1c0a2e"]]
@@ -308,7 +329,7 @@ window.BG_PAINTERS = {
   /* —— 电路脉冲：壁纸 + 沿走线疾驰的光信号 —— */
   circuit(canvas, ctx) {
     let w, h, raf, t = 0, paths = [], pulses = [], blinks = [];
-    const cover = makeCover("circuit.jpg");
+    const cover = makeCover("circuit.jpg", { amp: 3, bands: 64, speed: 1.8, freq: 2.2 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark ? [[0, "#020c1b"], [1, "#07182e"]] : [[0, "#eef5fc"], [1, "#ddeafc"]]);
     });
@@ -395,7 +416,7 @@ window.BG_PAINTERS = {
   /* —— 樱花雨：壁纸 + 两层翻滚花瓣 —— */
   sakura(canvas, ctx) {
     let w, h, raf, t = 0, near = [], far = [];
-    const cover = makeCover("sakura.jpg");
+    const cover = makeCover("sakura.jpg", { amp: 8, bands: 60, speed: 0.9, freq: 1.3 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark
         ? [[0, "#241426"], [0.6, "#3d1f38"], [1, "#5c2a44"]]
@@ -455,7 +476,7 @@ window.BG_PAINTERS = {
   /* —— 萤火虫：壁纸 + 呼吸明灭、聚向光标的光点 —— */
   fireflies(canvas, ctx) {
     let w, h, raf, t = 0, flies = [], blur = [];
-    const cover = makeCover("fireflies.jpg");
+    const cover = makeCover("fireflies.jpg", { amp: 7, bands: 56, speed: 0.7, freq: 1.0 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark ? [[0, "#050d05"], [1, "#0f2409"]] : [[0, "#f3f8e8"], [1, "#d5e6c3"]]);
     });
@@ -507,7 +528,7 @@ window.BG_PAINTERS = {
   /* —— 云海：壁纸缓推 + 掠过的飞鸟 —— */
   clouds(canvas, ctx) {
     let w, h, raf, t = 0, birds = [];
-    const cover = makeCover("clouds.jpg");
+    const cover = makeCover("clouds.jpg", { amp: 14, bands: 48, speed: 0.6, freq: 0.7 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark ? [[0, "#0d1730"], [1, "#1d2c4d"]] : [[0, "#8ecdf8"], [1, "#f2fafe"]]);
     });
@@ -545,7 +566,7 @@ window.BG_PAINTERS = {
   /* —— 星野：壁纸 + 亮星星芒 + 流星 —— */
   stars(canvas, ctx) {
     let w, h, raf, t = 0, bright = [], meteor = { m: null, next: 60 };
-    const cover = makeCover("stars.jpg");
+    const cover = makeCover("stars.jpg", { amp: 5, bands: 56, speed: 0.5, freq: 0.9 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark ? [[0, "#010309"], [1, "#12204a"]] : [[0, "#c9dcff"], [1, "#f6f9ff"]]);
     });
@@ -592,7 +613,7 @@ window.BG_PAINTERS = {
   /* —— 星云：壁纸 + 呼吸云气 + 星芒 —— */
   nebula(canvas, ctx) {
     let w, h, raf, t = 0, bright = [];
-    const cover = makeCover("nebula.jpg");
+    const cover = makeCover("nebula.jpg", { amp: 8, bands: 48, speed: 0.5, freq: 0.7 });
     const blobs = [
       { c: "124, 58, 237", bx: 0.28, by: 0.32, r: 0.36, sp: 0.9, ph: 0 },
       { c: "219, 39, 119", bx: 0.68, by: 0.4, r: 0.32, sp: 0.7, ph: 1.8 },
@@ -637,7 +658,7 @@ window.BG_PAINTERS = {
   /* —— 深空行星：壁纸 + 绕行的小月亮 —— */
   planet(canvas, ctx) {
     let w, h, raf, t = 0;
-    const cover = makeCover("planet.jpg");
+    const cover = makeCover("planet.jpg", { amp: 4, bands: 56, speed: 0.4, freq: 0.8 });
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark ? [[0, "#010309"], [1, "#0a1533"]] : [[0, "#bcd7ff"], [1, "#fdf3e3"]]);
     });
