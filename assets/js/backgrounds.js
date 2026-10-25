@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.5.0";
+const BG_VER = "1.5.2";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -20,6 +20,8 @@ addEventListener("mouseout", (e) => { if (!e.relatedTarget) { BG_MOUSE.x = -9999
 /* 固定定位的整页画布直接用视口尺寸，不依赖布局时序；
    主题页卡片里的小画布按自身元素测量 */
 function bgSize(canvas) {
+  /* 按设备像素比渲染，高分屏也锐利 */
+  const dpr = Math.min(2, devicePixelRatio || 1);
   let w, h;
   if (getComputedStyle(canvas).position === "fixed") {
     w = innerWidth;
@@ -29,8 +31,8 @@ function bgSize(canvas) {
     w = Math.round(rect.width) || canvas.width || innerWidth;
     h = Math.round(rect.height) || canvas.height || innerHeight;
   }
-  canvas.width = Math.max(1, w);
-  canvas.height = Math.max(1, h);
+  canvas.width = Math.max(1, Math.round(w * dpr));
+  canvas.height = Math.max(1, Math.round(h * dpr));
 }
 const isDarkBg = () => document.documentElement.dataset.theme === "dark";
 function countByArea(w, h, min, max, divisor) {
@@ -135,9 +137,9 @@ window.BG_PRESETS = {
   planet: { canvas: "planet" },
   galaxy: { canvas: "galaxy" },
   earth: { canvas: "earth" },
-  forest: { canvas: "mist", strength: 0.09 },
-  clouds: { canvas: "mist", strength: 0.15 },
-  valley: { canvas: "mist", strength: 0.05 },
+  forest: { canvas: "mist", strength: 0.17 },
+  clouds: { canvas: "mist", strength: 0.28 },
+  valley: { canvas: "mist", strength: 0.1 },
   drops: { canvas: "glow" },
   autumn: { canvas: "leaves" },
 };
@@ -146,7 +148,7 @@ window.BG_PRESETS = {
 window.BG_PAINTERS = {
   /* —— 极光：星尘粒子，随光标轻拂 —— */
   aurora(canvas, ctx) {
-    let w, h, raf, dots = [];
+    let w, h, raf, t = 0, dots = [];
     const cover = makeCover("aurora.jpg");
     const resize = () => { bgSize(canvas); w = canvas.width; h = canvas.height; };
     const seed = () => {
@@ -158,8 +160,36 @@ window.BG_PAINTERS = {
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
       const dark = isDarkBg();
       cover.draw(ctx, w, h, 0);
+      /* 流动的极光光带：让真实照片里的极光「舞动」起来 */
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      const ribbons = [
+        { c: "80, 250, 170", base: 0.3, ph: 0, f: 0.008, amp: 0.1 },
+        { c: "150, 120, 250", base: 0.42, ph: 2.4, f: 0.006, amp: 0.08 },
+      ];
+      for (const cur of ribbons) {
+        const stepX = Math.max(30, w / 40);
+        for (let px = 0; px <= w; px += stepX) {
+          const yTop = h * (cur.base + cur.amp) + Math.sin(px * cur.f + t * 0.01 + cur.ph) * h * 0.08;
+          const len = h * (0.26 + 0.08 * Math.sin(px * 0.016 - t * 0.008 + cur.ph));
+          const fade = 0.5 + 0.5 * Math.sin(px * 0.005 - t * 0.006 + cur.ph * 2);
+          const a = (dark ? 0.16 : 0.1) * (0.3 + fade);
+          const g = ctx.createLinearGradient(px, yTop, px, yTop + len);
+          g.addColorStop(0, `rgba(${cur.c},0)`);
+          g.addColorStop(0.4, `rgba(${cur.c},${a})`);
+          g.addColorStop(1, `rgba(${cur.c},0)`);
+          ctx.strokeStyle = g;
+          ctx.lineWidth = 26;
+          ctx.beginPath();
+          ctx.moveTo(px, yTop);
+          ctx.lineTo(px, yTop + len);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
       const p = ptr(canvas);
       const tone = dark ? "214, 226, 240" : "255, 255, 255";
       for (const d of dots) {
@@ -204,7 +234,7 @@ window.BG_PAINTERS = {
     const cover = makeCover("nebula.jpg");
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      bright = Array.from({ length: 6 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 1.8 + Math.random() * 1.2, ph: rand(0, 6.28) }));
+      bright = Array.from({ length: 9 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 1.8 + Math.random() * 1.6, ph: rand(0, 6.28) }));
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
@@ -216,7 +246,7 @@ window.BG_PAINTERS = {
       for (let i = 0; i < 2; i++) {
         const px = w * (0.3 + i * 0.4) + Math.sin(t * 0.002 + i * 2.5) * w * 0.05;
         const py = h * (0.4 + i * 0.2) + Math.cos(t * 0.0016 + i * 1.8) * h * 0.04;
-        glowDot(ctx, px, py, Math.min(w, h) * 0.22, "255, 230, 240", (dark ? 0.08 : 0.05) * (0.7 + 0.3 * Math.sin(t * 0.004 + i)));
+        glowDot(ctx, px, py, Math.min(w, h) * 0.26, "255, 220, 245", (dark ? 0.2 : 0.12) * (0.6 + 0.4 * Math.sin(t * 0.005 + i * 2)));
       }
       ctx.restore();
       for (const b of bright) {
@@ -239,7 +269,7 @@ window.BG_PAINTERS = {
     const cover = makeCover("planet.jpg");
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      stars = Array.from({ length: countByArea(w, h, 20, 70, 30000) }, () => ({
+      stars = Array.from({ length: countByArea(w, h, 30, 90, 18000) }, () => ({
         x: Math.random() * w, y: Math.random() * h, r: 0.4 + Math.random() * 1, ph: rand(0, 6.28), sp: rand(0.5, 1.4),
       }));
     };
@@ -265,16 +295,27 @@ window.BG_PAINTERS = {
 
   /* —— 银河：流星划过 —— */
   galaxy(canvas, ctx) {
-    let w, h, raf, meteor = { m: null, next: 90 };
+    let w, h, raf, t = 0, meteor = { m: null, next: 90 }, shimmer = [];
     const cover = makeCover("galaxy.jpg");
-    const resize = () => { bgSize(canvas); w = canvas.width; h = canvas.height; };
+    const resize = () => {
+      bgSize(canvas); w = canvas.width; h = canvas.height;
+      shimmer = Array.from({ length: 5 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: 40 + Math.random() * 70, ph: rand(0, 6.28) }));
+    };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
       const dark = isDarkBg();
       cover.draw(ctx, w, h, 0);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      for (const sp of shimmer) {
+        const a = (dark ? 0.1 : 0.06) * (0.5 + 0.5 * Math.sin(t * 0.006 + sp.ph));
+        glowDot(ctx, sp.x + Math.sin(t * 0.001 + sp.ph) * 30, sp.y, sp.r, "255, 220, 170", a);
+      }
+      ctx.restore();
       if (!meteor.m && --meteor.next <= 0) {
         meteor.m = { x: w * 0.2 + Math.random() * w * 0.6, y: Math.random() * h * 0.3, vx: -(4 + Math.random() * 3), vy: 2 + Math.random() * 1.4, life: 40 };
-        meteor.next = 180 + Math.random() * 240;
+        meteor.next = 90 + Math.random() * 160;
       }
       if (meteor.m) {
         const m = meteor.m;
@@ -300,18 +341,24 @@ window.BG_PAINTERS = {
 
   /* —— 蓝星：细小星光微闪 —— */
   earth(canvas, ctx) {
-    let w, h, raf, t = 0, stars = [];
+    let w, h, raf, t = 0, stars = [], drift = [];
     const cover = makeCover("earth.jpg");
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
       stars = Array.from({ length: countByArea(w, h, 16, 56, 34000) }, () => ({
         x: Math.random() * w, y: Math.random() * h, r: 0.3 + Math.random() * 0.9, ph: rand(0, 6.28), sp: 0.5 + Math.random() * 1.4,
       }));
+      drift = Array.from({ length: 3 }, () => ({ x: Math.random() * w, y: h * (0.3 + Math.random() * 0.4), r: Math.min(w, h) * 0.2, v: rand(0.15, 0.35) }));
     };
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       cover.draw(ctx, w, h, 0);
+      for (const c of drift) {
+        c.x += c.v;
+        if (c.x - c.r > w) c.x = -c.r;
+        glowDot(ctx, c.x, c.y, c.r, "235, 245, 255", dark ? 0.1 : 0.07);
+      }
       for (const s of stars) {
         const a = 0.12 + 0.35 * (0.5 + 0.5 * Math.sin(t * 0.02 * s.sp + s.ph));
         ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
@@ -370,7 +417,7 @@ window.BG_PAINTERS = {
       bgSize(canvas); w = canvas.width; h = canvas.height;
       spots = Array.from({ length: 7 }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        r: rand(30, 70), ph: rand(0, 6.28), sp: rand(0.006, 0.012),
+        r: rand(45, 90), ph: rand(0, 6.28), sp: rand(0.008, 0.016),
       }));
     };
     function frame() {
@@ -381,7 +428,7 @@ window.BG_PAINTERS = {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       for (const s of spots) {
-        const a = (dark ? 0.12 : 0.09) * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
+        const a = (dark ? 0.22 : 0.16) * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
         glowDot(ctx, s.x, s.y, s.r, "220, 235, 250", a);
       }
       ctx.restore();
@@ -401,7 +448,7 @@ window.BG_PAINTERS = {
     const cover = makeCover("autumn.jpg");
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      leaves = Array.from({ length: countByArea(w, h, 8, 22, 55000) }, () => ({
+      leaves = Array.from({ length: countByArea(w, h, 12, 30, 38000) }, () => ({
         x: Math.random() * w, y: Math.random() * h, s: rand(3, 6.5),
         rot: rand(0, 6.28), vr: rand(-0.02, 0.02), vy: rand(0.3, 0.7),
         ph: rand(0, 6.28), amp: rand(0.4, 0.9), fs: rand(0.015, 0.04),
