@@ -95,7 +95,9 @@ function initProfilePage() {
 
   function toggleEdit(editing) {
     $("#profileView").hidden = editing;
+    $("#profileView").classList.toggle("hidden", editing);
     $("#profileForm").hidden = !editing;
+    $("#profileForm").classList.toggle("hidden", !editing);
     if (editing) fillForm();
   }
 
