@@ -1962,3 +1962,90 @@ html[data-photo="dark"] .float-chip {
   border-color: rgba(255, 255, 255, 0.2);
   color: #cdd7e8;
 }
+
+/* ---------- 个人主页 ---------- */
+.hidden { display: none !important; }
+.profile-card { padding: 30px 34px; }
+.profile-top { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+.profile-avatar {
+  flex: none;
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: var(--gradient);
+  display: grid; place-items: center;
+  color: #fff; font-size: 38px; font-weight: 700;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-id { flex: 1; min-width: 200px; }
+.profile-id h2 { margin: 0; font-size: 25px; font-weight: 800; }
+.profile-motto { margin: 5px 0 10px; color: var(--text-soft); font-size: 15px; }
+.profile-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.profile-top .btn { margin-left: auto; }
+.btn-ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.profile-bio {
+  margin: 22px 0 0; padding-top: 20px;
+  border-top: 1px dashed var(--border);
+  color: var(--text-soft); line-height: 1.9;
+}
+.profile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 22px; margin-top: 20px; }
+.profile-item {
+  display: flex; gap: 10px; align-items: baseline;
+  font-size: 14.5px; padding: 11px 15px;
+  background: var(--accent-soft); border-radius: 10px;
+}
+.profile-item .pi-label { color: var(--text-faint); flex: none; }
+.profile-item a { color: var(--accent); }
+.profile-item a:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  .profile-card { padding: 22px 20px; }
+  .profile-top { gap: 18px; }
+  .profile-top .btn { margin-left: 0; width: 100%; justify-content: center; }
+  .profile-grid { grid-template-columns: 1fr; }
+}
+
+/* 编辑表单 */
+.form-avatar-row { display: flex; align-items: center; gap: 22px; margin-bottom: 8px; flex-wrap: wrap; }
+.form-avatar-side .form-hint { font-size: 12.5px; color: var(--text-faint); margin: 8px 0 10px; max-width: 32em; }
+.form-avatar-side .btn { margin-right: 10px; }
+.form-row { display: flex; align-items: center; gap: 16px; margin: 15px 0; }
+.form-row span { flex: none; width: 112px; font-size: 14px; color: var(--text-soft); }
+.form-row input,
+.form-row textarea {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit; font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-row input:focus,
+.form-row textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.form-row textarea { resize: vertical; min-height: 72px; }
+.form-actions { display: flex; gap: 14px; margin-top: 24px; flex-wrap: wrap; }
+.form-note { font-size: 12.5px; color: var(--text-faint); margin-top: 16px; }
+@media (max-width: 640px) {
+  .form-row { flex-direction: column; align-items: stretch; gap: 6px; }
+  .form-row span { width: auto; }
+}
+
+/* 首页：资料头像进星球 + 签名行 */
+.orb-avatar {
+  width: 80%; height: 80%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: inset 0 -16px 36px rgba(0, 0, 0, 0.28);
+}
+.hero-tagline {
+  margin: -4px 0 14px;
+  font-size: 15.5px;
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+}
