@@ -3134,3 +3134,94 @@ html[data-photo="dark"] .float-chip {
   color: var(--accent);
   font-weight: 700;
 }
+
+/* ---------- 个人主页：今日天气 ---------- */
+.weather-card {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 22px 30px;
+  flex-wrap: wrap;
+}
+.wx-loading { padding: 20px 6px; color: var(--text-faint); font-size: 14px; }
+.wx-icon { flex: none; width: 96px; height: 96px; }
+.wx-svg { width: 100%; height: 100%; overflow: visible; }
+.wx-svg .c-sun { fill: #ffd76e; }
+.wx-svg .wx-rays {
+  stroke: #f0b64f;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform-origin: 48px 48px;
+  animation: wx-spin 26s linear infinite;
+}
+.wx-svg .c-cloud { fill: #dfe7f5; }
+[data-theme="dark"] .wx-svg .c-cloud { fill: #c7d3ea; }
+.wx-svg .wx-cloud.lift { animation: wx-bob 6s ease-in-out infinite; }
+.wx-svg .wx-drop {
+  stroke: #7fb2e8;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: wx-drop 1.5s linear infinite;
+}
+.wx-svg .wx-drop.heavy { stroke-width: 4.5; stroke: #5d9fdd; }
+.wx-svg .wx-flake {
+  fill: #eaf3ff;
+  opacity: 0;
+  animation: wx-snow 2.8s ease-in-out infinite;
+}
+.wx-svg .wx-bolt {
+  fill: #ffd54a;
+  animation: wx-flash 3.4s ease-in-out infinite;
+}
+.wx-svg .wx-fog line {
+  stroke: #b9c4d8;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0.7;
+  animation: wx-fog 5s ease-in-out infinite alternate;
+}
+.wx-svg .wx-fog line:nth-of-type(2) { animation-delay: 0.7s; }
+.wx-svg .wx-fog line:nth-of-type(3) { animation-delay: 1.4s; }
+@keyframes wx-spin { to { transform: rotate(360deg); } }
+@keyframes wx-bob { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+@keyframes wx-drop {
+  0% { transform: translateY(-6px); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateY(16px); opacity: 0; }
+}
+@keyframes wx-snow {
+  0% { transform: translate(-3px, -5px); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translate(3px, 14px); opacity: 0; }
+}
+@keyframes wx-flash {
+  0%, 86%, 93%, 100% { opacity: 1; }
+  89%, 96% { opacity: 0.15; }
+}
+@keyframes wx-fog { from { transform: translateX(-5px); } to { transform: translateX(5px); } }
+.wx-main { flex: none; min-width: 120px; }
+.wx-main b {
+  display: block;
+  font-size: 46px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  line-height: 1.1;
+}
+.wx-main span { font-size: 15px; color: var(--text-soft); }
+.wx-details {
+  display: grid;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--text-faint);
+  border-left: 1px dashed var(--border);
+  padding-left: 24px;
+}
+.wx-city {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wx-svg * { animation: none !important; }
+}

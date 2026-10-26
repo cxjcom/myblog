@@ -480,12 +480,130 @@ function initMood() {
 }
 
 
+/* ---------------- 个人主页：今日天气（Open-Meteo 免费接口，无需密钥） ---------------- */
+const WMO_MAP = {
+  0: ["sun", "晴"], 1: ["suncloud", "大致晴朗"], 2: ["suncloud", "多云"], 3: ["cloud", "阴"],
+  45: ["fog", "有雾"], 48: ["fog", "雾凇"],
+  51: ["rain", "毛毛雨"], 53: ["rain", "毛毛雨"], 55: ["rain", "毛毛雨"],
+  61: ["rain", "小雨"], 63: ["rain", "中雨"], 65: ["rain", "大雨"],
+  66: ["rain", "冻雨"], 67: ["rain", "冻雨"],
+  71: ["snow", "小雪"], 73: ["snow", "中雪"], 75: ["snow", "大雪"], 77: ["snow", "霰"],
+  80: ["rain", "阵雨"], 81: ["rain", "强阵雨"], 82: ["rain", "暴雨"],
+  85: ["snow", "阵雪"], 86: ["snow", "阵雪"],
+  95: ["thunder", "雷阵雨"], 96: ["thunder", "雷阵雨"], 99: ["thunder", "强雷暴"],
+};
+
+const WX_FALLBACK = { latitude: 31.22222, longitude: 121.45806, city: "上海" };
+
+function wxCityCandidates(loc) {
+  const parts = (loc || "").split(/[·，,、\s]+/).map((x) => x.trim())
+    .filter((x) => x && !/^(中国|China)$/i.test(x));
+  if (!parts.length) parts.push(WX_FALLBACK.city);
+  return parts.reverse(); /* "中国 · 上海" → 先试 "上海" */
+}
+
+async function wxGeocode(name) {
+  const r = await fetch("https://geocoding-api.open-meteo.com/v1/search?name=" +
+    encodeURIComponent(name) + "&count=1&language=zh&format=json");
+  const d = await r.json();
+  return (d.results && d.results[0]) || null;
+}
+
+/* 动态 SVG 图标：随天气类型切换，动画由 CSS 驱动 */
+const WX_SUN_CORE = `<g class="wx-rays">
+      <line x1="48" y1="10" x2="48" y2="22"/><line x1="48" y1="74" x2="48" y2="86"/>
+      <line x1="10" y1="48" x2="22" y2="48"/><line x1="74" y1="48" x2="86" y2="48"/>
+      <line x1="21" y1="21" x2="30" y2="30"/><line x1="66" y1="66" x2="75" y2="75"/>
+      <line x1="75" y1="21" x2="66" y2="30"/><line x1="30" y1="66" x2="21" y2="75"/></g>
+    <circle class="c-sun" cx="48" cy="48" r="17"/>`;
+
+function wxIcon(kind) {
+  const cloud = (cls) => `<g class="wx-cloud ${cls || ""}">
+    <circle class="c-cloud" cx="36" cy="52" r="13"/><circle class="c-cloud" cx="52" cy="44" r="17"/>
+    <circle class="c-cloud" cx="66" cy="52" r="12"/><rect class="c-cloud" x="28" y="50" width="52" height="15" rx="7.5"/></g>`;
+  const drops = (cls) => [58, 70, 82].map((x, i) =>
+    `<line class="wx-drop ${cls}" x1="${x}" y1="66" x2="${x - 3}" y2="76" style="animation-delay:${i * 0.45}s"/>`).join("");
+  const flakes = (cls) => [58, 70, 82].map((x, i) =>
+    `<circle class="wx-flake ${cls}" cx="${x}" cy="68" r="2.6" style="animation-delay:${i * 0.6}s"/>`).join("");
+  const icons = {
+    sun: `<g class="wx-sun">${WX_SUN_CORE}</g>`,
+    suncloud: `<g class="wx-sun" transform="translate(-13,-13) scale(0.68)">${WX_SUN_CORE}</g>` + cloud("lift"),
+    cloud: cloud(),
+    rain: cloud("lift") + drops("heavy"),
+    drizzle: cloud("lift") + drops("light"),
+    snow: cloud("lift") + flakes(""),
+    thunder: cloud("dark") + `<polygon class="wx-bolt" points="52,58 44,74 51,74 46,88 60,70 52,70 58,58"/>`,
+    fog: cloud("lift") + `<g class="wx-fog">
+        <line x1="26" y1="72" x2="70" y2="72"/><line x1="32" y1="80" x2="76" y2="80"/><line x1="26" y1="88" x2="64" y2="88"/></g>`,
+  };
+  return `<svg viewBox="0 0 96 96" class="wx-svg" aria-hidden="true">${icons[kind] || icons.cloud}</svg>`;
+}
+
+async function initWeather() {
+  const card = $("#weatherCard");
+  if (!card) return;
+  const esc = escapeHTML;
+  const loc = loadProfile().location || "";
+
+  /* 会话内缓存 30 分钟，避免每次刷新都请求 */
+  try {
+    const cache = JSON.parse(localStorage.getItem("weather.cache.v1") || "null");
+    if (cache && cache.loc === loc && Date.now() - cache.at < 30 * 60 * 1000) {
+      renderWeather(cache.data, cache.city);
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    let coords = null, city = "";
+    for (const cand of wxCityCandidates(loc)) {
+      const hit = await wxGeocode(cand);
+      if (hit) { coords = hit; city = hit.name; break; }
+    }
+    if (!coords) { coords = WX_FALLBACK; city = WX_FALLBACK.city; }
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + coords.latitude +
+      "&longitude=" + coords.longitude +
+      "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
+      "&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1";
+    const d = await (await fetch(url)).json();
+    const data = {
+      temp: Math.round(d.current.temperature_2m),
+      code: d.current.weather_code,
+      humidity: d.current.relative_humidity_2m,
+      wind: Math.round(d.current.wind_speed_10m),
+      max: Math.round(d.daily.temperature_2m_max[0]),
+      min: Math.round(d.daily.temperature_2m_min[0]),
+    };
+    try {
+      localStorage.setItem("weather.cache.v1", JSON.stringify({ loc, at: Date.now(), data, city }));
+    } catch (e) {}
+    renderWeather(data, city);
+  } catch (e) {
+    card.innerHTML = '<div class="wx-loading">天气暂时拿不到，稍后再来看看吧</div>';
+  }
+
+  function renderWeather(data, city) {
+    const kindText = WMO_MAP[data.code] || ["cloud", "—"];
+    $("#wxLoc").textContent = city + " · 今天";
+    card.innerHTML = `
+      <div class="wx-icon">${wxIcon(kindText[0])}</div>
+      <div class="wx-main"><b>${data.temp}°</b><span>${kindText[1]}</span></div>
+      <div class="wx-details">
+        <span>最高 ${data.max}° · 最低 ${data.min}°</span>
+        <span>湿度 ${data.humidity}%</span>
+        <span>风速 ${data.wind} km/h</span>
+      </div>
+      <span class="wx-city">${esc(city)} · 今天</span>`;
+  }
+}
+
 /* ---------------- 全站应用（所有页面） ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   applyProfileToSite(loadProfile());
   if (document.body.dataset.page === "me") {
     initProfilePage();
     initProfileExtras();
+    initWeather();
     initNowMini();
     initSpaceLatest();
     initMood();

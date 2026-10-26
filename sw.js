@@ -1,7 +1,7 @@
 /* 拾光小栈 Service Worker：文章与静态资源离线可读 */
 "use strict";
 
-const CACHE = "myblog-v1.10.6";
+const CACHE = "myblog-v1.11.0";
 const CORE = ["", "index.html", "blog.html", "archive.html", "about.html", "album.html", "music.html", "shelf.html"];
 
 self.addEventListener("install", (e) => {
@@ -32,16 +32,17 @@ self.addEventListener("fetch", (e) => {
     );
     return;
   }
-  /* 静态资源：缓存优先 */
+  /* 静态资源：缓存优先 + 后台刷新（stale-while-revalidate），避免旧缓存长期滞留 */
   e.respondWith(
-    caches.match(e.request).then(
-      (m) =>
-        m ||
-        fetch(e.request).then((res) => {
+    caches.match(e.request).then((m) => {
+      const fresh = fetch(e.request)
+        .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(e.request, copy));
           return res;
         })
-    )
+        .catch(() => m);
+      return m || fresh;
+    })
   );
 });
