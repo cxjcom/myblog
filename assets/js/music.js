@@ -7,11 +7,11 @@
    type: "embed" 网易云外链 | "apple" Apple Music | "bili" B 站 | "audio" 音频直链 */
 const MUSIC_LIST = [
   {
-    title: "晴天",
-    artist: "周杰伦",
+    title: "The truth that you leave",
+    artist: "Pianoboy 高至豪",
     type: "embed",
-    src: "https://music.163.com/outchain/player?type=2&id=186016&auto=0&height=66",
-    note: "示例歌曲：在下方表单添加你喜欢的音乐，或直接编辑本文件换成自己的歌单。",
+    src: "https://music.163.com/outchain/player?type=2&id=139774&auto=0&height=66",
+    note: "示例歌曲（免登录即可播放）。周杰伦等版权歌曲需登录网易云 VIP 才能听——添加时优先选免登录可播的歌，或把 mp3 放进 assets/music/ 用直链，谁来都能听。",
   },
 ];
 
