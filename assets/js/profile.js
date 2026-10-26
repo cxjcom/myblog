@@ -599,10 +599,10 @@ async function initWeather() {
 /* ---------------- 全站应用（所有页面） ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   applyProfileToSite(loadProfile());
+  if (document.querySelector("#weatherCard")) initWeather();
   if (document.body.dataset.page === "me") {
     initProfilePage();
     initProfileExtras();
-    initWeather();
     initNowMini();
     initSpaceLatest();
     initMood();
