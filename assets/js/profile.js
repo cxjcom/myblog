@@ -14,6 +14,7 @@ const PROFILE_DEFAULTS = {
   email: "hello@example.com",
   qq: "",
   wechat: "",
+  yearGoal: 20,
   tags: ["前端开发", "摄影", "读书", "徒步"],
   avatar: "", // dataURL，空则用默认
 };
@@ -118,6 +119,7 @@ function initProfilePage() {
     $("#formQQ").value = p.qq || "";
     $("#formWechat").value = p.wechat || "";
     $("#formTags").value = (p.tags || []).join(", ");
+    $("#formGoal").value = p.yearGoal || 20;
   }
 
   function toggleEdit(editing) {
@@ -144,6 +146,7 @@ function initProfilePage() {
     p.qq = $("#formQQ").value.trim();
     p.wechat = $("#formWechat").value.trim();
     p.tags = $("#formTags").value.split(/[,，、]/).map((t) => t.trim()).filter(Boolean).slice(0, 8);
+    p.yearGoal = Math.max(1, +$("#formGoal").value || 20);
     p.avatar = tempAvatar || "";
     saveProfile(p);
     render();
@@ -263,6 +266,31 @@ function initProfileExtras() {
     )
     .join("");
 
+  /* 年度目标进度环 */
+  const year = new Date().getFullYear();
+  const yearPosts = POSTS.filter((p) => p.date.startsWith(String(year))).length;
+  const goal = Math.max(1, loadProfile().yearGoal || 20);
+  const pct = Math.min(100, Math.round((yearPosts / goal) * 100));
+  const C = 2 * Math.PI * 52;
+  const fg = $("#goalRingFg");
+  $("#goalHint").textContent = year + " 年目标 " + goal + " 篇 · 已完成 " + yearPosts + " 篇";
+  $("#goalDetail").innerHTML = "已完成 <b>" + yearPosts + "</b> / " + goal + " 篇" +
+    (pct >= 100 ? " · 目标达成 🎉" : " · 还差 " + (goal - yearPosts) + " 篇");
+  $("#goalPct").textContent = pct + "%";
+  const ringIO = new IntersectionObserver((ents) => {
+    ents.forEach((e) => {
+      if (!e.isIntersecting) return;
+      ringIO.unobserve(e.target);
+      const t0 = performance.now(), dur = rm ? 0 : 1100;
+      (function step(t) {
+        const k = dur ? Math.min(1, (t - t0) / dur) : 1;
+        fg.style.strokeDashoffset = C * (1 - (pct / 100) * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      })(t0);
+    });
+  }, { threshold: 0.4 });
+  ringIO.observe(fg);
+
   /* 签名打字机（首次加载时） */
   const mottoEl = $("#viewMotto");
   const motto = mottoEl.textContent;
@@ -280,11 +308,165 @@ function initProfileExtras() {
   }
 }
 
+/* ---------------- 个人主页：Now 卡 / 空间速览 / 心情签到 ---------------- */
+const NOW_DEFAULTS = {
+  doing: "维护这个博客，把想做的功能一个个做出来",
+  reading: "《卡片笔记写作法》",
+  listening: "歌单里的老歌随机播放",
+};
+
+function initNowMini() {
+  const box = $("#nowMini");
+  if (!box) return;
+  let data;
+  try {
+    data = Object.assign({}, NOW_DEFAULTS, JSON.parse(localStorage.getItem("now.v1") || "{}"));
+  } catch (e) {
+    data = Object.assign({}, NOW_DEFAULTS);
+  }
+  const esc = escapeHTML;
+  const rows = [
+    ["在做", data.doing], ["在读", data.reading], ["在听", data.listening],
+  ];
+  box.innerHTML = rows
+    .map(([k, v]) => `<div class="now-mini-row"><span>${k}</span><p>${esc(v || "…")}</p></div>`)
+    .join("") + `<a class="now-mini-edit" href="now.html">编辑这些状态 →</a>`;
+}
+
+function albumLatestPhoto() {
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open("myblog-album", 1);
+      req.onsuccess = () => {
+        try {
+          const tx = req.result.transaction("photos", "readonly").objectStore("photos").getAll();
+          tx.onsuccess = () => {
+            const list = (tx.result || []).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            resolve(list[0] || null);
+          };
+          tx.onerror = () => resolve(null);
+        } catch (err) { resolve(null); }
+      };
+      req.onerror = () => resolve(null);
+    } catch (err) { resolve(null); }
+  });
+}
+
+function localLatest(key) {
+  try {
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(arr) && arr.length ? arr[0] : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function initSpaceLatest() {
+  const box = $("#spaceLatest");
+  if (!box) return;
+  const esc = escapeHTML;
+  const cards = [
+    { href: "album.html", ico: "📸", label: "最新照片", fallback: "相册还没有照片，去上传一张" },
+    { href: "music.html", ico: "🎵", label: "最新歌曲", fallback: "歌单里还没有歌，去添加" },
+    { href: "shelf.html", ico: "📚", label: "最近记录", fallback: "书架还空着，去记一条" },
+  ];
+  box.innerHTML = cards.map((c) => `<a class="space-latest-card glass-card reveal" href="${c.href}"></a>`).join("");
+  const els = $$(".space-latest-card", box);
+
+  albumLatestPhoto().then((photo) => {
+    const v = photo ? { text: photo.title || "未命名", sub: photo.date || "" } : null;
+    els[0].innerHTML = `
+      <span class="sl-ico" aria-hidden="true">${cards[0].ico}</span>
+      <div class="sl-body"><small>${cards[0].label}</small>
+      ${v ? `<b>${esc(v.text)}</b>${v.sub ? `<small class="sl-sub">${esc(v.sub)}</small>` : ""}` : `<small class="sl-sub">${cards[0].fallback}</small>`}</div>
+      <span class="space-arrow" aria-hidden="true">→</span>`;
+    if (typeof observeReveals === "function") observeReveals();
+  });
+  const song = localLatest("music.user.v1");
+  els[1].innerHTML = `
+    <span class="sl-ico" aria-hidden="true">${cards[1].ico}</span>
+    <div class="sl-body"><small>${cards[1].label}</small>
+    ${song ? `<b>${esc(song.title || "未命名")}</b>${song.artist ? `<small class="sl-sub">${esc(song.artist)}</small>` : ""}` : `<small class="sl-sub">${cards[1].fallback}</small>`}</div>
+    <span class="space-arrow" aria-hidden="true">→</span>`;
+  const shelfItem = localLatest("shelf.user.v1");
+  els[2].innerHTML = `
+    <span class="sl-ico" aria-hidden="true">${cards[2].ico}</span>
+    <div class="sl-body"><small>${cards[2].label}</small>
+    ${shelfItem ? `<b>${esc(shelfItem.title || "未命名")}</b>${shelfItem.note ? `<small class="sl-sub">${esc(shelfItem.note)}</small>` : ""}` : `<small class="sl-sub">${cards[2].fallback}</small>`}</div>
+    <span class="space-arrow" aria-hidden="true">→</span>`;
+  if (typeof observeReveals === "function") observeReveals();
+}
+
+const MOOD_KEY = "mood.v1";
+const MOODS = ["😊", "🤩", "😌", "🤔", "😴", "😢"];
+let currentMood = MOODS[0];
+
+function loadMoods() {
+  try {
+    const o = JSON.parse(localStorage.getItem(MOOD_KEY) || "{}");
+    return o && typeof o === "object" ? o : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function initMood() {
+  const grid = $("#moodGrid");
+  if (!grid) return;
+  const picker = $("#moodPicker");
+  picker.innerHTML = MOODS.map((m, i) => `<button type="button" class="mood-opt${i === 0 ? " on" : ""}" data-m="${m}" aria-label="心情 ${m}">${m}</button>`).join("");
+  picker.addEventListener("click", (e) => {
+    const b = e.target.closest(".mood-opt");
+    if (!b) return;
+    currentMood = b.dataset.m;
+    $$(".mood-opt", picker).forEach((x) => x.classList.toggle("on", x === b));
+  });
+
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const first = new Date(y, m, 1);
+  const days = new Date(y, m + 1, 0).getDate();
+  const offset = (first.getDay() + 6) % 7; /* 周一开头 */
+  const moods = loadMoods();
+  const key = (d) => y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+  const wnames = ["一", "二", "三", "四", "五", "六", "日"];
+
+  function render() {
+    let html = wnames.map((w) => `<span class="mood-wn">${w}</span>`).join("");
+    for (let i = 0; i < offset; i++) html += "<span></span>";
+    for (let d = 1; d <= days; d++) {
+      const k = key(d);
+      const isToday = d === now.getDate();
+      html += '<button type="button" class="mood-day' + (isToday ? " today" : "") + '" data-k="' + k + '" title="' + k + '">' + (moods[k] || d) + "</button>";
+    }
+    grid.innerHTML = html;
+    const monthPrefix = y + "-" + String(m + 1).padStart(2, "0");
+    const count = Object.keys(moods).filter((k) => k.startsWith(monthPrefix)).length;
+    $("#moodCount").textContent = "本月签到 " + count + " 天";
+  }
+
+  grid.addEventListener("click", (e) => {
+    const b = e.target.closest(".mood-day");
+    if (!b) return;
+    const k = b.dataset.k;
+    if (moods[k] === currentMood) delete moods[k];
+    else moods[k] = currentMood;
+    try { localStorage.setItem(MOOD_KEY, JSON.stringify(moods)); } catch (err) {}
+    render();
+  });
+
+  render();
+}
+
+
 /* ---------------- 全站应用（所有页面） ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   applyProfileToSite(loadProfile());
   if (document.body.dataset.page === "me") {
     initProfilePage();
     initProfileExtras();
+    initNowMini();
+    initSpaceLatest();
+    initMood();
   }
 });

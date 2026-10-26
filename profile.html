@@ -116,6 +116,7 @@
         <label class="form-row"><span>QQ 号</span><input id="formQQ" maxlength="20" placeholder="你的 QQ 号（可不填）"></label>
         <label class="form-row"><span>微信号</span><input id="formWechat" maxlength="40" placeholder="你的微信号（可不填）"></label>
         <label class="form-row"><span>兴趣标签</span><input id="formTags" maxlength="100" placeholder="逗号分隔，如：前端, 摄影, 读书（最多 8 个）"></label>
+        <label class="form-row"><span>年度目标</span><input id="formGoal" type="number" min="1" max="365" placeholder="今年想写多少篇（默认 20）"></label>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">保存修改</button>
           <button type="button" class="btn" id="cancelEdit">取消</button>
@@ -138,6 +139,28 @@
         <div class="me-stat glass-card reveal" style="--d:.1s"><b data-count="0">0</b><span>累计字数</span></div>
         <div class="me-stat glass-card reveal" style="--d:.15s"><b data-count="0">0</b><span>个标签</span></div>
         <div class="me-stat glass-card reveal" style="--d:.2s"><b data-count="0">0</b><span>天创作旅程</span></div>
+      </div>
+    </section>
+
+    <!-- 年度目标 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Goal</span>
+          <h2>年度目标</h2>
+        </div>
+        <span class="count-hint" id="goalHint"></span>
+      </div>
+      <div class="glass-card goal-card reveal">
+        <svg viewBox="0 0 120 120" class="goal-ring" aria-hidden="true">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73" id="goalRingFg"></circle>
+        </svg>
+        <div class="goal-num">
+          <b id="goalPct">0%</b>
+          <span id="goalDetail"></span>
+          <small>目标可在「编辑资料」里调整</small>
+        </div>
       </div>
     </section>
 
@@ -195,6 +218,45 @@
         <a class="more" href="archive.html">时光机 →</a>
       </div>
       <div class="me-recent" id="meRecent"></div>
+    </section>
+
+    <!-- 最近在… -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Now</span>
+          <h2>最近在…</h2>
+        </div>
+        <a class="more" href="now.html">去编辑 →</a>
+      </div>
+      <div class="now-mini glass-card reveal" id="nowMini"></div>
+    </section>
+
+    <!-- 空间速览 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Spaces</span>
+          <h2>空间速览</h2>
+        </div>
+      </div>
+      <div class="space-latest" id="spaceLatest"></div>
+    </section>
+
+    <!-- 心情签到 -->
+    <section class="section">
+      <div class="section-head reveal">
+        <div>
+          <span class="kicker">Mood</span>
+          <h2>本月心情</h2>
+        </div>
+        <span class="count-hint" id="moodCount"></span>
+      </div>
+      <div class="glass-card mood-card reveal">
+        <div class="mood-picker" id="moodPicker" role="radiogroup" aria-label="选择心情"></div>
+        <div class="mood-grid" id="moodGrid"></div>
+        <p class="form-note">点日期盖一个选中的心情，再点一次可清除 · 记录保存在本机浏览器</p>
+      </div>
     </section>
 
     <!-- 快捷入口 -->
@@ -269,7 +331,7 @@
   </footer>
 
   <script src="assets/js/posts.js?v=1.10.0"></script>
-  <script src="assets/js/profile.js?v=1.10.13"></script>
+  <script src="assets/js/profile.js?v=1.10.14"></script>
   <script src="assets/js/main.js?v=1.10.7"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>
