@@ -1,5 +1,5 @@
 /* ============================================================
-   相册空间：公开照片数据 + 本地添加/删除（localStorage）+ 瀑布流 + 灯箱
+   相册空间：公开照片 + 本地添加/删除（IndexedDB）+ 瀑布流 + 灯箱
    ============================================================ */
 "use strict";
 
@@ -7,24 +7,75 @@
    把图片文件放进 assets/img/gallery/，然后加一行：
    { src: "assets/img/gallery/xxx.jpg", title: "标题", date: "2026-10-26" }, */
 const ALBUM_PHOTOS = [
-  { src: "assets/img/bg/nebula.jpg",    title: "星云深处",   date: "2026-10-24" },
-  { src: "assets/img/bg/aurora.jpg",    title: "极光之夜",   date: "2026-10-24" },
-  { src: "assets/img/bg/sakura.jpg",    title: "樱花季节",   date: "2026-10-24" },
-  { src: "assets/img/bg/fireflies.jpg", title: "萤火虫森林", date: "2026-10-24" },
-  { src: "assets/img/bg/stars.jpg",     title: "满天星野",   date: "2026-10-24" },
-  { src: "assets/img/bg/planet.jpg",    title: "遥远行星",   date: "2026-10-24" },
+  { src: "assets/img/bg/nebula.webp",    title: "星云深处",   date: "2026-10-24" },
+  { src: "assets/img/bg/aurora.webp",    title: "极光之夜",   date: "2026-10-24" },
+  { src: "assets/img/bg/sakura.webp",    title: "樱花季节",   date: "2026-10-24" },
+  { src: "assets/img/bg/fireflies.webp", title: "萤火虫森林", date: "2026-10-24" },
+  { src: "assets/img/bg/stars.webp",     title: "满天星野",   date: "2026-10-24" },
+  { src: "assets/img/bg/planet.webp",    title: "遥远行星",   date: "2026-10-24" },
 ];
 
-const ALBUM_KEY = "album.user.v1";    // 自己添加的照片
+const ALBUM_KEY = "album.user.v1";          // 旧版 localStorage 数据（仅用于迁移）
 const ALBUM_HIDDEN_KEY = "album.hidden.v1"; // 被删除的内置照片（src 列表）
 
-function loadUserPhotos() {
-  try {
-    const arr = JSON.parse(localStorage.getItem(ALBUM_KEY) || "[]");
-    return Array.isArray(arr) ? arr : [];
-  } catch (e) {
-    return [];
+/* ---------------- IndexedDB 存储层 ---------------- */
+const ALBUM_DB = (() => {
+  let dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((resolve, reject) => {
+      const req = indexedDB.open("myblog-album", 1);
+      req.onupgradeneeded = () => {
+        req.result.createObjectStore("photos", { keyPath: "id" });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbp;
   }
+  function tx(mode, fn) {
+    return open().then(
+      (db) =>
+        new Promise((resolve, reject) => {
+          const t = db.transaction("photos", mode);
+          const store = t.objectStore("photos");
+          const out = fn(store);
+          t.oncomplete = () => resolve(out && out.result !== undefined ? out.result : undefined);
+          t.onerror = () => reject(t.error);
+        })
+    );
+  }
+  return {
+    all: () => tx("readonly", (s) => s.getAll()).then((list) =>
+      (list || []).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+    ),
+    put: (photo) => tx("readwrite", (s) => s.put(photo)),
+    del: (id) => tx("readwrite", (s) => s.delete(id)),
+  };
+})();
+
+/* 旧 localStorage 数据一次性迁移到 IndexedDB */
+async function migrateAlbum() {
+  try {
+    const raw = localStorage.getItem(ALBUM_KEY);
+    if (!raw) return;
+    const old = JSON.parse(raw);
+    if (Array.isArray(old) && old.length) {
+      const now = Date.now();
+      for (let i = 0; i < old.length; i++) {
+        const p = old[i];
+        await ALBUM_DB.put({
+          id: p.id || "u" + (now - i),
+          user: true,
+          src: p.src,
+          title: p.title,
+          date: p.date,
+          createdAt: now - i,
+        });
+      }
+    }
+    localStorage.removeItem(ALBUM_KEY);
+  } catch (e) { /* 迁移失败不影响使用 */ }
 }
 
 function loadHiddenPhotos() {
@@ -36,17 +87,13 @@ function loadHiddenPhotos() {
   }
 }
 
-function saveStore(key, val) {
+function saveHidden(list) {
   try {
-    localStorage.setItem(key, JSON.stringify(val));
-    return true;
-  } catch (e) {
-    alert("保存失败：浏览器本地存储空间不足，试试换小一点的图片。");
-    return false;
-  }
+    localStorage.setItem(ALBUM_HIDDEN_KEY, JSON.stringify(list));
+  } catch (e) {}
 }
 
-/* 图片文件压缩为 dataURL（最长边 1280），控制本地存储体积 */
+/* 图片文件压缩为 dataURL（最长边 1280） */
 function compressImageFile(file, cb) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -69,33 +116,27 @@ function initAlbumPage() {
   const grid = $("#albumGrid");
   if (!grid) return;
   const esc = escapeHTML;
+  let renderSeq = 0; /* 防止异步渲染乱序 */
 
-  /* 兼容旧数据：给用户照片补 id */
-  function userPhotos() {
-    const list = loadUserPhotos();
-    let dirty = false;
-    list.forEach((p) => {
-      if (!p.id) { p.id = "u" + Date.now() + Math.random().toString(36).slice(2, 7); dirty = true; }
-    });
-    if (dirty) saveStore(ALBUM_KEY, list);
-    return list;
-  }
-
-  function allPhotos() {
+  async function allPhotos() {
     const hidden = new Set(loadHiddenPhotos());
-    return [...userPhotos(), ...ALBUM_PHOTOS.filter((p) => !hidden.has("d:" + p.src))]
-      .map((p) => ({ ...p, key: p.user ? "u:" + p.id : "d:" + p.src }));
+    const users = await ALBUM_DB.all();
+    return [
+      ...users.map((p) => ({ ...p, key: "u:" + p.id })),
+      ...ALBUM_PHOTOS.filter((p) => !hidden.has("d:" + p.src)).map((p) => ({ ...p, key: "d:" + p.src })),
+    ];
   }
 
-  function render() {
-    const list = allPhotos();
-    const hiddenCount = loadHiddenPhotos().length;
+  async function render() {
+    const seq = ++renderSeq;
+    const list = await allPhotos();
+    if (seq !== renderSeq) return;
     $("#albumCount").textContent = "· " + list.length + " 张";
-    $("#albumRestore").hidden = hiddenCount === 0;
+    $("#albumRestore").hidden = loadHiddenPhotos().length === 0;
     $("#albumEmpty").hidden = list.length > 0;
     grid.innerHTML = list
-      .map((p) => {
-        return `
+      .map(
+        (p) => `
         <figure class="album-item reveal" data-key="${esc(p.key)}">
           <img src="${esc(p.src)}" alt="${esc(p.title || "照片")}" loading="lazy">
           <figcaption>
@@ -103,8 +144,8 @@ function initAlbumPage() {
             ${p.date ? `<span class="album-date">${esc(p.date)}</span>` : ""}
             <button class="album-del" title="删除这张照片" aria-label="删除照片">✕</button>
           </figcaption>
-        </figure>`;
-      })
+        </figure>`
+      )
       .join("");
     if (typeof observeReveals === "function") observeReveals();
   }
@@ -128,25 +169,24 @@ function initAlbumPage() {
     if (e.key === "Escape" && !box.hidden) closeLightbox();
   });
 
-  grid.addEventListener("click", (e) => {
+  grid.addEventListener("click", async (e) => {
     const del = e.target.closest(".album-del");
     if (del) {
       e.stopPropagation();
       const key = del.closest(".album-item").dataset.key;
       if (key.startsWith("u:")) {
         const id = key.slice(2);
-        const list = userPhotos();
-        const removed = list.find((p) => p.id === id);
+        const users = await ALBUM_DB.all();
+        const removed = users.find((p) => p.id === id);
         if (removed && confirm(`删除「${removed.title || "未命名"}」？此操作不可恢复。`)) {
-          saveStore(ALBUM_KEY, list.filter((p) => p.id !== id));
+          await ALBUM_DB.del(id);
           render();
         }
       } else {
-        /* 内置照片：只在本浏览器隐藏，可随时恢复默认 */
         const hidden = loadHiddenPhotos();
         if (!hidden.includes(key)) {
           hidden.push(key);
-          saveStore(ALBUM_HIDDEN_KEY, hidden);
+          saveHidden(hidden);
           render();
         }
       }
@@ -154,14 +194,13 @@ function initAlbumPage() {
     }
     const item = e.target.closest(".album-item");
     if (item) {
-      const p = allPhotos().find((x) => x.key === item.dataset.key);
+      const p = (await allPhotos()).find((x) => x.key === item.dataset.key);
       if (p) openLightbox(p);
     }
   });
 
-  /* 恢复默认内容：找回被删除的内置照片 */
   $("#albumRestore").addEventListener("click", () => {
-    saveStore(ALBUM_HIDDEN_KEY, []);
+    saveHidden([]);
     render();
   });
 
@@ -171,48 +210,44 @@ function initAlbumPage() {
     if (!files.length) return;
     let pending = files.length;
     files.forEach((file) => {
-      compressImageFile(file, (dataURL) => {
-        const list = userPhotos();
-        list.unshift({
-          user: true,
+      compressImageFile(file, async (dataURL) => {
+        await ALBUM_DB.put({
           id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
+          user: true,
           src: dataURL,
           title: file.name.replace(/\.[a-z0-9]+$/i, "").slice(0, 30) || "我的照片",
           date: new Date().toISOString().slice(0, 10),
+          createdAt: Date.now(),
         });
-        if (saveStore(ALBUM_KEY, list)) {
-          render();
-          if (--pending === 0) grid.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        render();
+        if (--pending === 0) grid.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
     e.target.value = "";
   });
 
   /* 图片链接添加 */
-  $("#albumUrlForm").addEventListener("submit", (e) => {
+  $("#albumUrlForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const src = $("#albumUrl").value.trim();
     if (!/^https?:\/\//i.test(src)) {
       alert("请粘贴以 http(s):// 开头的图片链接");
       return;
     }
-    const list = userPhotos();
-    list.unshift({
-      user: true,
+    await ALBUM_DB.put({
       id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
+      user: true,
       src,
       title: $("#albumTitle").value.trim() || "网络图片",
       date: new Date().toISOString().slice(0, 10),
+      createdAt: Date.now(),
     });
-    if (saveStore(ALBUM_KEY, list)) {
-      $("#albumUrl").value = "";
-      $("#albumTitle").value = "";
-      render();
-    }
+    $("#albumUrl").value = "";
+    $("#albumTitle").value = "";
+    render();
   });
 
-  render();
+  migrateAlbum().then(render);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

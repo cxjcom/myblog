@@ -1,11 +1,10 @@
 /* ============================================================
-   音乐空间：公开歌单数据 + 本地添加/删除（localStorage）+ 播放器渲染
+   音乐空间：公开歌单 + 本地添加/删除 + 多平台解析 + 听歌记录
    ============================================================ */
 "use strict";
 
 /* ---------------- 公开歌单（想让所有访客听到就加在这里） ----------------
-   type: "embed" 粘贴网易云等平台的外链播放器地址
-         "audio" 直链音频文件（mp3 / m4a / ogg …，可放 assets/music/ 目录）  */
+   type: "embed" 网易云外链 | "apple" Apple Music | "bili" B 站 | "audio" 音频直链 */
 const MUSIC_LIST = [
   {
     title: "晴天",
@@ -16,8 +15,9 @@ const MUSIC_LIST = [
   },
 ];
 
-const MUSIC_KEY = "music.user.v1";       // 自己添加的歌曲
-const MUSIC_HIDDEN_KEY = "music.hidden.v1"; // 被删除的内置歌曲（type+src 列表）
+const MUSIC_KEY = "music.user.v1";        // 自己添加的歌曲
+const MUSIC_HIDDEN_KEY = "music.hidden.v1"; // 被删除的内置歌曲
+const MUSIC_HIST_KEY = "music.history.v1";  // 听歌记录 [{key,title,artist,at}]
 
 function loadUserTracks() {
   try {
@@ -47,10 +47,27 @@ function saveStore(key, val) {
   }
 }
 
-/* 智能识别音乐链接：
-   - 网易云歌曲页 / 音乐外链 → 外链播放器
-   - 直接粘贴的 <iframe …> 代码 → 提取其中 src
-   - mp3 / m4a / ogg / wav / flac 直链 → 原生播放器 */
+/* ---------------- 听歌记录 ---------------- */
+function loadHistory() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(MUSIC_HIST_KEY) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function recordPlay(key, title, artist) {
+  const h = loadHistory();
+  /* 同一首 30 秒内不重复记录 */
+  if (h[0] && h[0].key === key && Date.now() - h[0].at < 30000) return;
+  h.unshift({ key, title, artist, at: Date.now() });
+  saveStore(MUSIC_HIST_KEY, h.slice(0, 100));
+}
+
+/* ---------------- 链接智能识别 ----------------
+   网易云歌曲页/外链代码 → embed；Apple Music → 官方嵌入；
+   B 站视频页(BV号) → 官方播放器；mp3 等直链 → 原生播放器 */
 function parseMusicLink(raw) {
   const s = String(raw).trim();
   let m;
@@ -62,18 +79,36 @@ function parseMusicLink(raw) {
   if (m) {
     return { type: "embed", src: `https://music.163.com/outchain/player?type=2&id=${m[1]}&auto=0&height=66` };
   }
-  m = s.match(/outchain\/player\?/i);
-  if (m) return { type: "embed", src: s };
+  if (/outchain\/player\?/i.test(s)) return { type: "embed", src: s };
+  m = s.match(/music\.apple\.com\/(\S+)/i);
+  if (m) {
+    return { type: "apple", src: "https://embed." + m[0].replace(/[\?"'].*$/, "") };
+  }
+  m = s.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/i);
+  if (m) {
+    return {
+      type: "bili",
+      src: `https://player.bilibili.com/player.html?bvid=${m[1]}&autoplay=0&high_quality=1&danmaku=0`,
+    };
+  }
   if (/\.(mp3|m4a|ogg|wav|flac)(\?|#|$)/i.test(s)) return { type: "audio", src: s };
   return null;
 }
+
+/* 各类型播放器的渲染与卡片高度类 */
+const MUSIC_PLAYER = {
+  embed: (src, title) => `<iframe src="${src}" frameborder="no" loading="lazy" allowfullscreen title="${title}"></iframe>`,
+  apple: (src, title) => `<iframe src="${src}" frameborder="no" loading="lazy" allowfullscreen title="${title}"></iframe>`,
+  bili: (src, title) => `<iframe src="${src}" frameborder="no" loading="lazy" allowfullscreen scrolling="no" title="${title}"></iframe>`,
+  audio: (src) => `<audio controls preload="none" src="${src}"></audio>`,
+};
+const MUSIC_H_CLASS = { embed: "", apple: "music-item--h110", bili: "music-item--h210", audio: "" };
 
 function initMusicPage() {
   const list = $("#musicList");
   if (!list) return;
   const esc = escapeHTML;
 
-  /* 兼容旧数据：给用户歌曲补 id */
   function userTracks() {
     const arr = loadUserTracks();
     let dirty = false;
@@ -90,35 +125,84 @@ function initMusicPage() {
       .map((t) => ({ ...t, key: t.user ? "u:" + t.id : "d:" + t.type + ":" + t.src }));
   }
 
+  function trackKeyOf(t) {
+    return t.user ? "u:" + t.id : "d:" + t.type + ":" + t.src;
+  }
+
   function render() {
     const tracks = allTracks();
-    const hiddenCount = loadHiddenTracks().length;
     $("#musicCount").textContent = "· " + tracks.length + " 首";
-    $("#musicRestore").hidden = hiddenCount === 0;
+    $("#musicRestore").hidden = loadHiddenTracks().length === 0;
     $("#musicEmpty").hidden = tracks.length > 0;
     list.innerHTML = tracks
       .map((t) => {
-        const player =
-          t.type === "embed"
-            ? `<iframe src="${esc(t.src)}" frameborder="no" loading="lazy" allowfullscreen title="${esc(t.title)}"></iframe>`
-            : `<audio controls preload="none" src="${esc(t.src)}"></audio>`;
+        const render2 = MUSIC_PLAYER[t.type] || MUSIC_PLAYER.embed;
         return `
-        <article class="music-item glass-card reveal" data-key="${esc(t.key)}">
+        <article class="music-item glass-card reveal ${MUSIC_H_CLASS[t.type] || ""}" data-key="${esc(t.key)}">
           <div class="music-item-head">
             <span class="music-dot" aria-hidden="true"></span>
             <h3>${esc(t.title || "未命名")}</h3>
             ${t.artist ? `<span class="chip">${esc(t.artist)}</span>` : ""}
+            <button class="music-log" title="记入听歌记录" aria-label="记入听歌记录">♪</button>
             <button class="music-del" title="删除这首歌" aria-label="删除歌曲">✕</button>
           </div>
           ${t.note ? `<p class="music-note">${esc(t.note)}</p>` : ""}
-          ${player}
+          ${render2(esc(t.src), esc(t.title || "未命名"))}
         </article>`;
       })
       .join("");
     if (typeof observeReveals === "function") observeReveals();
+    renderHistory();
   }
 
+  /* ---------------- 听歌记录面板 ---------------- */
+  function renderHistory() {
+    const box = $("#musicHistory");
+    if (!box) return;
+    const h = loadHistory();
+    box.hidden = h.length === 0;
+    if (!h.length) return;
+    const fmt = (ts) => {
+      const d = new Date(ts), now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      const hh = String(d.getHours()).padStart(2, "0"), mm = String(d.getMinutes()).padStart(2, "0");
+      return sameDay ? `今天 ${hh}:${mm}` : `${d.getMonth() + 1}/${d.getDate()} ${hh}:${mm}`;
+    };
+    const recent = h.slice(0, 5);
+    const counts = {};
+    h.forEach((x) => { counts[x.key] = counts[x.key] || { n: 0, title: x.title, artist: x.artist }; counts[x.key].n++; });
+    const top = Object.values(counts).sort((a, b) => b.n - a.n).slice(0, 5);
+    box.innerHTML = `
+      <div class="music-hist glass-card reveal">
+        <h3><span class="music-dot"></span>最近播放</h3>
+        <ol class="hist-list">${recent.map((x) => `<li><span class="hist-title">${esc(x.title)}</span><time>${fmt(x.at)}</time></li>`).join("")}</ol>
+      </div>
+      <div class="music-hist glass-card reveal">
+        <h3><span class="music-dot"></span>常听排行</h3>
+        <ol class="hist-list top">${top.map((x, i) => `<li><b class="hist-rank">${i + 1}</b><span class="hist-title">${esc(x.title)}</span><time>${x.n} 次</time></li>`).join("")}</ol>
+      </div>`;
+  }
+
+  /* 原生 audio 播放自动记录 */
+  list.addEventListener("play", (e) => {
+    if (e.target.tagName !== "AUDIO") return;
+    const item = e.target.closest(".music-item");
+    if (!item) return;
+    const t = allTracks().find((x) => x.key === item.dataset.key);
+    if (t) { recordPlay(t.key, t.title, t.artist); renderHistory(); }
+  }, true);
+
+  /* 手动记一次（外链播放器无法监听，给个按钮） */
   list.addEventListener("click", (e) => {
+    const log = e.target.closest(".music-log");
+    if (log) {
+      const item = log.closest(".music-item");
+      const t = allTracks().find((x) => x.key === item.dataset.key);
+      if (t) { recordPlay(t.key, t.title, t.artist); renderHistory(); }
+      log.classList.add("done");
+      setTimeout(() => log.classList.remove("done"), 800);
+      return;
+    }
     const del = e.target.closest(".music-del");
     if (!del) return;
     const key = del.closest(".music-item").dataset.key;
@@ -131,7 +215,6 @@ function initMusicPage() {
         render();
       }
     } else {
-      /* 内置歌曲：只在本浏览器隐藏，可随时恢复默认 */
       const hidden = loadHiddenTracks();
       if (!hidden.includes(key)) {
         hidden.push(key);
@@ -141,7 +224,6 @@ function initMusicPage() {
     }
   });
 
-  /* 恢复默认内容：找回被删除的内置歌曲 */
   $("#musicRestore").addEventListener("click", () => {
     saveStore(MUSIC_HIDDEN_KEY, []);
     render();
@@ -154,7 +236,7 @@ function initMusicPage() {
     const link = $("#musicLink").value.trim();
     const parsed = parseMusicLink(link);
     if (!parsed) {
-      alert("没有识别出音乐链接：支持网易云音乐歌曲链接/外链代码，或 mp3 等音频直链。");
+      alert("没有识别出音乐链接：支持网易云 / Apple Music / B 站视频页链接、外链代码，或 mp3 等音频直链。");
       return;
     }
     const tracks = userTracks();
