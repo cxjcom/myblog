@@ -463,7 +463,7 @@ function initMood() {
     grid.innerHTML = html;
     const monthPrefix = y + "-" + String(m + 1).padStart(2, "0");
     const count = Object.keys(moods).filter((k) => k.startsWith(monthPrefix)).length;
-    $("#moodCount").textContent = `本月签到 ${count} 天`;
+    $("#moodMeta").textContent = y + " 年 " + (m + 1) + " 月 · 本月签到 " + count + " 天";
   }
 
   grid.addEventListener("click", (e) => {
