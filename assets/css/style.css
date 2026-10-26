@@ -2850,3 +2850,79 @@ html[data-photo="dark"] .float-chip {
   font-family: var(--font-mono);
 }
 .shelf-del { margin-left: auto; }
+
+/* ---------- 留言板 ---------- */
+.gb-guide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.gb-guide-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.gb-guide-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.gb-guide-ico {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  background: var(--accent-soft);
+}
+.gb-guide-card h3 { margin: 0 0 3px; font-size: 15.5px; }
+.gb-guide-card p { margin: 0; font-size: 13px; color: var(--text-soft); }
+
+.gb-topics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px;
+}
+.gb-topics-label {
+  font-size: 13.5px;
+  color: var(--text-faint);
+  margin-right: 2px;
+}
+.gb-topics .chip { cursor: default; }
+
+.gb-board {
+  padding: 10px 26px 26px;
+  position: relative;
+  overflow: hidden;
+}
+.gb-board::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent) 30%, var(--accent-2) 70%, transparent);
+  opacity: 0.65;
+}
+.gb-board-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 0 10px;
+  color: var(--text-faint);
+  font-size: 14px;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+}
+.gb-board-head i {
+  font-style: normal;
+  color: var(--accent);
+  font-size: 12px;
+  opacity: 0.8;
+}
+.gb-board .comments { padding: 0; border: none; margin: 0; }

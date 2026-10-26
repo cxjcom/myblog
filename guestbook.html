@@ -8,7 +8,7 @@
   <meta name="author" content="拾光">
   <meta name="theme-color" content="#f4f6fc">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=1.10.5">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.10.8">
   <script>
     (function () {
       try {
@@ -67,9 +67,54 @@
         <p>任何话都可以留在这里——对博客的建议、想交换的友链，或者只是打个招呼。</p>
       </section>
 
-      <section class="section">
-        <div class="comments" id="giscusBox" style="padding:26px">
-          💬 评论区加载中……（若长时间未显示，请确认 giscus App 已安装到本仓库）
+      <!-- 怎么留言 -->
+      <section class="section" style="padding-top:6px">
+        <div class="gb-guide">
+          <div class="gb-guide-card glass-card reveal" style="--d:.05s">
+            <span class="gb-guide-ico" aria-hidden="true">👋</span>
+            <div>
+              <h3>打个招呼</h3>
+              <p>用 GitHub 账号一键登录，说句话就好。</p>
+            </div>
+          </div>
+          <div class="gb-guide-card glass-card reveal" style="--d:.1s">
+            <span class="gb-guide-ico" aria-hidden="true">📮</span>
+            <div>
+              <h3>永久存档</h3>
+              <p>留言保存在仓库 Discussions，不会丢。</p>
+            </div>
+          </div>
+          <div class="gb-guide-card glass-card reveal" style="--d:.15s">
+            <span class="gb-guide-ico" aria-hidden="true">🎉</span>
+            <div>
+              <h3>表情回应</h3>
+              <p>支持点赞等各种表情，欢迎互动。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 话题提示 -->
+      <section class="section" style="padding-top:0">
+        <div class="gb-topics reveal">
+          <span class="gb-topics-label">可以说——</span>
+          <span class="chip">🎁 夸夸博主</span>
+          <span class="chip">💡 提个建议</span>
+          <span class="chip">🔗 交换友链</span>
+          <span class="chip">🌌 聊聊星空</span>
+          <span class="chip">☕ 或者随便聊聊</span>
+        </div>
+      </section>
+
+      <!-- 留言区 -->
+      <section class="section" style="padding-top:0">
+        <div class="gb-board glass-card reveal">
+          <div class="gb-board-head" aria-hidden="true">
+            <i>✦</i><span>留下你的足迹</span><i>✦</i>
+          </div>
+          <div class="comments" id="giscusBox">
+            💬 评论区加载中……
+          </div>
         </div>
       </section>
     </div>
