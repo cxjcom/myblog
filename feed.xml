@@ -7,6 +7,13 @@
     <description>记录、思考与热爱</description>
     <language>zh-CN</language>
     <item>
+      <title>建站日志：这个博客是怎么长出来的</title>
+      <link>https://cxjcom.github.io/myblog/posts/build-log-2026.html</link>
+      <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/build-log-2026.html</guid>
+      <pubDate>2026-10-26</pubDate>
+      <description>三周、53 次提交、32 个版本标签：从一行 HTML 到相册音乐空间与自动部署的完整记录，含翻车与回滚实录。</description>
+    </item>
+    <item>
       <title>你好，世界：我的博客正式开张</title>
       <link>https://cxjcom.github.io/myblog/posts/hello-world.html</link>
       <guid isPermaLink="true">https://cxjcom.github.io/myblog/posts/hello-world.html</guid>

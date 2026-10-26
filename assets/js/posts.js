@@ -7,6 +7,18 @@
    ============================================================ */
 window.POSTS = [
   {
+    slug: "build-log-2026",
+    title: "建站日志：这个博客是怎么长出来的",
+    date: "2026-10-26",
+    tags: ["随笔", "工具"],
+    cover: "g1",
+    featured: true,
+    minutes: 6,
+    words: 1700,
+    summary: "三周、53 次提交、32 个版本标签：从一行 HTML 到相册音乐空间与自动部署的完整记录，含翻车与回滚实录。",
+    keywords: "建站 博客 git 回滚 github pages 静态站",
+  },
+  {
     slug: "hello-world",
     title: "你好，世界：我的博客正式开张",
     date: "2026-10-24",
