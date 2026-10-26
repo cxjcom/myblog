@@ -560,6 +560,29 @@ function initArchive() {
   const box = $("#timeline");
   if (!box || !window.POSTS) return;
   const sorted = [...window.POSTS].sort(byDateDesc);
+
+  /* 写作热力图：最近 26 周，每天一格 */
+  const heat = $("#heatMap");
+  if (heat) {
+    const byDay = {};
+    window.POSTS.forEach((p) => (byDay[p.date] = (byDay[p.date] || 0) + 1));
+    const cells = [];
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - (26 * 7 - 1 + ((start.getDay() + 6) % 7)));
+    for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+      const key = d.toISOString().slice(0, 10);
+      const c = byDay[key] || 0;
+      cells.push(
+        `<span class="heat-cell lv${Math.min(c, 3)}" title="${key}${c ? " · " + c + " 篇" : ""}"></span>`
+      );
+    }
+    heat.innerHTML = cells.join("");
+    const totalDays = Object.keys(byDay).length;
+    const label = $("#heatLabel");
+    if (label) label.textContent = `最近半年 · ${totalDays} 个写作日`;
+  }
+
   const years = {};
   for (const p of sorted) {
     const y = p.date.slice(0, 4);

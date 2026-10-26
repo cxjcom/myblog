@@ -7,7 +7,7 @@
   <meta name="description" content="拾光小栈全部文章的时间线归档，按年份倒序排列。">
   <meta name="theme-color" content="#f4f6fc">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=1.9.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.10.2">
   <script>
     (function () {
       try {
@@ -66,6 +66,18 @@
 
     <div class="stats-row" id="archiveStats" style="max-width:none;grid-template-columns:repeat(3,1fr)"></div>
 
+    <section class="section" style="padding-top:10px">
+      <div class="glass-card heat-card reveal">
+        <div class="section-head" style="margin:0">
+          <div>
+            <span class="kicker">Heatmap</span>
+            <h2 style="font-size:20px">写作热力图 <span id="heatLabel" class="count-hint"></span></h2>
+          </div>
+        </div>
+        <div class="heat-grid" id="heatMap"></div>
+      </div>
+    </section>
+
     <div class="timeline" id="timeline"></div>
   </main>
 
@@ -90,6 +102,6 @@
   <script src="assets/js/posts.js?v=1.10.0"></script>
   <script src="assets/js/backgrounds.js?v=1.7.0"></script>
   <script src="assets/js/profile.js?v=1.8.10"></script>
-  <script src="assets/js/main.js?v=1.9.0"></script>
+  <script src="assets/js/main.js?v=1.10.2"></script>
 </body>
 </html>
