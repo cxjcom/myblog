@@ -12,6 +12,8 @@ const PROFILE_DEFAULTS = {
   location: "中国 · 上海",
   github: "cxjcom",
   email: "hello@example.com",
+  qq: "",
+  wechat: "",
   tags: ["前端开发", "摄影", "读书", "徒步"],
   avatar: "", // dataURL，空则用默认
 };
@@ -98,6 +100,8 @@ function initProfilePage() {
     const em = $("#viewEmail");
     em.textContent = p.email || "—";
     em.href = "mailto:" + (p.email || "");
+    $("#viewQQ").textContent = p.qq || "—";
+    $("#viewWechat").textContent = p.wechat || "—";
   }
 
   function fillForm() {
@@ -111,6 +115,8 @@ function initProfilePage() {
     $("#formLocation").value = p.location;
     $("#formGithub").value = p.github;
     $("#formEmail").value = p.email;
+    $("#formQQ").value = p.qq || "";
+    $("#formWechat").value = p.wechat || "";
     $("#formTags").value = (p.tags || []).join(", ");
   }
 
@@ -135,6 +141,8 @@ function initProfilePage() {
     p.location = $("#formLocation").value.trim();
     p.github = $("#formGithub").value.trim().replace(/^@/, "");
     p.email = $("#formEmail").value.trim();
+    p.qq = $("#formQQ").value.trim();
+    p.wechat = $("#formWechat").value.trim();
     p.tags = $("#formTags").value.split(/[,，、]/).map((t) => t.trim()).filter(Boolean).slice(0, 8);
     p.avatar = tempAvatar || "";
     saveProfile(p);
