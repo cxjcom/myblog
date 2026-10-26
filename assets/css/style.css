@@ -2775,3 +2775,43 @@ html[data-photo="dark"] .float-chip {
 [data-theme="dark"] .heat-cell.lv1 { background: rgba(129, 140, 248, 0.4); }
 [data-theme="dark"] .heat-cell.lv2 { background: rgba(129, 140, 248, 0.7); }
 [data-theme="dark"] .heat-cell.lv3 { background: #a5b4fc; }
+
+/* ---------- Now 页 ---------- */
+.now-card { padding: 26px 28px; }
+.now-row {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.now-row:last-of-type { border-bottom: none; }
+.now-kicker {
+  flex: none;
+  width: 52px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+.now-line {
+  margin: 0;
+  flex: 1;
+  font-size: 16.5px;
+  line-height: 1.8;
+  outline: none;
+  border-radius: 6px;
+  padding: 2px 8px;
+  transition: background 0.2s;
+}
+.now-line:hover { background: var(--accent-soft); }
+.now-line:focus { background: var(--accent-soft); }
+.now-line:empty::before { content: "点击输入…"; color: var(--text-faint); }
+.now-updated {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
