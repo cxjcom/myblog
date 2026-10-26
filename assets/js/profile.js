@@ -62,6 +62,9 @@ function applyProfileToSite(p) {
     a.textContent = "@" + gh;
     a.href = "https://github.com/" + gh;
   });
+  $$("[data-profile-email]").forEach((a) => {
+    if (p.email) a.href = "mailto:" + p.email;
+  });
 }
 
 document.addEventListener("profilechange", (e) => applyProfileToSite(e.detail));

@@ -12,12 +12,12 @@ const SITE = {
   github: "https://github.com/cxjcom",
   email: "hello@example.com", // 换成你自己的邮箱
   rss: "feed.xml",
-  // 在 https://giscus.app 生成配置后填入，评论区即自动开启
+  // giscus 评论：配置已填好，只差在 https://github.com/apps/giscus 安装 App 到本仓库
   giscus: {
-    repo: "", // 例如 "cxjcom/myblog"
-    repoId: "",
+    repo: "cxjcom/myblog",
+    repoId: "R_kgDOVVxvMw",
     category: "Announcements",
-    categoryId: "",
+    categoryId: "DIC_kwDOVVxvM84DJnb_",
   },
 };
 
