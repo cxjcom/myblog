@@ -762,31 +762,32 @@ function initPostPage() {
     });
   }
 
-  /* Giscus 评论区 */
+  /* Giscus 评论区：任意带 #giscusBox 的页面（文章页/留言板）由启动序列统一加载 */
+}
+
+/* ---------------- Giscus 评论（文章页 + 留言板共用） ---------------- */
+function initGiscus() {
   const box = $("#giscusBox");
-  if (box) {
-    const g = SITE.giscus;
-    if (g.repo && g.repoId && g.categoryId) {
-      box.innerHTML = "";
-      const s = document.createElement("script");
-      s.src = "https://giscus.app/client.js";
-      s.setAttribute("data-repo", g.repo);
-      s.setAttribute("data-repo-id", g.repoId);
-      s.setAttribute("data-category", g.category);
-      s.setAttribute("data-category-id", g.categoryId);
-      s.setAttribute("data-mapping", "pathname");
-      s.setAttribute("data-strict", "0");
-      s.setAttribute("data-reactions-enabled", "1");
-      s.setAttribute("data-emit-metadata", "0");
-      s.setAttribute("data-input-position", "top");
-      s.setAttribute("data-theme", "preferred_color_scheme");
-      s.setAttribute("data-lang", "zh-CN");
-      s.crossOrigin = "anonymous";
-      s.async = true;
-      box.appendChild(s);
-    }
-    /* 未配置时保留占位提示，不做任何伪装 */
-  }
+  if (!box) return;
+  const g = SITE.giscus;
+  if (!(g.repo && g.repoId && g.categoryId)) return;
+  box.innerHTML = "";
+  const s = document.createElement("script");
+  s.src = "https://giscus.app/client.js";
+  s.setAttribute("data-repo", g.repo);
+  s.setAttribute("data-repo-id", g.repoId);
+  s.setAttribute("data-category", g.category);
+  s.setAttribute("data-category-id", g.categoryId);
+  s.setAttribute("data-mapping", "pathname");
+  s.setAttribute("data-strict", "0");
+  s.setAttribute("data-reactions-enabled", "1");
+  s.setAttribute("data-emit-metadata", "0");
+  s.setAttribute("data-input-position", "top");
+  s.setAttribute("data-theme", "preferred_color_scheme");
+  s.setAttribute("data-lang", "zh-CN");
+  s.crossOrigin = "anonymous";
+  s.async = true;
+  box.appendChild(s);
 }
 
 /* ---------------- 启动 ---------------- */
@@ -805,5 +806,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initBlog();
   initArchive();
   initPostPage();
+  initGiscus();
   observeReveals();
 });
