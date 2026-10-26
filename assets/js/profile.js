@@ -398,13 +398,29 @@ function initSpaceLatest() {
 }
 
 const MOOD_KEY = "mood.v1";
-const MOODS = ["😊", "🤩", "😌", "🤔", "😴", "😢"];
-let currentMood = MOODS[0];
+const MOODS = [
+  { e: "😄", label: "开心", tint: "rgba(255, 205, 110, 0.4)" },
+  { e: "🥰", label: "喜爱", tint: "rgba(255, 158, 205, 0.38)" },
+  { e: "😌", label: "平静", tint: "rgba(133, 222, 190, 0.38)" },
+  { e: "🤔", label: "思考", tint: "rgba(150, 190, 255, 0.38)" },
+  { e: "😴", label: "疲惫", tint: "rgba(170, 175, 235, 0.38)" },
+  { e: "🥲", label: "低落", tint: "rgba(160, 200, 230, 0.34)" },
+];
+/* 旧版单 emoji 数据映射到新表情 */
+const MOOD_MIGRATE = { "😊": "😄", "🤩": "🥰", "😢": "🥲" };
+let currentMood = MOODS[0].e;
+
+function moodTintOf(e) {
+  const hit = MOODS.find((m) => m.e === e);
+  return hit ? hit.tint : "rgba(160, 170, 190, 0.3)";
+}
 
 function loadMoods() {
   try {
     const o = JSON.parse(localStorage.getItem(MOOD_KEY) || "{}");
-    return o && typeof o === "object" ? o : {};
+    const out = {};
+    Object.keys(o || {}).forEach((k) => (out[k] = MOOD_MIGRATE[o[k]] || o[k]));
+    return out;
   } catch (e) {
     return {};
   }
@@ -414,7 +430,10 @@ function initMood() {
   const grid = $("#moodGrid");
   if (!grid) return;
   const picker = $("#moodPicker");
-  picker.innerHTML = MOODS.map((m, i) => `<button type="button" class="mood-opt${i === 0 ? " on" : ""}" data-m="${m}" aria-label="心情 ${m}">${m}</button>`).join("");
+  picker.innerHTML = MOODS.map((m, i) => `
+    <button type="button" class="mood-opt${i === 0 ? " on" : ""}" data-m="${m.e}" style="--tint:${m.tint}" aria-label="心情：${m.label}">
+      <span class="m-emoji" aria-hidden="true">${m.e}</span><span class="m-label">${m.label}</span>
+    </button>`).join("");
   picker.addEventListener("click", (e) => {
     const b = e.target.closest(".mood-opt");
     if (!b) return;
@@ -436,13 +455,15 @@ function initMood() {
     for (let i = 0; i < offset; i++) html += "<span></span>";
     for (let d = 1; d <= days; d++) {
       const k = key(d);
-      const isToday = d === now.getDate();
-      html += '<button type="button" class="mood-day' + (isToday ? " today" : "") + '" data-k="' + k + '" title="' + k + '">' + (moods[k] || d) + "</button>";
+      const stamped = moods[k];
+      const cls = "mood-day" + (stamped ? " stamped" : "") + (d === now.getDate() ? " today" : "");
+      const tint = stamped ? ` style="--tint:${moodTintOf(stamped)}"` : "";
+      html += `<button type="button" class="${cls}" data-k="${k}" title="${k}${stamped ? " · " + stamped : ""}"${tint}>${stamped || d}</button>`;
     }
     grid.innerHTML = html;
     const monthPrefix = y + "-" + String(m + 1).padStart(2, "0");
     const count = Object.keys(moods).filter((k) => k.startsWith(monthPrefix)).length;
-    $("#moodCount").textContent = "本月签到 " + count + " 天";
+    $("#moodCount").textContent = `本月签到 ${count} 天`;
   }
 
   grid.addEventListener("click", (e) => {
