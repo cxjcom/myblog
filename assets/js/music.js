@@ -77,7 +77,11 @@ function parseMusicLink(raw) {
   }
   m = s.match(/music\.163\.com.*[?&]id=(\d+)/i);
   if (m) {
-    return { type: "embed", src: `https://music.163.com/outchain/player?type=2&id=${m[1]}&auto=0&height=66` };
+    return {
+      type: "embed",
+      src: `https://music.163.com/outchain/player?type=2&id=${m[1]}&auto=0&height=66`,
+      neteaseId: m[1],
+    };
   }
   if (/outchain\/player\?/i.test(s)) return { type: "embed", src: s };
   m = s.match(/music\.apple\.com\/(\S+)/i);
@@ -143,6 +147,7 @@ function initMusicPage() {
             <span class="music-dot" aria-hidden="true"></span>
             <h3>${esc(t.title || "未命名")}</h3>
             ${t.artist ? `<span class="chip">${esc(t.artist)}</span>` : ""}
+            ${(t.neteaseId || /music\.163\.com.*[?&]id=(\d+)/.test(t.src)) ? `<a class="music-open" href="https://music.163.com/song?id=${(t.neteaseId || (t.src.match(/[?&]id=(\d+)/) || [])[1])}" target="_blank" rel="noopener" title="在网易云打开这首歌">网易云 ↗</a>` : ""}
             <button class="music-log" title="记入听歌记录" aria-label="记入听歌记录">♪</button>
             <button class="music-del" title="删除这首歌" aria-label="删除歌曲">✕</button>
           </div>
@@ -243,7 +248,7 @@ function initMusicPage() {
     tracks.unshift({
       user: true,
       id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
-      title: title || "未命名",
+      title: title || (parsed.neteaseId ? "网易云歌曲 " + parsed.neteaseId : "未命名"),
       artist,
       ...parsed,
     });

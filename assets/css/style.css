@@ -2926,3 +2926,14 @@ html[data-photo="dark"] .float-chip {
   opacity: 0.8;
 }
 .gb-board .comments { padding: 0; border: none; margin: 0; }
+
+.music-open {
+  flex: none;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-faint);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.music-open:hover { color: var(--accent); }
+.music-item-head .music-del { margin-left: 0; }
