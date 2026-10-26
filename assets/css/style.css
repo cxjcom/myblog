@@ -2815,3 +2815,38 @@ html[data-photo="dark"] .float-chip {
   align-items: center;
   gap: 12px;
 }
+
+/* ---------- 书影记录 ---------- */
+.shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+.shelf-item { padding: 18px 20px; }
+.shelf-item-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.shelf-type {
+  flex: none;
+  padding: 2px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.shelf-score { color: #e8a33d; font-size: 13px; letter-spacing: 2px; }
+.shelf-score i { color: var(--border); font-style: normal; }
+.shelf-item h3 { margin: 0 0 6px; font-size: 16px; }
+.shelf-item p { margin: 0; font-size: 13.5px; color: var(--text-soft); line-height: 1.7; }
+.shelf-item time {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+.shelf-del { margin-left: auto; }
