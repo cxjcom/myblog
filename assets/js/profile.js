@@ -5,6 +5,7 @@
 
 const PROFILE_KEY = "profile.v1";
 const PROFILE_DEFAULTS = {
+  siteName: "拾光小栈",
   name: "拾光",
   motto: "记录、思考与热爱",
   bio: "白天写前端，晚上写博客，周末在山里或书里。喜欢把复杂的东西讲简单。",
@@ -38,7 +39,11 @@ function profileAvatarHTML(p, cls) {
 
 /* 把资料应用到全站（首页问候 / 星球头像 / 品牌印章首字 / 关于页） */
 function applyProfileToSite(p) {
+  const site = p.siteName || "拾光小栈";
   const name = p.name || "拾光";
+  $$("[data-site-name]").forEach((el) => (el.textContent = site));
+  /* 浏览器标签标题跟随站点名 */
+  if (site !== "拾光小栈") document.title = document.title.replace(/拾光小栈/g, site);
   $$("[data-profile-name]").forEach((el) => (el.textContent = name));
   $$("[data-profile-motto]").forEach((el) => (el.textContent = p.motto || ""));
   const orb = $(".orb");
@@ -99,6 +104,7 @@ function initProfilePage() {
     const p = loadProfile();
     tempAvatar = p.avatar || "";
     $("#formAvatarPreview").innerHTML = profileAvatarHTML(p);
+    $("#formSiteName").value = p.siteName;
     $("#formName").value = p.name;
     $("#formMotto").value = p.motto;
     $("#formBio").value = p.bio;
@@ -122,6 +128,7 @@ function initProfilePage() {
   $("#profileForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const p = loadProfile();
+    p.siteName = $("#formSiteName").value.trim() || "拾光小栈";
     p.name = $("#formName").value.trim() || "拾光";
     p.motto = $("#formMotto").value.trim();
     p.bio = $("#formBio").value.trim();

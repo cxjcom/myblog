@@ -24,7 +24,7 @@
 
   <header class="site-header">
     <nav class="nav container">
-      <a class="brand" href="index.html"><span class="brand-dot"></span>拾光小栈</a>
+      <a class="brand" href="index.html"><span class="brand-dot"></span><span data-site-name>拾光小栈</span></a>
       <ul class="nav-links">
         <li><a href="index.html" data-page="home">首页</a></li>
         <li><a href="blog.html" data-page="blog">博客</a></li>
@@ -104,6 +104,7 @@
             <p class="form-hint">支持 JPG / PNG，会自动居中裁剪为正方形并压缩后保存在本机浏览器</p>
           </div>
         </div>
+        <label class="form-row"><span>站点名称</span><input id="formSiteName" maxlength="20" placeholder="显示在左上角和页脚的站名"></label>
         <label class="form-row"><span>昵称 / ID</span><input id="formName" maxlength="20" placeholder="显示在首页和资料卡上的名字"></label>
         <label class="form-row"><span>个性签名</span><input id="formMotto" maxlength="40" placeholder="一句话介绍自己"></label>
         <label class="form-row"><span>个人简介</span><textarea id="formBio" rows="3" maxlength="200" placeholder="多写一点也没关系"></textarea></label>
@@ -258,13 +259,13 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
         </a>
       </div>
-      <p>© <span data-year>2026</span> 拾光小栈 · 由 <span class="heart">♥</span> 与好奇心驱动</p>
+      <p>© <span data-year>2026</span> <span data-site-name>拾光小栈</span> · 由 <span class="heart">♥</span> 与好奇心驱动</p>
       <p>零依赖静态站点 · 托管于 GitHub Pages</p>
     </div>
   </footer>
 
   <script src="assets/js/posts.js?v=1.10.0"></script>
-  <script src="assets/js/profile.js?v=1.8.10"></script>
+  <script src="assets/js/profile.js?v=1.10.12"></script>
   <script src="assets/js/main.js?v=1.10.7"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>
