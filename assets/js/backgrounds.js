@@ -93,7 +93,7 @@ function makeCover(file, flow) {
   let ok = false, failed = false, alpha = REDUCE_BG ? 1 : 0;
   img.onload = () => { ok = true; };
   img.onerror = () => { failed = true; };
-  img.src = `${BG_ROOT}assets/img/bg/${file}?v=${BG_VER}`;
+  img.src = `${BG_ROOT}assets/img/bg/${file.replace(/\.jpg$/, ".webp")}?v=${BG_VER}`;
   return {
     draw(ctx, w, h, t) {
       if (!ok) return;
