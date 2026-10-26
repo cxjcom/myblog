@@ -790,6 +790,16 @@ function initGiscus() {
   box.appendChild(s);
 }
 
+/* ---------------- 手气不错：随机读一篇 ---------------- */
+function initRandomPost() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".js-random-post");
+    if (!btn || !window.POSTS || !window.POSTS.length) return;
+    const p = window.POSTS[Math.floor(Math.random() * window.POSTS.length)];
+    location.href = postUrl(p.slug);
+  });
+}
+
 /* ---------------- 启动 ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   initDecor();
@@ -807,5 +817,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initArchive();
   initPostPage();
   initGiscus();
+  initRandomPost();
   observeReveals();
 });
