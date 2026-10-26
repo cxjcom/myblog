@@ -2701,3 +2701,51 @@ html[data-photo="dark"] .float-chip {
 .music-log:hover, .music-log.done { color: var(--accent); }
 .music-item--h110 iframe { height: 110px; }
 .music-item--h210 iframe { height: 210px; }
+
+/* ---------- 年度回顾 ---------- */
+.wrap-bars { padding: 22px 26px 14px; }
+.wrap-bars-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
+  align-items: end;
+  height: 160px;
+}
+.wrap-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.wrap-bar {
+  width: 100%;
+  max-width: 34px;
+  height: calc(var(--h) * 0.82);
+  border-radius: 6px 6px 2px 2px;
+  background: var(--accent);
+  opacity: 0.85;
+  transform-origin: bottom;
+  animation: wrap-bar-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.wrap-bar-col small {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+@keyframes wrap-bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.wrap-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+.wrap-final { padding: 30px 28px; text-align: center; }
+.wrap-quote {
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 2;
+  color: var(--text-soft);
+  margin: 0 0 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wrap-bar { animation: none; }
+}
