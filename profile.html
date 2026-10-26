@@ -59,10 +59,15 @@
   </header>
 
   <main id="main" class="container">
-    <div class="page-head">
-      <span class="kicker">Profile</span>
-      <h1>个人<span class="gradient-text">主页</span></h1>
-      <p>我的资料卡。点击「编辑资料」可以修改头像、昵称和各种信息——保存后立即生效，并同步到首页与品牌印章。</p>
+    <div class="page-head page-head--split">
+      <div class="page-head-left">
+        <span class="kicker">Profile</span>
+        <h1>个人<span class="gradient-text">主页</span></h1>
+        <p>我的资料卡。点击「编辑资料」可以修改头像、昵称和各种信息——保存后立即生效，并同步到首页与品牌印章。</p>
+      </div>
+      <div class="weather-chip glass-card reveal" id="weatherCard">
+        <div class="wx-loading">天气加载中…</div>
+      </div>
     </div>
 
     <section class="section">
@@ -232,20 +237,6 @@
       <div class="now-mini glass-card reveal" id="nowMini"></div>
     </section>
 
-    <!-- 今日天气 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Weather</span>
-          <h2>今日天气</h2>
-        </div>
-        <span class="count-hint" id="wxLoc"></span>
-      </div>
-      <div class="glass-card weather-card reveal" id="weatherCard">
-        <div class="wx-loading">天气加载中…</div>
-      </div>
-    </section>
-
     <!-- 空间速览 -->
     <section class="section">
       <div class="section-head reveal">
@@ -345,7 +336,7 @@
   </footer>
 
   <script src="assets/js/posts.js?v=1.10.0"></script>
-  <script src="assets/js/profile.js?v=1.11.0"></script>
+  <script src="assets/js/profile.js?v=1.11.2"></script>
   <script src="assets/js/main.js?v=1.10.7"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>

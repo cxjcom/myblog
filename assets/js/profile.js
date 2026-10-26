@@ -9,7 +9,7 @@ const PROFILE_DEFAULTS = {
   name: "拾光",
   motto: "记录、思考与热爱",
   bio: "白天写前端，晚上写博客，周末在山里或书里。喜欢把复杂的东西讲简单。",
-  location: "中国 · 上海",
+  location: "湖北 · 黄石",
   github: "cxjcom",
   email: "hello@example.com",
   qq: "",
@@ -584,8 +584,7 @@ async function initWeather() {
 
   function renderWeather(data, city) {
     const kindText = WMO_MAP[data.code] || ["cloud", "—"];
-    $("#wxLoc").textContent = city + " · 今天";
-    card.innerHTML = `
+      card.innerHTML = `
       <div class="wx-icon">${wxIcon(kindText[0])}</div>
       <div class="wx-main"><b>${data.temp}°</b><span>${kindText[1]}</span></div>
       <div class="wx-details">
