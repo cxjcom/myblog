@@ -120,7 +120,7 @@
               <input type="file" id="avatarInput" accept="image/*" hidden>
             </label>
             <button type="button" class="btn" id="avatarReset">恢复默认头像</button>
-            <p class="form-hint">支持 JPG / PNG，会自动居中裁剪为正方形并压缩后保存在本机浏览器</p>
+            <p class="form-hint">支持 JPG / PNG，会自动居中裁剪为正方形并压缩，随资料一起保存</p>
           </div>
         </div>
         <label class="form-row"><span>站点名称</span><input id="formSiteName" maxlength="20" placeholder="显示在左上角和页脚的站名"></label>
@@ -139,9 +139,10 @@
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">保存修改</button>
           <button type="button" class="btn" id="cancelEdit">取消</button>
-          <button type="button" class="btn" id="resetProfile">恢复默认资料</button>
+          <button type="button" class="btn" id="resetProfile">放弃本机修改</button>
         </div>
-        <p class="form-note">资料仅保存在本机浏览器（localStorage），不会上传到任何服务器。</p>
+        <p class="form-note">保存后先在本机生效；通过 scripts/dev_server.py 启动本地站点时会自动同步到 GitHub 仓库（data/profile.json），线上站点稍后自动更新。</p>
+        <p class="form-note sync-status" id="syncStatus" hidden></p>
       </form>
     </div>
 
@@ -300,7 +301,7 @@
   </footer>
 
   <script src="assets/js/posts.js?v=1.10.0"></script>
-  <script src="assets/js/profile.js?v=1.12.1"></script>
+  <script src="assets/js/profile.js?v=1.13.0"></script>
   <script src="assets/js/main.js?v=1.10.7"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>

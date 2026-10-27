@@ -53,11 +53,13 @@ myblog/
 ```bash
 # Python（Windows 自带）
 cd myblog
-python -m http.server 8787
+python scripts/dev_server.py 8787
 # 打开 http://127.0.0.1:8787
 ```
 
-或直接双击 `index.html` 用浏览器打开（搜索等功能同样可用）。
+> 推荐用 `scripts/dev_server.py` 而不是 `python -m http.server`：它额外支持在「个人主页 → 编辑资料」里保存资料后**自动写入 `data/profile.json` 并提交推送到 GitHub**，线上站点随之更新，所有设备看到的资料保持一致。
+
+或直接双击 `index.html` 用浏览器打开（搜索等功能同样可用；个人资料以仓库 `data/profile.json` 为准，本机未同步的修改仅草稿保存在浏览器里）。
 
 ## ✍️ 如何写一篇新文章
 

@@ -3,7 +3,14 @@
    ============================================================ */
 "use strict";
 
-const PROFILE_KEY = "profile.v1";
+/* 站点根路径：由本脚本的引用地址推导，文章子目录页也能取到 data/profile.json */
+const SITE_BASE = (document.currentScript && document.currentScript.src
+  ? document.currentScript.src.replace(/assets\/js\/profile\.js.*$/, "")
+  : "./");
+
+const PROFILE_KEY = "profile.v1"; /* 旧版本遗留，仅用于一次性迁移 */
+const PROFILE_DRAFT_KEY = "profile.draft.v1"; /* 本机未同步的草稿 */
+let SERVER_PROFILE = null; /* 仓库 data/profile.json，所有设备一致的权威资料 */
 const PROFILE_DEFAULTS = {
   siteName: "拾光小栈",
   name: "拾光",
@@ -42,18 +49,59 @@ function zodiacOf(birthday) {
 }
 
 function loadProfile() {
+  let server = null, draft = null;
+  try { server = SERVER_PROFILE; } catch (e) {}
+  try { draft = JSON.parse(localStorage.getItem(PROFILE_DRAFT_KEY) || "null"); } catch (e) {}
+  return Object.assign({}, PROFILE_DEFAULTS, server || {}, draft || {});
+}
+
+/* 本机草稿：编辑后先落在这里立即生效，同步到仓库成功后清除 */
+function saveDraft(p) {
+  try { localStorage.setItem(PROFILE_DRAFT_KEY, JSON.stringify(p)); } catch (e) {}
+  document.dispatchEvent(new CustomEvent("profilechange", { detail: p }));
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(PROFILE_DRAFT_KEY); } catch (e) {}
+}
+
+/* 迁移旧版 profile.v1 的数据为草稿（升级 v1.13.0 前保存过的资料不丢失） */
+function migrateOldProfile() {
   try {
-    return Object.assign({}, PROFILE_DEFAULTS, JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"));
+    const old = localStorage.getItem(PROFILE_KEY);
+    if (old && !localStorage.getItem(PROFILE_DRAFT_KEY)) {
+      localStorage.setItem(PROFILE_DRAFT_KEY, old);
+    }
+    localStorage.removeItem(PROFILE_KEY);
+  } catch (e) {}
+}
+
+/* 启动时拉取仓库资料（网络优先，保证同步后立即可见） */
+async function loadServerProfile() {
+  try {
+    const r = await fetch(SITE_BASE + "data/profile.json?v=" + Date.now(), { cache: "no-store" });
+    if (r.ok) SERVER_PROFILE = await r.json();
+  } catch (e) {}
+  return SERVER_PROFILE;
+}
+
+/* 把资料写入仓库：仅本地服务器（scripts/dev_server.py）支持，GitHub Pages 上会失败 */
+async function syncProfileToRepo(p) {
+  try {
+    const r = await fetch(SITE_BASE + "api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(p),
+    });
+    const d = await r.json().catch(() => ({}));
+    return { ok: r.ok && d.ok !== false, pushed: !!d.pushed, message: d.message || "" };
   } catch (e) {
-    return Object.assign({}, PROFILE_DEFAULTS);
+    return { ok: false, pushed: false, message: "" };
   }
 }
 
 function saveProfile(p) {
-  try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-  } catch (e) {}
-  document.dispatchEvent(new CustomEvent("profilechange", { detail: p }));
+  saveDraft(p);
 }
 
 /* 头像 HTML：有自定义头像用图片，否则回退到首字符 */
@@ -181,16 +229,41 @@ function initProfilePage() {
     render();
     applyProfileToSite(p);
     toggleEdit(false);
+    syncAfterSave(p);
   });
 
+  /* 保存后自动尝试同步到仓库；失败时提示如何启用永久保存 */
+  function showSyncStatus(text, sticky) {
+    const el = $("#syncStatus");
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = false;
+    el.classList.toggle("ok", /✅/.test(text));
+    if (!sticky) setTimeout(() => { el.hidden = true; }, 6000);
+  }
+
+  async function syncAfterSave(p) {
+    showSyncStatus("已在本机生效，正在同步到 GitHub 仓库…", true);
+    const r = await syncProfileToRepo(p);
+    if (r.ok && r.pushed) {
+      SERVER_PROFILE = p; /* 仓库已是最新，草稿可以清掉 */
+      clearDraft();
+      showSyncStatus("✅ 已保存并同步到 GitHub 仓库（data/profile.json），线上站点稍后自动更新", false);
+    } else if (r.ok) {
+      showSyncStatus("✅ 资料已写入 data/profile.json：" + (r.message || "仓库已更新"), false);
+    } else {
+      showSyncStatus("💾 已保存在本机浏览器。要永久保存到仓库，请用 scripts/dev_server.py 启动本地站点后重新保存", true);
+    }
+  }
+
   $("#resetProfile").addEventListener("click", () => {
-    if (!confirm("确定恢复全部默认资料吗？")) return;
-    try { localStorage.removeItem(PROFILE_KEY); } catch (e) {}
-    tempAvatar = PROFILE_DEFAULTS.avatar;
-    saveProfile(Object.assign({}, PROFILE_DEFAULTS));
+    if (!confirm("确定放弃本机未同步的修改吗？资料将回到仓库 data/profile.json 中保存的版本。")) return;
+    clearDraft();
+    tempAvatar = loadProfile().avatar || "";
     render();
     applyProfileToSite(loadProfile());
     toggleEdit(false);
+    showSyncStatus("已回到仓库资料", false);
   });
 
   $("#avatarReset").addEventListener("click", () => {
@@ -710,13 +783,18 @@ async function initWeather() {
 
 /* ---------------- 全站应用（所有页面） ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
+  migrateOldProfile();
+  /* 先用本机草稿/默认值渲染，仓库资料到达后再刷新一遍 */
   applyProfileToSite(loadProfile());
-  if (document.querySelector("#weatherCard")) initWeather();
-  if (document.body.dataset.page === "me") {
-    initProfilePage();
-    initProfileExtras();
-    initNowMini();
-    initSpaceLatest();
-    initMood();
-  }
+  loadServerProfile().then(() => {
+    applyProfileToSite(loadProfile());
+    if (document.querySelector("#weatherCard")) initWeather();
+    if (document.body.dataset.page === "me") {
+      initProfilePage();
+      initProfileExtras();
+      initNowMini();
+      initSpaceLatest();
+      initMood();
+    }
+  });
 });
