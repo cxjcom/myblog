@@ -3266,3 +3266,66 @@ html[data-photo="dark"] .float-chip {
   grid-row: 1;
   justify-self: center;
 }
+
+/* ---------- 天气芯片：展开面板 / 三日预报 / 城市切换 ---------- */
+.weather-chip--hero { cursor: pointer; }
+.weather-chip--hero .wx-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+}
+.weather-chip--hero .wx-temp {
+  display: flex;
+  flex-direction: column;
+}
+.weather-chip--hero .wx-city { margin-left: auto; }
+.wx-panel {
+  margin-top: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  width: 100%;
+}
+.wx-panel[hidden] { display: none; }
+.wx-forecast { display: grid; gap: 6px; margin-bottom: 12px; }
+.wx-frow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+}
+.wx-fday {
+  flex: none;
+  width: 76px;
+  color: var(--text-soft);
+}
+.wx-fday small { color: var(--text-faint); margin-left: 4px; font-family: var(--font-mono); font-size: 11px; }
+.wx-fico { flex: none; font-size: 16px; }
+.wx-fdeg { margin-left: auto; font-family: var(--font-mono); font-size: 13px; }
+.wx-fdeg small { color: var(--text-faint); }
+.wx-city-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.wx-city-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+}
+.wx-city-form input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+.wx-city-form .btn { padding: 8px 14px; font-size: 13.5px; }
+.wx-follow { color: var(--text-faint) !important; }

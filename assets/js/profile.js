@@ -480,7 +480,7 @@ function initMood() {
 }
 
 
-/* ---------------- 个人主页：今日天气（Open-Meteo 免费接口，无需密钥） ---------------- */
+/* ---------------- 个人主页/首页：今日天气 + 城市切换 + 三日预报（Open-Meteo） ---------------- */
 const WMO_MAP = {
   0: ["sun", "晴"], 1: ["suncloud", "大致晴朗"], 2: ["suncloud", "多云"], 3: ["cloud", "阴"],
   45: ["fog", "有雾"], 48: ["fog", "雾凇"],
@@ -493,13 +493,31 @@ const WMO_MAP = {
   95: ["thunder", "雷阵雨"], 96: ["thunder", "雷阵雨"], 99: ["thunder", "强雷暴"],
 };
 
-const WX_FALLBACK = { latitude: 31.22222, longitude: 121.45806, city: "上海" };
+const WX_FALLBACK = { latitude: 30.24706, longitude: 115.04814, city: "黄石" };
+const WX_OVERRIDE_KEY = "weather.override.v1";
+const WX_CACHE_KEY = "weather.cache.v1";
+let wxPanelOpen = false;
+
+function wxOverride() {
+  try {
+    const o = JSON.parse(localStorage.getItem(WX_OVERRIDE_KEY) || "null");
+    if (o && o.city && o.coords) return o;
+  } catch (e) {}
+  return null;
+}
+
+function setWxOverride(o) {
+  try {
+    if (o) localStorage.setItem(WX_OVERRIDE_KEY, JSON.stringify(o));
+    else localStorage.removeItem(WX_OVERRIDE_KEY);
+  } catch (e) {}
+}
 
 function wxCityCandidates(loc) {
   const parts = (loc || "").split(/[·，,、\s]+/).map((x) => x.trim())
     .filter((x) => x && !/^(中国|China)$/i.test(x));
   if (!parts.length) parts.push(WX_FALLBACK.city);
-  return parts.reverse(); /* "中国 · 上海" → 先试 "上海" */
+  return parts.reverse();
 }
 
 async function wxGeocode(name) {
@@ -509,7 +527,7 @@ async function wxGeocode(name) {
   return (d.results && d.results[0]) || null;
 }
 
-/* 动态 SVG 图标：随天气类型切换，动画由 CSS 驱动 */
+/* 动态 SVG 图标 */
 const WX_SUN_CORE = `<g class="wx-rays">
       <line x1="48" y1="10" x2="48" y2="22"/><line x1="48" y1="74" x2="48" y2="86"/>
       <line x1="10" y1="48" x2="22" y2="48"/><line x1="74" y1="48" x2="86" y2="48"/>
@@ -539,32 +557,46 @@ function wxIcon(kind) {
   return `<svg viewBox="0 0 96 96" class="wx-svg" aria-hidden="true">${icons[kind] || icons.cloud}</svg>`;
 }
 
+function wxSmallIcon(code) {
+  const kind = (WMO_MAP[code] || ["cloud"])[0];
+  const m = { sun: "☀️", suncloud: "🌤️", cloud: "☁️", fog: "🌫️", rain: "🌧️", drizzle: "🌦️", snow: "🌨️", thunder: "⛈️" };
+  return m[kind] || "☁️";
+}
+
 async function initWeather() {
   const card = $("#weatherCard");
   if (!card) return;
   const esc = escapeHTML;
   const loc = loadProfile().location || "";
+  const ov = wxOverride();
 
-  /* 会话内缓存 30 分钟，避免每次刷新都请求 */
+  /* 缓存 30 分钟（按生效城市区分） */
+  const cacheKey = (ov ? "o:" + ov.city : "p:" + loc);
   try {
-    const cache = JSON.parse(localStorage.getItem("weather.cache.v1") || "null");
-    if (cache && cache.loc === loc && Date.now() - cache.at < 30 * 60 * 1000) {
-      renderWeather(cache.data, cache.city);
+    const cache = JSON.parse(localStorage.getItem(WX_CACHE_KEY) || "null");
+    if (cache && cache.key === cacheKey && Date.now() - cache.at < 30 * 60 * 1000) {
+      paint(cache.data, cache.city, !!ov, cache.forecast);
       return;
     }
   } catch (e) {}
 
+  card.innerHTML = '<div class="wx-loading">天气加载中…</div>';
   try {
-    let coords = null, city = "";
-    for (const cand of wxCityCandidates(loc)) {
-      const hit = await wxGeocode(cand);
-      if (hit) { coords = hit; city = hit.name; break; }
+    let coords, city;
+    if (ov) {
+      coords = ov.coords; city = ov.city;
+    } else {
+      coords = null; city = "";
+      for (const cand of wxCityCandidates(loc)) {
+        const hit = await wxGeocode(cand);
+        if (hit) { coords = hit; city = hit.name; break; }
+      }
+      if (!coords) { coords = WX_FALLBACK; city = WX_FALLBACK.city; }
     }
-    if (!coords) { coords = WX_FALLBACK; city = WX_FALLBACK.city; }
     const url = "https://api.open-meteo.com/v1/forecast?latitude=" + coords.latitude +
       "&longitude=" + coords.longitude +
       "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
-      "&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1";
+      "&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=3";
     const d = await (await fetch(url)).json();
     const data = {
       temp: Math.round(d.current.temperature_2m),
@@ -574,27 +606,78 @@ async function initWeather() {
       max: Math.round(d.daily.temperature_2m_max[0]),
       min: Math.round(d.daily.temperature_2m_min[0]),
     };
+    const forecast = [0, 1, 2].map((i) => ({
+      date: d.daily.time[i],
+      code: d.daily.weather_code[i],
+      max: Math.round(d.daily.temperature_2m_max[i]),
+      min: Math.round(d.daily.temperature_2m_min[i]),
+    }));
     try {
-      localStorage.setItem("weather.cache.v1", JSON.stringify({ loc, at: Date.now(), data, city }));
+      localStorage.setItem(WX_CACHE_KEY, JSON.stringify({ key: cacheKey, at: Date.now(), data, city, forecast }));
     } catch (e) {}
-    renderWeather(data, city);
+    paint(data, city, !!ov, forecast);
   } catch (e) {
     card.innerHTML = '<div class="wx-loading">天气暂时拿不到，稍后再来看看吧</div>';
   }
 
-  function renderWeather(data, city) {
+  function paint(data, city, isOverride, forecast) {
     const kindText = WMO_MAP[data.code] || ["cloud", "—"];
-      card.innerHTML = `
-      <div class="wx-icon">${wxIcon(kindText[0])}</div>
-      <div class="wx-main"><b>${data.temp}°</b><span>${kindText[1]}</span></div>
-      <div class="wx-details">
-        <span>最高 ${data.max}° · 最低 ${data.min}°</span>
-        <span>湿度 ${data.humidity}%</span>
-        <span>风速 ${data.wind} km/h</span>
-      </div>
-      <span class="wx-city">${esc(city)} · 今天</span>`;
+    card.innerHTML = `
+      <button type="button" class="wx-main" title="展开预报与城市切换">
+        <span class="wx-icon">${wxIcon(kindText[0])}</span>
+        <span class="wx-temp"><b>${data.temp}°</b><span>${kindText[1]}</span></span>
+        <span class="wx-details">
+          <span>最高 ${data.max}° · 最低 ${data.min}°</span>
+          <span>湿度 ${data.humidity}% · 风速 ${data.wind} km/h</span>
+        </span>
+        <span class="wx-city">${esc(city)} · 今天 ▾</span>
+      </button>
+      <div class="wx-panel" ${wxPanelOpen ? "" : "hidden"}>
+        <div class="wx-forecast">
+          ${forecast.map((f, i) => {
+            const dt = new Date(f.date + "T12:00");
+            const label = i === 0 ? "今天" : i === 1 ? "明天" : "后天";
+            return `<div class="wx-frow">
+              <span class="wx-fday">${label}<small>${dt.getMonth() + 1}/${dt.getDate()}</small></span>
+              <span class="wx-fico" title="${(WMO_MAP[f.code] || ["", ""])[1]}">${wxSmallIcon(f.code)}</span>
+              <span class="wx-fdeg">${f.max}° <small>/ ${f.min}°</small></span>
+            </div>`;
+          }).join("")}
+        </div>
+        <form class="wx-city-form">
+          <input type="text" placeholder="输入任意城市：北京 / Tokyo …" aria-label="城市名">
+          <button class="btn" type="submit">切换</button>
+          ${isOverride ? '<button type="button" class="btn wx-follow">跟随资料所在地</button>' : ""}
+        </form>
+      </div>`;
+    wire(data, city, isOverride, forecast);
+  }
+
+  function wire(data, city, isOverride, forecast) {
+    $(".wx-main", card).addEventListener("click", () => {
+      wxPanelOpen = !wxPanelOpen;
+      const panel = $(".wx-panel", card);
+      if (panel) panel.hidden = !wxPanelOpen;
+    });
+    $(".wx-city-form", card).addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $(".wx-city-form input", card).value.trim();
+      if (!name) return;
+      const hit = await wxGeocode(name);
+      if (!hit) { alert("没有找到城市「" + name + "」，换个名字试试（支持中文和英文）"); return; }
+      setWxOverride({ city: hit.name, coords: { latitude: hit.latitude, longitude: hit.longitude } });
+      wxPanelOpen = true;
+      initWeather();
+    });
+    const follow = $(".wx-follow", card);
+    if (follow) follow.addEventListener("click", () => {
+      setWxOverride(null);
+      wxPanelOpen = true;
+      initWeather();
+    });
   }
 }
+
 
 /* ---------------- 全站应用（所有页面） ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
