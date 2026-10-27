@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.7.0";
+const BG_VER = "1.8.0";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -146,6 +146,7 @@ window.BG_THEMES = [
   { id: "circuit",   cat: "科技未来", name: "电路脉冲",   desc: "电路板微距实景，光信号沿走线疾驰",     swatch: "linear-gradient(135deg,#020c1b,#0f2a4a 60%,#38bdf8)" },
   { id: "sakura",    cat: "自然",     name: "樱花雨",     desc: "春樱实景，两层花瓣翻滚飘落",           swatch: "linear-gradient(135deg,#fff1f5,#f9a8d4 60%,#fb7185)" },
   { id: "fireflies", cat: "自然",     name: "萤火虫",     desc: "夏夜森林实景，光点呼吸明灭、聚向光标", swatch: "linear-gradient(135deg,#02120a,#14532d 55%,#a3e635)" },
+  { id: "autumn",    cat: "自然",     name: "秋日小径",   desc: "深秋金色林间实景，落叶随风缓缓飘落",   swatch: "linear-gradient(135deg,#7c2d12,#ea580c 55%,#fbbf24)" },
   { id: "clouds",    cat: "自然",     name: "云海",       desc: "日出云海全景缓推，偶有飞鸟掠过",       swatch: "linear-gradient(135deg,#7dd3fc,#e0f2fe 60%,#f8fafc)" },
   { id: "stars",     cat: "宇宙",     name: "星野",       desc: "银河夜景壁纸，亮星闪耀、流星 Regular", swatch: "linear-gradient(135deg,#010409,#0f1c3f 60%,#475569)" },
   { id: "nebula",    cat: "宇宙",     name: "星云",       desc: "深空星云壁纸，云气呼吸、亮星星芒",     swatch: "linear-gradient(135deg,#1e1b4b,#7c3aed 45%,#db2777 80%,#020617)" },
@@ -159,6 +160,7 @@ window.BG_PRESETS = {
   circuit: { canvas: "circuit" },
   sakura: { canvas: "sakura" },
   fireflies: { canvas: "fireflies" },
+  autumn: { canvas: "autumn" },
   clouds: { canvas: "clouds" },
   stars: { canvas: "stars" },
   nebula: { canvas: "nebula" },
@@ -516,6 +518,72 @@ window.BG_PAINTERS = {
       for (const f of blur) step(f, 7, 0.12);
       for (const f of flies) step(f, 3.4, 0.2);
       vignette(ctx, w, h, dark ? 0.34 : 0.12);
+      raf = requestAnimationFrame(frame);
+    }
+    addEventListener("resize", resize);
+    resize();
+    if (REDUCE_BG) frame(), cancelAnimationFrame(raf);
+    else frame();
+    return () => cancelAnimationFrame(raf);
+  },
+
+  /* —— 秋日小径：壁纸 + 两层翻滚飘落的秋叶 —— */
+  autumn(canvas, ctx) {
+    let w, h, raf, t = 0, near = [], far = [];
+    const cover = makeCover("autumn.jpg", { amp: 8, bands: 56, speed: 0.8, freq: 1.1 });
+    const TONES = ["251, 191, 36", "245, 158, 11", "234, 88, 12", "220, 110, 60"];
+    const bd = backdrop((x, W, H, dark) => {
+      fillSky(x, W, H, dark
+        ? [[0, "#1c0d05"], [0.6, "#2d1408"], [1, "#3d1e0a"]]
+        : [[0, "#fff8ec"], [0.55, "#ffedd3"], [1, "#ffe3bd"]]);
+    });
+    const leaf = (s) => ({
+      x: Math.random() * w, y: Math.random() * h, s,
+      rot: rand(0, 6.28), vr: rand(-0.035, 0.035),
+      vy: rand(0.4, 1.0) * (s / 7), ph: rand(0, 6.28), amp: rand(0.5, 1.2),
+      fs: rand(0.02, 0.05),
+      tone: TONES[(Math.random() * TONES.length) | 0],
+    });
+    const resize = () => {
+      bgSize(canvas); w = canvas.width; h = canvas.height;
+      near = Array.from({ length: countByArea(w, h, 8, 24, 52000) }, () => leaf(rand(5, 9)));
+      far = Array.from({ length: countByArea(w, h, 6, 18, 76000) }, () => leaf(rand(2.5, 4)));
+    };
+    const drawLeaf = (p, alpha) => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot + Math.sin(t * p.fs * 2 + p.ph) * 0.6);
+      ctx.scale(Math.max(0.2, Math.abs(Math.sin(t * p.fs + p.ph))), 1);
+      ctx.beginPath();
+      ctx.moveTo(0, -p.s);
+      ctx.bezierCurveTo(p.s * 0.85, -p.s * 0.45, p.s * 0.7, p.s * 0.55, 0, p.s);
+      ctx.bezierCurveTo(-p.s * 0.7, p.s * 0.55, -p.s * 0.85, -p.s * 0.45, 0, -p.s);
+      ctx.fillStyle = `rgba(${p.tone}, ${alpha})`;
+      ctx.fill();
+      /* 叶脉：一条浅色中线 */
+      ctx.strokeStyle = `rgba(255, 240, 200, ${alpha * 0.45})`;
+      ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.moveTo(0, -p.s * 0.7); ctx.lineTo(0, p.s * 0.7); ctx.stroke();
+      ctx.restore();
+    };
+    function frame() {
+      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 1;
+      const dark = isDarkBg();
+      bd.draw(ctx, w, h, dark);
+      cover.draw(ctx, w, h, t);
+      for (const p of far) {
+        p.y += p.vy * 0.55; p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.45;
+        if (p.y > h + 12) { p.y = -12; p.x = Math.random() * w; }
+        drawLeaf(p, dark ? 0.5 : 0.6);
+      }
+      for (const p of near) {
+        p.y += p.vy; p.x += Math.sin(t * 0.01 * p.amp + p.ph) * 0.75;
+        p.rot += p.vr;
+        if (p.y > h + 16) { p.y = -16; p.x = Math.random() * w; }
+        drawLeaf(p, dark ? 0.85 : 0.9);
+      }
+      vignette(ctx, w, h, dark ? 0.34 : 0.1);
       raf = requestAnimationFrame(frame);
     }
     addEventListener("resize", resize);
