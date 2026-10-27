@@ -1,21 +1,22 @@
 {
-  "siteName": "拾光小栈",
-  "name": "拾光",
+  "siteName": "蔡贤军的博客",
+  "name": "蔡贤军",
   "motto": "记录、思考与热爱",
   "bio": "白天写前端，晚上写博客，周末在山里或书里。喜欢把复杂的东西讲简单。",
   "location": "湖北 · 黄石",
   "github": "cxjcom",
   "email": "hello@example.com",
-  "qq": "",
+  "qq": "717583885",
   "wechat": "",
-  "birthday": "",
-  "job": "",
+  "birthday": "2005-03-12",
+  "job": "学生",
   "yearGoal": 20,
   "tags": [
     "前端开发",
     "摄影",
     "读书",
-    "徒步"
+    "徒步",
+    "打游戏"
   ],
   "avatar": "",
   "joined": "2026 年 10 月"
