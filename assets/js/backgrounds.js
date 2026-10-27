@@ -529,7 +529,7 @@ window.BG_PAINTERS = {
 
   /* —— 秋日小径：壁纸（树冠随风摇曳）+ 阵风驱动的两层秋叶 —— */
   autumn(canvas, ctx) {
-    let w, h, raf, t = 0, near = [], far = [];
+    let w, h, raf, t = 0, near = [], far = [], scud = [];
     /* 专属壁纸层：分条带风摇——树冠（上部）摆幅大，小径（下部）基本不动，
        双频正弦叠加出阵风感；画面略大于视口，摆动时不露边 */
     const img = new Image();
@@ -553,6 +553,14 @@ window.BG_PAINTERS = {
       bgSize(canvas); w = canvas.width; h = canvas.height;
       near = Array.from({ length: countByArea(w, h, 10, 26, 46000) }, () => leaf(rand(6, 11)));
       far = Array.from({ length: countByArea(w, h, 8, 20, 70000) }, () => leaf(rand(3, 5)));
+      /* 路面上的落叶：平时躺着，阵风超过各自的起风阈值时被卷起沿路飘走 */
+      scud = Array.from({ length: 5 }, () => ({
+        x: rand(0, w), y: rand(h * 0.6, h * 0.92),
+        s: rand(4, 7), rot: rand(0, 6.28), vr: rand(-0.3, 0.3),
+        ph: rand(0, 6.28),
+        tone: TONES[(Math.random() * TONES.length) | 0],
+        trig: rand(0.45, 0.78), flying: false,
+      }));
     };
     const drawLeaf = (p, alpha, gust) => {
       ctx.save();
@@ -577,7 +585,10 @@ window.BG_PAINTERS = {
       t += 1;
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
-      /* 壁纸：整体缓推 + 树冠条带风摇 */
+      /* 阵风：约 9 秒一波、忽强忽弱（幂次拉大静风与强风的对比），
+         树冠摆幅和落叶速度都由它驱动 */
+      const gust = REDUCE_BG ? 0 : Math.pow(0.5 + 0.5 * Math.sin(t * 0.011 + Math.sin(t * 0.0043) * 2.0), 1.6);
+      /* 壁纸：整体缓推 + 树冠条带风摇（静风时轻颤，阵风时明显摇晃） */
       if (imgOk) {
         if (!REDUCE_BG) alpha = Math.min(1, alpha + 0.02);
         const z = REDUCE_BG ? 1.01 : 1.03 + 0.006 * Math.sin(t * 0.0022);
@@ -596,7 +607,7 @@ window.BG_PAINTERS = {
           const bh = dh / bands;
           for (let i = 0; i < bands; i++) {
             const yn = i / bands; /* 0=画面顶（树冠）1=底（小径） */
-            const sway = (11 * Math.pow(1 - yn, 1.7) + 1.2) * Math.min(2, devicePixelRatio || 1);
+            const sway = ((1.0 + 12 * gust) * Math.pow(1 - yn, 1.7) + 1.0) * Math.min(2, devicePixelRatio || 1);
             const off =
               Math.sin(t * 0.0016 + yn * 5.2) * sway +
               Math.sin(t * 0.0041 + yn * 11.0) * sway * 0.4;
@@ -608,8 +619,6 @@ window.BG_PAINTERS = {
         }
         ctx.restore();
       }
-      /* 阵风：约 8 秒一个起风周期，叶子随之加速、偏移、翻滚 */
-      const gust = REDUCE_BG ? 0 : 0.5 + 0.5 * Math.sin(t * 0.0008 + Math.sin(t * 0.0021) * 1.6);
       for (const p of far) {
         p.y += p.vy * 0.55;
         p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.45 + gust * 0.55;
@@ -624,6 +633,20 @@ window.BG_PAINTERS = {
         if (p.y > h + 16) { p.y = -16; p.x = Math.random() * w * 0.9; }
         if (p.x > w + 16) p.x = -16;
         drawLeaf(p, dark ? 0.85 : 0.9, gust);
+      }
+      /* 路上的落叶：风过阈值就卷起来向右飘走，风歇了落回原地 */
+      for (const p of scud) {
+        if (!p.flying && gust > p.trig) p.flying = true;
+        else if (p.flying && gust < p.trig - 0.15) p.flying = false;
+        if (p.flying) {
+          p.x += 1.2 + gust * 3.2;
+          p.y += Math.sin(t * 0.02 + p.ph) * 0.5;
+          p.rot += p.vr * (1 + gust);
+          if (p.x > w + 20) { p.x = rand(-80, -10); p.y = rand(h * 0.6, h * 0.92); p.flying = gust > p.trig; }
+        } else {
+          p.x += Math.sin(t * 0.006 + p.ph) * 0.05;
+        }
+        drawLeaf(p, dark ? 0.7 : 0.8, gust);
       }
       vignette(ctx, w, h, dark ? 0.34 : 0.1);
       raf = requestAnimationFrame(frame);
