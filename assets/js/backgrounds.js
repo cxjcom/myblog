@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.8.0";
+const BG_VER = "1.9.0";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -527,10 +527,15 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 秋日小径：壁纸 + 两层翻滚飘落的秋叶 —— */
+  /* —— 秋日小径：壁纸（树冠随风摇曳）+ 阵风驱动的两层秋叶 —— */
   autumn(canvas, ctx) {
     let w, h, raf, t = 0, near = [], far = [];
-    const cover = makeCover("autumn.jpg", { amp: 8, bands: 56, speed: 0.8, freq: 1.1 });
+    /* 专属壁纸层：分条带风摇——树冠（上部）摆幅大，小径（下部）基本不动，
+       双频正弦叠加出阵风感；画面略大于视口，摆动时不露边 */
+    const img = new Image();
+    let imgOk = false, alpha = REDUCE_BG ? 1 : 0;
+    img.onload = () => { imgOk = true; };
+    img.src = `${BG_ROOT}assets/img/bg/autumn.webp?v=${BG_VER}`;
     const TONES = ["251, 191, 36", "245, 158, 11", "234, 88, 12", "220, 110, 60"];
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark
@@ -539,20 +544,21 @@ window.BG_PAINTERS = {
     });
     const leaf = (s) => ({
       x: Math.random() * w, y: Math.random() * h, s,
-      rot: rand(0, 6.28), vr: rand(-0.035, 0.035),
-      vy: rand(0.4, 1.0) * (s / 7), ph: rand(0, 6.28), amp: rand(0.5, 1.2),
+      rot: rand(0, 6.28), vr: rand(-0.04, 0.04),
+      vy: rand(0.45, 1.0) * (s / 7), ph: rand(0, 6.28), amp: rand(0.6, 1.4),
       fs: rand(0.02, 0.05),
       tone: TONES[(Math.random() * TONES.length) | 0],
     });
     const resize = () => {
       bgSize(canvas); w = canvas.width; h = canvas.height;
-      near = Array.from({ length: countByArea(w, h, 8, 24, 52000) }, () => leaf(rand(5, 9)));
-      far = Array.from({ length: countByArea(w, h, 6, 18, 76000) }, () => leaf(rand(2.5, 4)));
+      near = Array.from({ length: countByArea(w, h, 10, 26, 46000) }, () => leaf(rand(6, 11)));
+      far = Array.from({ length: countByArea(w, h, 8, 20, 70000) }, () => leaf(rand(3, 5)));
     };
-    const drawLeaf = (p, alpha) => {
+    const drawLeaf = (p, alpha, gust) => {
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot + Math.sin(t * p.fs * 2 + p.ph) * 0.6);
+      /* 阵风越大叶子摆头越明显 */
+      ctx.rotate(p.rot + Math.sin(t * p.fs * 2 + p.ph) * (0.5 + gust * 0.9));
       ctx.scale(Math.max(0.2, Math.abs(Math.sin(t * p.fs + p.ph))), 1);
       ctx.beginPath();
       ctx.moveTo(0, -p.s);
@@ -571,17 +577,53 @@ window.BG_PAINTERS = {
       t += 1;
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
-      cover.draw(ctx, w, h, t);
+      /* 壁纸：整体缓推 + 树冠条带风摇 */
+      if (imgOk) {
+        if (!REDUCE_BG) alpha = Math.min(1, alpha + 0.02);
+        const z = REDUCE_BG ? 1.01 : 1.03 + 0.006 * Math.sin(t * 0.0022);
+        const scale = Math.max(w / img.width, h / img.height) * z * 1.04;
+        const dw = img.width * scale, dh = img.height * scale;
+        const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.004);
+        const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.003);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        if (REDUCE_BG) {
+          ctx.drawImage(img, dx, dy, dw, dh);
+        } else {
+          const bands = 44;
+          const bh = dh / bands;
+          for (let i = 0; i < bands; i++) {
+            const yn = i / bands; /* 0=画面顶（树冠）1=底（小径） */
+            const sway = (11 * Math.pow(1 - yn, 1.7) + 1.2) * Math.min(2, devicePixelRatio || 1);
+            const off =
+              Math.sin(t * 0.0016 + yn * 5.2) * sway +
+              Math.sin(t * 0.0041 + yn * 11.0) * sway * 0.4;
+            const sy = (yn * img.height) | 0;
+            const sh = img.height / bands + 1;
+            ctx.drawImage(img, 0, sy, img.width, Math.min(img.height - sy, sh),
+              dx + off, dy + yn * dh, dw, bh + 1);
+          }
+        }
+        ctx.restore();
+      }
+      /* 阵风：约 8 秒一个起风周期，叶子随之加速、偏移、翻滚 */
+      const gust = REDUCE_BG ? 0 : 0.5 + 0.5 * Math.sin(t * 0.0008 + Math.sin(t * 0.0021) * 1.6);
       for (const p of far) {
-        p.y += p.vy * 0.55; p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.45;
-        if (p.y > h + 12) { p.y = -12; p.x = Math.random() * w; }
-        drawLeaf(p, dark ? 0.5 : 0.6);
+        p.y += p.vy * 0.55;
+        p.x += Math.sin(t * 0.008 * p.amp + p.ph) * 0.45 + gust * 0.55;
+        if (p.y > h + 12) { p.y = -12; p.x = Math.random() * w * 0.9; }
+        if (p.x > w + 14) p.x = -14;
+        drawLeaf(p, dark ? 0.5 : 0.6, gust);
       }
       for (const p of near) {
-        p.y += p.vy; p.x += Math.sin(t * 0.01 * p.amp + p.ph) * 0.75;
-        p.rot += p.vr;
-        if (p.y > h + 16) { p.y = -16; p.x = Math.random() * w; }
-        drawLeaf(p, dark ? 0.85 : 0.9);
+        p.y += p.vy * (0.85 + gust * 0.5);
+        p.x += Math.sin(t * 0.01 * p.amp + p.ph) * 0.75 + gust * 1.1;
+        p.rot += p.vr * (0.7 + gust * 1.6);
+        if (p.y > h + 16) { p.y = -16; p.x = Math.random() * w * 0.9; }
+        if (p.x > w + 16) p.x = -16;
+        drawLeaf(p, dark ? 0.85 : 0.9, gust);
       }
       vignette(ctx, w, h, dark ? 0.34 : 0.1);
       raf = requestAnimationFrame(frame);
