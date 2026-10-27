@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.9.0";
+const BG_VER = "1.10.0";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -527,15 +527,22 @@ window.BG_PAINTERS = {
     return () => cancelAnimationFrame(raf);
   },
 
-  /* —— 秋日小径：壁纸（树冠随风摇曳）+ 阵风驱动的两层秋叶 —— */
+  /* —— 秋日小径：底层风景保持真实静止，只有抠出的树叶层随风摇摆 —— */
   autumn(canvas, ctx) {
     let w, h, raf, t = 0, near = [], far = [], scud = [];
-    /* 专属壁纸层：分条带风摇——树冠（上部）摆幅大，小径（下部）基本不动，
-       双频正弦叠加出阵风感；画面略大于视口，摆动时不露边 */
-    const img = new Image();
-    let imgOk = false, alpha = REDUCE_BG ? 1 : 0;
-    img.onload = () => { imgOk = true; };
-    img.src = `${BG_ROOT}assets/img/bg/autumn.webp?v=${BG_VER}`;
+    /* 三层图：底层整景（树干/路面永不变形）+ 远景树冠叶 + 近景前景叶。
+       叶层按颜色+纹理从原图抠出（树干、光斑已剔除），各自绕"枝干连接处"锚点
+       做小幅平移+旋转摆动，阵风时加大、风歇时几乎静止 */
+    const IMGS = { base: null, farLeaf: null, nearLeaf: null };
+    let imgOk = 0, alpha = REDUCE_BG ? 1 : 0;
+    for (const [key, file] of [
+      ["base", "autumn.webp"], ["farLeaf", "autumn-far.webp"], ["nearLeaf", "autumn-near.webp"],
+    ]) {
+      const img = new Image();
+      img.onload = () => { imgOk += 1; };
+      img.src = `${BG_ROOT}assets/img/bg/${file}?v=${BG_VER}`;
+      IMGS[key] = img;
+    }
     const TONES = ["251, 191, 36", "245, 158, 11", "234, 88, 12", "220, 110, 60"];
     const bd = backdrop((x, W, H, dark) => {
       fillSky(x, W, H, dark
@@ -580,42 +587,51 @@ window.BG_PAINTERS = {
       ctx.beginPath(); ctx.moveTo(0, -p.s * 0.7); ctx.lineTo(0, p.s * 0.7); ctx.stroke();
       ctx.restore();
     };
+    /* 叶层摆动：绕锚点(枝干连接处)旋转 + 平移，锚点像素与底图完全重合 */
+    function swayLayer(img, rect, ax, ay, dx2, dy2, rot) {
+      ctx.save();
+      ctx.translate(ax, ay);
+      ctx.rotate(rot);
+      ctx.drawImage(img, rect.dx - ax + dx2, rect.dy - ay + dy2, rect.dw, rect.dh);
+      ctx.restore();
+    }
     function frame() {
       if (document.hidden) { raf = requestAnimationFrame(frame); return; }
       t += 1;
       const dark = isDarkBg();
       bd.draw(ctx, w, h, dark);
-      /* 阵风：约 9 秒一波、忽强忽弱（幂次拉大静风与强风的对比），
-         树冠摆幅和落叶速度都由它驱动 */
+      /* 阵风：约 9 秒一波、忽强忽弱，树冠摆幅与落叶速度都由它驱动 */
       const gust = REDUCE_BG ? 0 : Math.pow(0.5 + 0.5 * Math.sin(t * 0.011 + Math.sin(t * 0.0043) * 2.0), 1.6);
-      /* 壁纸：整体缓推 + 树冠条带风摇（静风时轻颤，阵风时明显摇晃） */
-      if (imgOk) {
+      /* 底图：极缓的镜头漂移（相机在动，场景本身不变形） */
+      if (imgOk === 3) {
         if (!REDUCE_BG) alpha = Math.min(1, alpha + 0.02);
-        const z = REDUCE_BG ? 1.01 : 1.03 + 0.006 * Math.sin(t * 0.0022);
-        const scale = Math.max(w / img.width, h / img.height) * z * 1.04;
-        const dw = img.width * scale, dh = img.height * scale;
-        const dx = (w - dw) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0014) * w * 0.004);
-        const dy = (h - dh) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.0011) * h * 0.003);
+        const z = REDUCE_BG ? 1.01 : 1.02 + 0.005 * Math.sin(t * 0.0018);
+        const scale = Math.max(w / IMGS.base.width, h / IMGS.base.height) * z * 1.03;
+        const rect = {
+          dx: (w - IMGS.base.width * scale) / 2 + (REDUCE_BG ? 0 : Math.sin(t * 0.0013) * w * 0.003),
+          dy: (h - IMGS.base.height * scale) / 2 + (REDUCE_BG ? 0 : Math.cos(t * 0.001) * h * 0.002),
+          dw: IMGS.base.width * scale,
+          dh: IMGS.base.height * scale,
+        };
         ctx.save();
         ctx.globalAlpha = alpha;
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
-        if (REDUCE_BG) {
-          ctx.drawImage(img, dx, dy, dw, dh);
-        } else {
-          const bands = 44;
-          const bh = dh / bands;
-          for (let i = 0; i < bands; i++) {
-            const yn = i / bands; /* 0=画面顶（树冠）1=底（小径） */
-            const sway = ((1.0 + 12 * gust) * Math.pow(1 - yn, 1.7) + 1.0) * Math.min(2, devicePixelRatio || 1);
-            const off =
-              Math.sin(t * 0.0016 + yn * 5.2) * sway +
-              Math.sin(t * 0.0041 + yn * 11.0) * sway * 0.4;
-            const sy = (yn * img.height) | 0;
-            const sh = img.height / bands + 1;
-            ctx.drawImage(img, 0, sy, img.width, Math.min(img.height - sy, sh),
-              dx + off, dy + yn * dh, dw, bh + 1);
-          }
+        ctx.drawImage(IMGS.base, rect.dx, rect.dy, rect.dw, rect.dh);
+        if (!REDUCE_BG) {
+          const dpr = Math.min(2, devicePixelRatio || 1);
+          /* 远景树冠：幅度小、相位慢 */
+          swayLayer(IMGS.farLeaf, rect,
+            w * 0.5, h * 0.6,
+            Math.sin(t * 0.0011 + 0.7) * (1.2 + 2.4 * gust) * dpr,
+            Math.cos(t * 0.0008) * (0.3 + 0.7 * gust) * dpr,
+            Math.sin(t * 0.0009 + 0.3) * (0.0009 + 0.0015 * gust));
+          /* 近景前景叶：幅度更大、相位不同，像离镜头最近的枝头 */
+          swayLayer(IMGS.nearLeaf, rect,
+            w * 0.5, h * 0.33,
+            Math.sin(t * 0.0016 + 2.1) * (2.2 + 4.0 * gust) * dpr,
+            Math.cos(t * 0.001 + 1.4) * (0.8 + 1.5 * gust) * dpr,
+            Math.sin(t * 0.0012 + 1.2) * (0.0016 + 0.0030 * gust));
         }
         ctx.restore();
       }
