@@ -90,6 +90,9 @@
           <div class="profile-item"><span class="pi-label">邮箱</span><a id="viewEmail">—</a></div>
           <div class="profile-item"><span class="pi-label">QQ</span><span id="viewQQ">—</span></div>
           <div class="profile-item"><span class="pi-label">微信</span><span id="viewWechat">—</span></div>
+          <div class="profile-item"><span class="pi-label">生日</span><span id="viewBirthday">—</span></div>
+          <div class="profile-item"><span class="pi-label">星座</span><span id="viewZodiac">—</span></div>
+          <div class="profile-item"><span class="pi-label">职业</span><span id="viewJob">—</span></div>
         </div>
       </div>
 
@@ -115,6 +118,8 @@
         <label class="form-row"><span>邮箱</span><input id="formEmail" maxlength="60" placeholder="you@example.com"></label>
         <label class="form-row"><span>QQ 号</span><input id="formQQ" maxlength="20" placeholder="你的 QQ 号（可不填）"></label>
         <label class="form-row"><span>微信号</span><input id="formWechat" maxlength="40" placeholder="你的微信号（可不填）"></label>
+        <label class="form-row"><span>生日</span><input type="date" id="formBirthday" aria-label="出生年月日"></label>
+        <label class="form-row"><span>职业</span><input id="formJob" maxlength="30" placeholder="如：后端工程师 / 学生（可不填）"></label>
         <label class="form-row"><span>兴趣标签</span><input id="formTags" maxlength="100" placeholder="逗号分隔，如：前端, 摄影, 读书（最多 8 个）"></label>
         <label class="form-row"><span>年度目标</span><input id="formGoal" type="number" min="1" max="365" placeholder="今年想写多少篇（默认 20）"></label>
         <div class="form-actions">
@@ -331,7 +336,7 @@
   </footer>
 
   <script src="assets/js/posts.js?v=1.10.0"></script>
-  <script src="assets/js/profile.js?v=1.11.3"></script>
+  <script src="assets/js/profile.js?v=1.12.1"></script>
   <script src="assets/js/main.js?v=1.10.7"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>

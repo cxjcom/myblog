@@ -14,10 +14,32 @@ const PROFILE_DEFAULTS = {
   email: "hello@example.com",
   qq: "",
   wechat: "",
+  birthday: "",
+  job: "",
   yearGoal: 20,
   tags: ["前端开发", "摄影", "读书", "徒步"],
   avatar: "", // dataURL，空则用默认
 };
+
+function fmtBirthday(v) {
+  const d = new Date(v + "T12:00");
+  if (isNaN(d)) return v;
+  return d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+}
+
+function zodiacOf(birthday) {
+  const d = new Date(birthday + "T12:00");
+  if (isNaN(d)) return "";
+  const m = d.getMonth() + 1, day = d.getDate();
+  const names = ["摩羯座", "水瓶座", "双鱼座", "白羊座", "金牛座", "双子座", "巨蟹座", "狮子座", "处女座", "天秤座", "天蝎座", "射手座", "摩羯座"];
+  const edges = [[1, 20], [2, 19], [3, 21], [4, 20], [5, 21], [6, 22], [7, 23], [8, 23], [9, 23], [10, 24], [11, 23], [12, 22]];
+  let idx = 12;
+  for (let i = 0; i < 12; i++) {
+    if (m < edges[i][0] || (m === edges[i][0] && day < edges[i][1])) { idx = i; break; }
+    idx = i + 1;
+  }
+  return names[idx];
+}
 
 function loadProfile() {
   try {
@@ -103,6 +125,9 @@ function initProfilePage() {
     em.href = "mailto:" + (p.email || "");
     $("#viewQQ").textContent = p.qq || "—";
     $("#viewWechat").textContent = p.wechat || "—";
+    $("#viewBirthday").textContent = p.birthday ? fmtBirthday(p.birthday) : "—";
+    $("#viewZodiac").textContent = p.birthday ? zodiacOf(p.birthday) : "—";
+    $("#viewJob").textContent = p.job || "—";
   }
 
   function fillForm() {
@@ -118,6 +143,8 @@ function initProfilePage() {
     $("#formEmail").value = p.email;
     $("#formQQ").value = p.qq || "";
     $("#formWechat").value = p.wechat || "";
+    $("#formBirthday").value = p.birthday || "";
+    $("#formJob").value = p.job || "";
     $("#formTags").value = (p.tags || []).join(", ");
     $("#formGoal").value = p.yearGoal || 20;
   }
@@ -145,6 +172,8 @@ function initProfilePage() {
     p.email = $("#formEmail").value.trim();
     p.qq = $("#formQQ").value.trim();
     p.wechat = $("#formWechat").value.trim();
+    p.birthday = $("#formBirthday").value;
+    p.job = $("#formJob").value.trim();
     p.tags = $("#formTags").value.split(/[,，、]/).map((t) => t.trim()).filter(Boolean).slice(0, 8);
     p.yearGoal = Math.max(1, +$("#formGoal").value || 20);
     p.avatar = tempAvatar || "";
