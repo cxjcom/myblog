@@ -1,0 +1,22 @@
+{
+  "siteName": "拾光小栈",
+  "name": "拾光",
+  "motto": "记录、思考与热爱",
+  "bio": "白天写前端，晚上写博客，周末在山里或书里。喜欢把复杂的东西讲简单。",
+  "location": "湖北 · 黄石",
+  "github": "cxjcom",
+  "email": "hello@example.com",
+  "qq": "",
+  "wechat": "",
+  "birthday": "",
+  "job": "",
+  "yearGoal": 20,
+  "tags": [
+    "前端开发",
+    "摄影",
+    "读书",
+    "徒步"
+  ],
+  "avatar": "",
+  "joined": "2026 年 10 月"
+}
