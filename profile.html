@@ -59,40 +59,54 @@
   </header>
 
   <main id="main" class="container">
-    <div class="page-head">
-      <span class="kicker">Profile</span>
-      <h1>个人<span class="gradient-text">主页</span></h1>
-      <p>我的资料卡。点击「编辑资料」可以修改头像、昵称和各种信息——保存后立即生效，并同步到首页与品牌印章。</p>
+    <div class="page-head page-head--split">
+      <div class="page-head-left">
+        <span class="kicker">Profile</span>
+        <h1>个人<span class="gradient-text">主页</span></h1>
+        <p>我的资料卡。点击「编辑资料」可以修改头像、昵称和各种信息——保存后立即生效，并同步到首页与品牌印章。</p>
+      </div>
+      <div class="weather-chip glass-card reveal" id="weatherCard">
+        <div class="wx-loading">天气加载中…</div>
+      </div>
     </div>
 
-    <section class="section">
-      <!-- 浏览视图 -->
-      <div class="glass-card profile-card" id="profileView">
-        <div class="profile-top">
-          <div class="profile-avatar-ring">
-            <div class="profile-avatar" id="viewAvatar">拾</div>
+    <div class="me-section">
+      <!-- 资料卡（浏览视图） -->
+      <div class="glass-card me-hero" id="profileView">
+        <div class="me-banner" aria-hidden="true"></div>
+        <div class="me-hero-body">
+          <div class="profile-top">
+            <div class="profile-avatar-ring">
+              <div class="profile-avatar" id="viewAvatar">拾</div>
+            </div>
+            <div class="profile-id">
+              <h2 id="viewName">拾光</h2>
+              <p class="profile-motto" id="viewMotto"></p>
+              <div class="profile-tags" id="viewTags"></div>
+            </div>
+            <button class="btn btn-primary" id="editBtn" type="button">
+              <svg viewBox="0 0 24 24" class="btn-ico"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>
+              编辑资料
+            </button>
           </div>
-          <div class="profile-id">
-            <h2 id="viewName">拾光</h2>
-            <p class="profile-motto" id="viewMotto"></p>
-            <div class="profile-tags" id="viewTags"></div>
+          <p class="profile-bio" id="viewBio"></p>
+          <div class="profile-grid">
+            <div class="profile-item"><span class="pi-label">📍 所在地</span><span id="viewLocation">—</span></div>
+            <div class="profile-item"><span class="pi-label">🗓 加入时间</span><span id="viewJoined">—</span></div>
+            <div class="profile-item"><span class="pi-label">GitHub</span><a id="viewGithub" target="_blank" rel="noopener">—</a></div>
+            <div class="profile-item"><span class="pi-label">邮箱</span><a id="viewEmail">—</a></div>
+            <div class="profile-item"><span class="pi-label">QQ</span><span id="viewQQ">—</span></div>
+            <div class="profile-item"><span class="pi-label">微信</span><span id="viewWechat">—</span></div>
+            <div class="profile-item"><span class="pi-label">生日</span><span id="viewBirthday">—</span></div>
+            <div class="profile-item"><span class="pi-label">星座</span><span id="viewZodiac">—</span></div>
+            <div class="profile-item"><span class="pi-label">职业</span><span id="viewJob">—</span></div>
           </div>
-          <button class="btn btn-primary" id="editBtn" type="button">
-            <svg viewBox="0 0 24 24" class="btn-ico"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>
-            编辑资料
-          </button>
-        </div>
-        <p class="profile-bio" id="viewBio"></p>
-        <div class="profile-grid">
-          <div class="profile-item"><span class="pi-label">📍 所在地</span><span id="viewLocation">—</span></div>
-          <div class="profile-item"><span class="pi-label">🗓 加入时间</span><span id="viewJoined">—</span></div>
-          <div class="profile-item"><span class="pi-label">GitHub</span><a id="viewGithub" target="_blank" rel="noopener">—</a></div>
-          <div class="profile-item"><span class="pi-label">邮箱</span><a id="viewEmail">—</a></div>
-          <div class="profile-item"><span class="pi-label">QQ</span><span id="viewQQ">—</span></div>
-          <div class="profile-item"><span class="pi-label">微信</span><span id="viewWechat">—</span></div>
-          <div class="profile-item"><span class="pi-label">生日</span><span id="viewBirthday">—</span></div>
-          <div class="profile-item"><span class="pi-label">星座</span><span id="viewZodiac">—</span></div>
-          <div class="profile-item"><span class="pi-label">职业</span><span id="viewJob">—</span></div>
+          <div class="me-stats-inline" id="meStats">
+            <div class="ms-item"><b data-count="0">0</b><span>篇文章</span></div>
+            <div class="ms-item"><b data-count="0">0</b><span>累计字数</span></div>
+            <div class="ms-item"><b data-count="0">0</b><span>个标签</span></div>
+            <div class="ms-item"><b data-count="0">0</b><span>天创作旅程</span></div>
+          </div>
         </div>
       </div>
 
@@ -113,7 +127,7 @@
         <label class="form-row"><span>昵称 / ID</span><input id="formName" maxlength="20" placeholder="显示在首页和资料卡上的名字"></label>
         <label class="form-row"><span>个性签名</span><input id="formMotto" maxlength="40" placeholder="一句话介绍自己"></label>
         <label class="form-row"><span>个人简介</span><textarea id="formBio" rows="3" maxlength="200" placeholder="多写一点也没关系"></textarea></label>
-        <label class="form-row"><span>所在地</span><input id="formLocation" maxlength="30" placeholder="如：中国 · 上海"></label>
+        <label class="form-row"><span>所在地</span><input id="formLocation" maxlength="30" placeholder="如：湖北 · 黄石"></label>
         <label class="form-row"><span>GitHub 用户名</span><input id="formGithub" maxlength="40" placeholder="不带 @ 的用户名"></label>
         <label class="form-row"><span>邮箱</span><input id="formEmail" maxlength="60" placeholder="you@example.com"></label>
         <label class="form-row"><span>QQ 号</span><input id="formQQ" maxlength="20" placeholder="你的 QQ 号（可不填）"></label>
@@ -129,143 +143,92 @@
         </div>
         <p class="form-note">资料仅保存在本机浏览器（localStorage），不会上传到任何服务器。</p>
       </form>
-    </section>
+    </div>
 
-    <!-- 创作数据 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Numbers</span>
-          <h2>创作数据</h2>
+    <!-- 双栏仪表盘 -->
+    <div class="me-grid">
+      <div class="me-col">
+        <div class="glass-card me-card reveal">
+          <div class="me-card-head"><span class="me-ico">🎯</span><h3>年度目标</h3><span class="me-hint" id="goalHint"></span></div>
+          <div class="goal-card">
+            <svg viewBox="0 0 120 120" class="goal-ring" aria-hidden="true">
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73" id="goalRingFg"></circle>
+            </svg>
+            <div class="goal-num">
+              <b id="goalPct">0%</b>
+              <span id="goalDetail"></span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="me-stats" id="meStats">
-        <div class="me-stat glass-card reveal" style="--d:.05s"><b data-count="0">0</b><span>篇文章</span></div>
-        <div class="me-stat glass-card reveal" style="--d:.1s"><b data-count="0">0</b><span>累计字数</span></div>
-        <div class="me-stat glass-card reveal" style="--d:.15s"><b data-count="0">0</b><span>个标签</span></div>
-        <div class="me-stat glass-card reveal" style="--d:.2s"><b data-count="0">0</b><span>天创作旅程</span></div>
-      </div>
-    </section>
 
-    <!-- 年度目标 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Goal</span>
-          <h2>年度目标</h2>
+        <div class="glass-card me-card reveal">
+          <div class="me-card-head">
+            <span class="me-ico">📡</span><h3>最近在…</h3>
+            <a class="me-more" href="now.html">编辑 →</a>
+          </div>
+          <div class="now-mini" id="nowMini"></div>
         </div>
-        <span class="count-hint" id="goalHint"></span>
-      </div>
-      <div class="glass-card goal-card reveal">
-        <svg viewBox="0 0 120 120" class="goal-ring" aria-hidden="true">
-          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
-          <circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73" id="goalRingFg"></circle>
-        </svg>
-        <div class="goal-num">
-          <b id="goalPct">0%</b>
-          <span id="goalDetail"></span>
-          <small>目标可在「编辑资料」里调整</small>
-        </div>
-      </div>
-    </section>
 
-    <!-- 技能与兴趣：百分比值直接改下面的 --w 和文字即可 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Skills</span>
-          <h2>技能与兴趣</h2>
+        <div class="glass-card me-card reveal">
+          <div class="me-card-head"><span class="me-ico">🗓️</span><h3>本月心情</h3><span class="me-hint" id="moodMeta"></span></div>
+          <div class="mood-picker" id="moodPicker" role="radiogroup" aria-label="选择心情"></div>
+          <div class="mood-grid" id="moodGrid"></div>
+          <p class="form-note">点日期盖一个选中的心情，再点一次可清除</p>
         </div>
       </div>
-      <div class="glass-card me-skills reveal">
-        <div class="skill" style="--w:85%">
-          <div class="skill-head"><span>前端开发</span><span>85%</span></div>
-          <div class="skill-track"><div class="skill-fill"></div></div>
-        </div>
-        <div class="skill" style="--w:72%">
-          <div class="skill-head"><span>写作表达</span><span>72%</span></div>
-          <div class="skill-track"><div class="skill-fill"></div></div>
-        </div>
-        <div class="skill" style="--w:78%">
-          <div class="skill-head"><span>读书</span><span>78%</span></div>
-          <div class="skill-track"><div class="skill-fill"></div></div>
-        </div>
-        <div class="skill" style="--w:62%">
-          <div class="skill-head"><span>摄影</span><span>62%</span></div>
-          <div class="skill-track"><div class="skill-fill"></div></div>
-        </div>
-        <div class="skill" style="--w:55%">
-          <div class="skill-head"><span>徒步与户外</span><span>55%</span></div>
-          <div class="skill-track"><div class="skill-fill"></div></div>
-        </div>
-      </div>
-    </section>
 
-    <!-- 成就徽章：由文章数据自动解锁 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Achievements</span>
-          <h2>成就徽章</h2>
+      <div class="me-col">
+        <div class="glass-card me-card reveal">
+          <div class="me-card-head"><span class="me-ico">🛠️</span><h3>技能与兴趣</h3></div>
+          <div class="skill" style="--w:85%">
+            <div class="skill-head"><span>前端开发</span><span>85%</span></div>
+            <div class="skill-track"><div class="skill-fill"></div></div>
+          </div>
+          <div class="skill" style="--w:72%">
+            <div class="skill-head"><span>写作表达</span><span>72%</span></div>
+            <div class="skill-track"><div class="skill-fill"></div></div>
+          </div>
+          <div class="skill" style="--w:78%">
+            <div class="skill-head"><span>读书</span><span>78%</span></div>
+            <div class="skill-track"><div class="skill-fill"></div></div>
+          </div>
+          <div class="skill" style="--w:62%">
+            <div class="skill-head"><span>摄影</span><span>62%</span></div>
+            <div class="skill-track"><div class="skill-fill"></div></div>
+          </div>
+          <div class="skill" style="--w:55%">
+            <div class="skill-head"><span>徒步与户外</span><span>55%</span></div>
+            <div class="skill-track"><div class="skill-fill"></div></div>
+          </div>
         </div>
-        <span class="count-hint" id="badgeHint"></span>
-      </div>
-      <div class="badge-grid" id="meBadges"></div>
-    </section>
 
-    <!-- 最近动态 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Recent</span>
-          <h2>最近动态</h2>
+        <div class="glass-card me-card reveal">
+          <div class="me-card-head">
+            <span class="me-ico">⚡</span><h3>最近动态</h3>
+            <a class="me-more" href="archive.html">时光机 →</a>
+          </div>
+          <div class="me-recent" id="meRecent"></div>
         </div>
-        <a class="more" href="archive.html">时光机 →</a>
-      </div>
-      <div class="me-recent" id="meRecent"></div>
-    </section>
 
-    <!-- 最近在… -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Now</span>
-          <h2>最近在…</h2>
-        </div>
-        <a class="more" href="now.html">去编辑 →</a>
-      </div>
-      <div class="now-mini glass-card reveal" id="nowMini"></div>
-    </section>
-
-    <!-- 空间速览 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Spaces</span>
-          <h2>空间速览</h2>
+        <div class="glass-card me-card reveal">
+          <div class="me-card-head"><span class="me-ico">🧭</span><h3>空间速览</h3></div>
+          <div class="space-latest" id="spaceLatest"></div>
         </div>
       </div>
-      <div class="space-latest" id="spaceLatest"></div>
-    </section>
+    </div>
 
-    <!-- 心情签到 -->
-    <section class="section">
-      <div class="section-head reveal">
-        <div>
-          <span class="kicker">Mood</span>
-          <h2>本月心情</h2>
+    <div class="me-section">
+      <div class="glass-card me-card reveal">
+        <div class="me-card-head">
+          <span class="me-ico">🏅</span><h3>成就徽章</h3>
+          <span class="me-hint" id="badgeHint"></span>
         </div>
-        <span class="count-hint" id="moodMeta"></span>
+        <div class="badge-grid" id="meBadges"></div>
       </div>
-      <div class="glass-card mood-card reveal">
-        <div class="mood-picker" id="moodPicker" role="radiogroup" aria-label="选择心情"></div>
-        <div class="mood-grid" id="moodGrid"></div>
-        <p class="form-note">点日期盖一个选中的心情，再点一次可清除 · 记录保存在本机浏览器</p>
-      </div>
-    </section>
+    </div>
 
-    <!-- 快捷入口 -->
-    <section class="section">
+    <div class="me-section">
       <div class="section-head reveal">
         <div>
           <span class="kicker">Shortcuts</span>
@@ -314,8 +277,9 @@
           <span class="space-arrow" aria-hidden="true">→</span>
         </a>
       </div>
-    </section>
+    </div>
   </main>
+
 
   <footer class="site-footer">
     <div class="footer-inner container">

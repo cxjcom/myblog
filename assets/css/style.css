@@ -3329,3 +3329,91 @@ html[data-photo="dark"] .float-chip {
 .wx-city-form input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 .wx-city-form .btn { padding: 8px 14px; font-size: 13.5px; }
 .wx-follow { color: var(--text-faint) !important; }
+
+/* ---------- 个人主页二期：仪表盘版式 ---------- */
+.me-section { margin-bottom: 18px; }
+.me-grid {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 16px;
+  margin: 16px 0 18px;
+  align-items: start;
+}
+.me-col { display: grid; gap: 16px; }
+.me-card { padding: 18px 22px; }
+.me-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.me-card-head h3 { margin: 0; font-size: 16px; }
+.me-card-head .me-ico {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  background: var(--accent-soft);
+}
+.me-card-head .me-hint { margin-left: auto; font-size: 12.5px; color: var(--text-faint); }
+.me-card-head .me-more { margin-left: auto; font-size: 13px; color: var(--text-faint); text-decoration: none; }
+.me-card-head .me-more:hover { color: var(--accent); }
+
+/* 名片卡：渐变横幅 + 头像压边 + 内联统计 */
+.me-hero { padding: 0 0 4px; overflow: hidden; }
+.me-banner {
+  height: 92px;
+  background:
+    radial-gradient(circle at 18% 40%, rgba(255, 255, 255, 0.14) 0 2px, transparent 3px),
+    radial-gradient(circle at 42% 70%, rgba(255, 255, 255, 0.12) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 74% 30%, rgba(255, 255, 255, 0.16) 0 2px, transparent 3px),
+    linear-gradient(120deg, #6366f1, #8b5cf6 45%, #06b6d4);
+  opacity: 0.9;
+}
+[data-theme="dark"] .me-banner { opacity: 0.55; }
+.me-hero-body { padding: 0 28px 8px; }
+.me-hero .profile-top {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  margin-top: -48px;
+}
+.me-hero .profile-id h2 { font-size: 30px; }
+.me-hero .btn { margin-left: auto; margin-bottom: 6px; }
+.me-hero .profile-bio { margin-top: 18px; }
+.me-hero .profile-grid { grid-template-columns: repeat(3, 1fr); gap: 10px 18px; }
+.me-hero .profile-item { padding: 9px 14px; }
+.me-stats-inline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+.ms-item {
+  text-align: center;
+  padding: 14px 8px 10px;
+  border-left: 1px solid var(--border);
+}
+.ms-item:first-child { border-left: none; }
+.ms-item b {
+  display: block;
+  font-size: 24px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+}
+.ms-item span { font-size: 12.5px; color: var(--text-faint); }
+.me-card .goal-card { padding: 0; gap: 22px; }
+.me-card .goal-card .goal-ring { width: 110px; height: 110px; }
+.me-card .goal-card .goal-num b { font-size: 32px; }
+.me-more { font-size: 13px; }
+@media (max-width: 1080px) {
+  .me-grid { grid-template-columns: 1fr; }
+  .me-hero .profile-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .me-hero .profile-top { flex-wrap: wrap; }
+  .me-hero .btn { margin-left: 0; }
+}
