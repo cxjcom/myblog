@@ -9,7 +9,7 @@
 
 const REDUCE_BG = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const BG_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
-const BG_VER = "1.10.0";
+const BG_VER = "1.11.0";
 
 /* ---------------- 共享光标 ---------------- */
 const BG_MOUSE = { x: -99999, y: -99999 };
@@ -557,7 +557,16 @@ window.BG_PAINTERS = {
       tone: TONES[(Math.random() * TONES.length) | 0],
     });
     const resize = () => {
-      bgSize(canvas); w = canvas.width; h = canvas.height;
+      /* 画布按设备像素比渲染（上限 2），高分屏上壁纸不再被拉伸发糊；
+         绘制坐标仍用 CSS 像素，setTransform 统一换算 */
+      const fixed = getComputedStyle(canvas).position === "fixed";
+      const cw = fixed ? innerWidth : Math.round(canvas.getBoundingClientRect().width) || innerWidth;
+      const ch = fixed ? innerHeight : Math.round(canvas.getBoundingClientRect().height) || innerHeight;
+      const dpr = Math.min(2, devicePixelRatio || 1);
+      canvas.width = Math.round(cw * dpr);
+      canvas.height = Math.round(ch * dpr);
+      w = cw; h = ch;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       near = Array.from({ length: countByArea(w, h, 10, 26, 46000) }, () => leaf(rand(6, 11)));
       far = Array.from({ length: countByArea(w, h, 8, 20, 70000) }, () => leaf(rand(3, 5)));
       /* 路面上的落叶：平时躺着，阵风超过各自的起风阈值时被卷起沿路飘走 */
@@ -619,19 +628,65 @@ window.BG_PAINTERS = {
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(IMGS.base, rect.dx, rect.dy, rect.dw, rect.dh);
         if (!REDUCE_BG) {
-          const dpr = Math.min(2, devicePixelRatio || 1);
           /* 远景树冠：幅度小、相位慢 */
           swayLayer(IMGS.farLeaf, rect,
             w * 0.5, h * 0.6,
-            Math.sin(t * 0.0011 + 0.7) * (1.2 + 2.4 * gust) * dpr,
-            Math.cos(t * 0.0008) * (0.3 + 0.7 * gust) * dpr,
+            Math.sin(t * 0.0011 + 0.7) * (1.2 + 2.4 * gust),
+            Math.cos(t * 0.0008) * (0.3 + 0.7 * gust),
             Math.sin(t * 0.0009 + 0.3) * (0.0009 + 0.0015 * gust));
           /* 近景前景叶：幅度更大、相位不同，像离镜头最近的枝头 */
           swayLayer(IMGS.nearLeaf, rect,
             w * 0.5, h * 0.33,
-            Math.sin(t * 0.0016 + 2.1) * (2.2 + 4.0 * gust) * dpr,
-            Math.cos(t * 0.001 + 1.4) * (0.8 + 1.5 * gust) * dpr,
+            Math.sin(t * 0.0016 + 2.1) * (2.2 + 4.0 * gust),
+            Math.cos(t * 0.001 + 1.4) * (0.8 + 1.5 * gust),
             Math.sin(t * 0.0012 + 1.2) * (0.0016 + 0.0030 * gust));
+          /* 阳光透叶扫径：每约 16 秒一束暖光从树冠间沿小径扫过，
+             叶隙随风闪烁，光落处路面亮起光斑 */
+          const CYCLE = 960; /* 帧 ≈ 16 秒 */
+          const rp = (t % CYCLE) / CYCLE;
+          const env = Math.pow(Math.sin(Math.PI * rp), 1.5);
+          if (env > 0.02) {
+            const inten = env * (0.6 + 0.55 * gust);
+            const tilt = 0.14; /* 光束与竖直方向夹角：太阳在左上方 */
+            const bx = w * (0.40 + 0.20 * rp); /* 光束顶部沿画面从左扫到右 */
+            const topY = h * 0.30;
+            const len = h * 0.62;
+            const w0 = w * 0.05, w1 = w * 0.11; /* 上窄下宽 */
+            ctx.save();
+            ctx.globalCompositeOperation = "lighter";
+            ctx.translate(bx, topY);
+            ctx.rotate(tilt);
+            const beam = (cx2, halfW, a) => {
+              const g = ctx.createLinearGradient(cx2 - halfW, 0, cx2 + halfW, 0);
+              g.addColorStop(0, "rgba(255, 214, 140, 0)");
+              g.addColorStop(0.4, `rgba(255, 214, 140, ${a})`);
+              g.addColorStop(0.6, `rgba(255, 214, 140, ${a})`);
+              g.addColorStop(1, "rgba(255, 214, 140, 0)");
+              ctx.fillStyle = g;
+              ctx.beginPath();
+              ctx.moveTo(cx2 - halfW * 0.45, -h * 0.04);
+              ctx.lineTo(cx2 + halfW * 0.45, -h * 0.04);
+              ctx.lineTo(cx2 + halfW, len);
+              ctx.lineTo(cx2 - halfW, len);
+              ctx.closePath();
+              ctx.fill();
+            };
+            beam(0, w0, 0.13 * inten);
+            /* 两道细光柱：叶隙纹理，位置与亮度轻微闪烁 */
+            beam(-w1 * 0.55, w0 * 0.38, 0.09 * inten * (0.55 + 0.45 * Math.sin(t * 0.017)));
+            beam(w1 * 0.5, w0 * 0.30, 0.08 * inten * (0.55 + 0.45 * Math.sin(t * 0.021 + 2.4)));
+            ctx.restore();
+            /* 光束落点在路面上的光斑 */
+            const gx2 = bx + Math.tan(tilt) * (h * 0.72 - topY);
+            ctx.save();
+            ctx.globalCompositeOperation = "lighter";
+            const g2 = ctx.createRadialGradient(gx2, h * 0.74, 0, gx2, h * 0.74, w * 0.13);
+            g2.addColorStop(0, `rgba(255, 226, 160, ${0.14 * inten})`);
+            g2.addColorStop(1, "rgba(255, 226, 160, 0)");
+            ctx.fillStyle = g2;
+            ctx.fillRect(gx2 - w * 0.14, h * 0.6, w * 0.28, h * 0.28);
+            ctx.restore();
+          }
         }
         ctx.restore();
       }
