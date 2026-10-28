@@ -3419,3 +3419,59 @@ html[data-photo="dark"] .float-chip {
   .me-hero .profile-top { flex-wrap: wrap; }
   .me-hero .btn { margin-left: 0; }
 }
+
+/* ---------------- 写文章编辑器 + 动态文章阅读页 ---------------- */
+.write-card { display: flex; flex-direction: column; gap: 12px; padding: 26px; }
+.editor-toolbar {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 8px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px 10px 0 0;
+  background: rgba(255,255,255,0.04);
+}
+.editor-toolbar button {
+  padding: 5px 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.14);
+  background: transparent; color: inherit; font-size: 13px; cursor: pointer;
+}
+.editor-toolbar button:hover { background: rgba(255,255,255,0.1); }
+.editor-count { margin-left: auto; font-size: 12.5px; color: var(--text-faint, #8a93ad); }
+.editor-body {
+  min-height: 320px; padding: 18px 20px; line-height: 1.9;
+  border: 1px solid rgba(255,255,255,0.12); border-top: none; border-radius: 0 0 10px 10px;
+  background: rgba(255,255,255,0.03); outline: none; overflow-wrap: break-word;
+}
+.editor-body:empty::before { content: attr(data-placeholder); color: var(--text-faint, #8a93ad); }
+.editor-body img { max-width: 100%; border-radius: 10px; margin: 8px 0; }
+.editor-body pre {
+  background: rgba(0,0,0,0.25); padding: 12px 14px; border-radius: 10px;
+  overflow-x: auto; white-space: pre-wrap;
+}
+.editor-body blockquote {
+  margin: 8px 0; padding: 6px 14px; border-left: 3px solid var(--accent, #7c8cf8);
+  color: var(--text-faint, #8a93ad);
+}
+.post-card--manage { position: relative; display: block; color: inherit; text-decoration: none; }
+.post-card-link { display: block; color: inherit; text-decoration: none; }
+.post-manage {
+  position: absolute; right: 14px; bottom: 12px; display: flex; gap: 8px;
+}
+.post-manage button {
+  padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06); color: inherit; font-size: 12.5px; cursor: pointer;
+}
+.post-manage button:hover { background: rgba(255,255,255,0.14); }
+.post-manage .post-del:hover { background: rgba(220, 60, 60, 0.25); }
+.post-view { padding: 34px 38px; }
+.post-view h1 { font-size: clamp(24px, 4vw, 34px); margin: 10px 0 8px; }
+.post-view-body { margin-top: 22px; line-height: 1.95; overflow-wrap: break-word; }
+.post-view-body img { max-width: 100%; border-radius: 12px; margin: 10px 0; }
+.post-view-body pre {
+  background: rgba(0,0,0,0.25); padding: 14px 16px; border-radius: 10px;
+  overflow-x: auto; white-space: pre-wrap;
+}
+.post-view-body blockquote {
+  margin: 12px 0; padding: 8px 16px; border-left: 3px solid var(--accent, #7c8cf8);
+  color: var(--text-faint, #8a93ad);
+}
+.post-view-body iframe, .post-view-body video { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 12px; margin: 10px 0; }
+.post-view-body .post-video { margin: 12px 0; }
+.post-back { text-align: center; margin: 26px 0; }
+.post-back a { color: var(--text-faint, #8a93ad); }

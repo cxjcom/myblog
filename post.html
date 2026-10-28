@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文章 · 拾光小栈</title>
+  <meta name="theme-color" content="#f4f6fc">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.16.0">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches))
+          document.documentElement.dataset.theme = "dark";
+        else if (t === "light") document.documentElement.dataset.theme = "light";
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header">
+    <nav class="nav container">
+      <a class="brand" href="index.html"><span class="brand-dot"></span><span data-site-name>拾光小栈</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html" data-page="home">首页</a></li>
+        <li><a href="blog.html" data-page="blog" class="active">博客</a></li>
+        <li><a href="archive.html" data-page="archive">归档</a></li>
+        <li><a href="projects.html" data-page="projects">项目</a></li>
+        <li><a href="links.html" data-page="links">导航</a></li>
+        <li><a href="about.html" data-page="about">关于</a></li>
+        <li><a href="album.html" data-page="album">相册</a></li>
+        <li><a href="music.html" data-page="music">音乐</a></li>
+        <li><a href="guestbook.html" data-page="guestbook">留言板</a></li>
+        <li><a href="profile.html" data-page="me">我的</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="icon-btn js-toggle-theme" aria-label="切换主题" title="切换明暗主题">
+          <svg viewBox="0 0 24 24" class="icon-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg viewBox="0 0 24 24" class="icon-moon"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        </button>
+        <button class="icon-btn nav-burger js-toggle-menu" aria-label="打开菜单">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <article class="glass-card post-view">
+      <div class="post-card-top">
+        <span class="chip" id="vTag">博文</span>
+        <time id="vDate"></time>
+      </div>
+      <h1 id="vTitle">加载中…</h1>
+      <div class="post-meta" id="vMeta"></div>
+      <div class="post-view-body" id="vBody"><p>正在加载文章内容…</p></div>
+    </article>
+    <p class="post-back"><a href="blog.html">← 返回博客列表</a></p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <p>© <span data-year>2026</span> <span data-site-name>拾光小栈</span> · 由 <span class="heart">♥</span> 与好奇心驱动</p>
+      <p>零依赖静态站点 · 托管于 GitHub Pages</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/posts.js?v=1.16.1"></script>
+  <script src="assets/js/backgrounds.js?v=1.14.0"></script>
+  <script src="assets/js/profile.js?v=1.15.4"></script>
+  <script src="assets/js/main.js?v=1.16.0"></script>
+  <script>
+    (async () => {
+      await window.POSTS_READY;
+      const slug = new URLSearchParams(location.search).get("slug");
+      const p = (window.POSTS || []).find((x) => x.slug === slug);
+      if (!p) {
+        document.getElementById("vTitle").textContent = "没有找到这篇文章";
+        document.getElementById("vBody").innerHTML = '<p>它可能已被删除。回<a href="blog.html">博客列表</a>看看其他文章吧。</p>';
+        return;
+      }
+      if (!p.body) { location.replace((p.url || "posts/" + slug + ".html")); return; }
+      document.title = p.title + " · " + (document.querySelector("[data-site-name]")?.textContent || "拾光小栈");
+      document.getElementById("vTitle").textContent = p.title;
+      document.getElementById("vTag").textContent = p.tags[0] || "博文";
+      document.getElementById("vDate").textContent = p.date;
+      document.getElementById("vDate").setAttribute("datetime", p.date);
+      document.getElementById("vMeta").innerHTML =
+        "<span>约 " + p.minutes + " 分钟</span><span class='dot'>·</span><span>" + p.words + " 字</span>" +
+        (p.tags || []).map((t) => "<span class='chip'>" + t + "</span>").join("");
+      document.getElementById("vBody").innerHTML = p.body;
+    })();
+  </script>
+  <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
+</body>
+</html>

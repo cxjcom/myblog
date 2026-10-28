@@ -1,7 +1,7 @@
 /* 拾光小栈 Service Worker：文章与静态资源离线可读 */
 "use strict";
 
-const CACHE = "myblog-v1.13.0";
+const CACHE = "myblog-v1.16.0";
 const CORE = ["", "index.html", "blog.html", "archive.html", "about.html", "album.html", "music.html", "shelf.html"];
 
 self.addEventListener("install", (e) => {
@@ -21,7 +21,7 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
   /* 页面：网络优先，失败回退缓存（保证内容新鲜，离线可读） */
   /* 资料数据：网络优先，同步后立即可见 */
-  if (url.pathname.endsWith("/data/profile.json")) {
+  if (url.pathname.startsWith("/data/")) {
     e.respondWith(
       fetch(e.request)
         .then((res) => {

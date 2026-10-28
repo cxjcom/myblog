@@ -91,3 +91,70 @@ window.POSTS = [
     keywords: "目标 计划 年度 慢递 信",
   },
 ];
+
+/* ============================================================
+   自定义文章：仓库 data/posts.json（所有人可见）+ 本机草稿覆盖
+   ============================================================ */
+const POSTS_ROOT = /\/posts\//.test(location.pathname) ? "../" : "./";
+const POSTS_ADDED_KEY = "posts.added.v1";     // 本机未同步的新文章
+const POSTS_DELETED_KEY = "posts.deleted.v1"; // 本机删除的仓库文章 slug
+
+function postsLocalAdded() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(POSTS_ADDED_KEY) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function postsLocalDeleted() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(POSTS_DELETED_KEY) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function postsSaveLocal(added, deleted) {
+  try { localStorage.setItem(POSTS_ADDED_KEY, JSON.stringify(added)); } catch (e) {}
+  try { localStorage.setItem(POSTS_DELETED_KEY, JSON.stringify(deleted)); } catch (e) {}
+}
+function customPostUrl(slug) {
+  return POSTS_ROOT + "post.html?slug=" + encodeURIComponent(slug);
+}
+
+/* 把仓库文章与本机覆盖合并进 window.POSTS；列表页等待 POSTS_READY 后再渲染 */
+window.POSTS_READY = (async () => {
+  let repoPosts = [];
+  try {
+    const r = await fetch(POSTS_ROOT + "data/posts.json?v=" + Date.now(), { cache: "no-store" });
+    if (r.ok) repoPosts = await r.json();
+  } catch (e) {}
+  /* 防御：缺 slug/title/date 的脏数据直接丢弃，避免排序/渲染报错 */
+  window.REPO_POSTS = (Array.isArray(repoPosts) ? repoPosts : []).filter(
+    (p) => p && p.slug && p.title && p.date
+  );
+  const repoSlugs = new Set(window.REPO_POSTS.map((p) => p.slug));
+  const deleted = new Set(postsLocalDeleted());
+  /* 本机新文章：仓库里已有同 slug 的视为已同步，不再本地叠加 */
+  const added = postsLocalAdded().filter((p) => !repoSlugs.has(p.slug));
+  const customs = [
+    ...added.map((p) => ({ ...p, local: true })),
+    ...window.REPO_POSTS.filter((p) => !deleted.has(p.slug)),
+  ].map((p) => ({ ...p, custom: true, url: customPostUrl(p.slug) }));
+  const byDate = (a, b) => String(b.date || "").localeCompare(String(a.date || ""));
+  window.POSTS = [...customs, ...window.POSTS].sort(byDate);
+  document.dispatchEvent(new CustomEvent("postsready"));
+  return window.POSTS;
+})();
+
+/* 站主发布/删除：把完整自定义文章列表推送到仓库（需本地 dev_server） */
+async function syncPostsRepo(list) {
+  try {
+    const r = await fetch(POSTS_ROOT + "api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(list),
+    });
+    const d = await r.json().catch(() => ({}));
+    return { ok: r.ok && d.ok !== false, pushed: !!d.pushed, message: d.message || "" };
+  } catch (e) {
+    return { ok: false, pushed: false, message: "" };
+  }
+}

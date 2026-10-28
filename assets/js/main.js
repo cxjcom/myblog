@@ -362,8 +362,9 @@ function initTyped() {
 }
 
 /* ---------------- 卡片渲染 ---------------- */
-function postCard(p, delay = 0) {
-  return `<a class="post-card reveal" style="--d:${delay}s" href="${postUrl(p.slug)}">
+function postCard(p, delay = 0, manage = false) {
+  const link = p.url || postUrl(p.slug);
+  const inner = `
     <div class="post-card-body">
       <div class="post-card-top">
         <span class="chip">${escapeHTML(p.tags[0] || "博文")}</span>
@@ -374,8 +375,18 @@ function postCard(p, delay = 0) {
       <div class="post-meta">
         <span>约 ${p.minutes} 分钟</span><span class="dot">·</span><span>${p.words} 字</span>
       </div>
+    </div>`;
+  if (!manage) {
+    return `<a class="post-card reveal" style="--d:${delay}s" href="${link}">${inner}</a>`;
+  }
+  /* 本机自定义文章：卡片下方带编辑/删除 */
+  return `<div class="post-card reveal post-card--manage" style="--d:${delay}s" data-slug="${escapeHTML(p.slug)}">
+    <a class="post-card-link" href="${link}">${inner}</a>
+    <div class="post-manage">
+      <button type="button" class="post-edit" data-edit="${escapeHTML(p.slug)}">编辑</button>
+      <button type="button" class="post-del" data-del="${escapeHTML(p.slug)}">删除</button>
     </div>
-  </a>`;
+  </div>`;
 }
 const byDateDesc = (a, b) => b.date.localeCompare(a.date);
 
@@ -547,12 +558,44 @@ function initBlog() {
         p.tags.some((t) => t.toLowerCase().includes(q));
       return tagOk && qOk;
     }).sort(byDateDesc);
-    grid.innerHTML = list.map((p, i) => postCard(p, i * 0.06)).join("");
+    grid.innerHTML = list.map((p, i) => postCard(p, i * 0.06, !!p.custom)).join("");
     if (countEl) countEl.textContent = `共 ${list.length} 篇`;
     if (emptyEl) emptyEl.hidden = list.length > 0;
     observeReveals();
   }
   render();
+
+  /* 本机自定义文章：编辑 / 删除 */
+  grid.addEventListener("click", async (e) => {
+    const editBtn = e.target.closest("[data-edit]");
+    const delBtn = e.target.closest("[data-del]");
+    if (!editBtn && !delBtn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const slug = (editBtn || delBtn).dataset.edit || (delBtn || editBtn).dataset.del;
+    if (editBtn) {
+      location.href = rootUrl("write.html") + "?slug=" + encodeURIComponent(slug);
+      return;
+    }
+    const p = window.POSTS.find((x) => x.slug === slug);
+    if (!p || !confirm(`删除《${p.title}》？${p.local ? "" : "将同步到仓库，所有人可见的版本会移除。"}`)) return;
+    /* 仓库文章：从合并列表中移除并推送；本机草稿：仅本地移除 */
+    const deleted = new Set(postsLocalDeleted());
+    const added = postsLocalAdded();
+    const addedIdx = added.findIndex((x) => x.slug === slug);
+    if (addedIdx > -1) added.splice(addedIdx, 1);
+    if (!p.local) deleted.add(slug);
+    postsSaveLocal(added, [...deleted]);
+    if (!p.local) {
+      const r = await syncPostsRepo((window.REPO_POSTS || []).filter((x) => x.slug !== slug));
+      if (!r.ok) return showToast("已在本机删除；同步到仓库失败（需本地 dev_server.py）", true);
+      /* 同步成功：清除对应的本机删除记录（仓库里已不存在） */
+      postsSaveLocal(postsLocalAdded(), postsLocalDeleted().filter((s) => s !== slug));
+      showToast("✅ 已删除并同步到仓库");
+    }
+    window.POSTS = window.POSTS.filter((x) => x.slug !== slug);
+    render();
+  });
 }
 
 /* ---------------- 归档页 ---------------- */
@@ -811,12 +854,15 @@ document.addEventListener("DOMContentLoaded", () => {
   initBackTop();
   initHitokoto();
   initTyped();
-  initHome();
   initGalaxyHalo();
-  initBlog();
-  initArchive();
   initPostPage();
   initGiscus();
   initRandomPost();
   observeReveals();
+  /* 文章列表等待仓库文章合并完成后渲染 */
+  (window.POSTS_READY || Promise.resolve()).then(() => {
+    initHome();
+    initBlog();
+    initArchive();
+  });
 });
