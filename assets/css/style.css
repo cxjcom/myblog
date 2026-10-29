@@ -3473,3 +3473,151 @@ button.chip:hover {
   .section-head::before { animation: none; }
   .btn-primary::after { display: none; }
 }
+
+/* ============================================================
+   v2.1 工位场景 · 线条小人操作电脑（灵感来自 jiejoe.com）
+   ============================================================ */
+.scene-stage {
+  position: relative;
+  padding: 30px 30px 6px;
+  overflow: hidden;
+}
+.sc-svg {
+  display: block;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  height: auto;
+  color: var(--text);
+}
+
+/* 身体轻微起伏 */
+.sc-figure {
+  transform-box: view-box;
+  transform-origin: 470px 310px;
+  animation: scSway 5s ease-in-out infinite;
+}
+@keyframes scSway {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(3px) rotate(0.6deg); }
+}
+
+/* 敲键盘的左臂：肩关节小幅摆动，带停顿 */
+.sc-arm {
+  transform-box: view-box;
+  transform-origin: 434px 212px;
+  animation: scArm 2.5s ease infinite;
+}
+@keyframes scArm {
+  0%, 40%, 80%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-3deg); }
+  30% { transform: rotate(5deg); }
+  60% { transform: rotate(6deg); }
+}
+
+/* 眨眼 */
+.sc-eyes {
+  transform-box: view-box;
+  transform-origin: 470px 142px;
+  animation: scBlink 4.6s linear infinite;
+}
+@keyframes scBlink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  93% { transform: scaleY(0.12); }
+  96% { transform: scaleY(1); }
+}
+
+/* 屏幕代码向上滚动 */
+.sc-code {
+  animation: scScroll 5.5s linear infinite;
+}
+@keyframes scScroll {
+  to { transform: translateY(-150px); }
+}
+
+/* 咖啡热气 */
+.sc-steam { animation: scSteam 2.8s ease-out infinite; }
+.sc-steam.s2 { animation-delay: -1.4s; }
+@keyframes scSteam {
+  0% { opacity: 0; transform: translateY(4px); }
+  25% { opacity: 0.7; }
+  60% { opacity: 0.45; }
+  100% { opacity: 0; transform: translateY(-16px); }
+}
+
+/* 电源灯与柔光 */
+.sc-led { animation: scLed 2s ease-in-out infinite; }
+@keyframes scLed {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.sc-glow { animation: scGlow 4s ease-in-out infinite; }
+@keyframes scGlow {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+[data-theme="light"] .sc-glow { animation-name: scGlowLight; }
+@keyframes scGlowLight {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.6; }
+}
+
+/* 对话气泡：四句话轮播 */
+.sc-bubble {
+  position: absolute;
+  left: 5%;
+  top: 7%;
+  width: 190px;
+  height: 60px;
+  pointer-events: none;
+  background: var(--card-solid);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.sc-bubble::before {
+  content: "";
+  position: absolute;
+  left: 26px;
+  bottom: -8px;
+  width: 14px;
+  height: 14px;
+  background: var(--card-solid);
+  border-right: 1.5px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
+  transform: rotate(45deg);
+}
+.sc-bubble span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: 0;
+  animation: bubbleMsg 12s linear infinite;
+}
+.sc-bubble span:nth-child(2) { animation-delay: -3s; }
+.sc-bubble span:nth-child(3) { animation-delay: -6s; }
+.sc-bubble span:nth-child(4) { animation-delay: -9s; }
+@keyframes bubbleMsg {
+  0% { opacity: 0; transform: translateY(8px); }
+  4% { opacity: 1; transform: translateY(0); }
+  22% { opacity: 1; }
+  27% { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .scene-stage { padding: 16px 12px 2px; }
+  .sc-bubble { width: 150px; height: 52px; font-size: 12px; left: 4%; top: 5%; }
+  .sc-bubble span { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-bubble span:first-child { opacity: 1; animation: none; }
+  .sc-steam { display: none; }
+}
