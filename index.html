@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/img/hero/galaxy-cutout.webp?v=1.7.3">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.1.1">
   <script>
     (function () {
       try {
@@ -132,7 +132,7 @@
           <span>咖啡续命中…</span>
           <span>键盘敲击中…</span>
         </div>
-        <svg class="sc-svg" viewBox="0 0 680 430" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="sc-svg" viewBox="0 0 680 318" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="scGlow" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#17f700" stop-opacity=".2"/>
@@ -144,27 +144,16 @@
           <!-- 显示器后方柔光 -->
           <ellipse class="sc-glow" cx="230" cy="210" rx="170" ry="120" fill="url(#scGlow)"/>
 
-          <!-- 人物：头部 / 表情 / 领带 / 躯干（画在桌子之前，被桌沿遮挡下半身） -->
+          <!-- 人物躯干（画在桌面之前，被桌沿遮挡下半身） -->
           <g class="sc-figure">
-            <g class="sc-head">
-              <circle cx="470" cy="142" r="32" stroke="currentColor" stroke-width="2.5"/>
-              <g class="sc-eyes">
-                <path d="M455 142 L464 142" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                <path d="M476 142 L485 142" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-              </g>
-            </g>
-            <path d="M420 312 L420 226 Q420 200 444 194 L496 194 Q520 200 520 226 L520 312" stroke="currentColor" stroke-width="2.5"/>
-            <path d="M452 186 L470 198 L488 186" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path class="sc-tie" d="M465 198 L475 198 L472 208 L477 246 L470 256 L463 246 L468 208 Z" fill="currentColor"/>
-            <path d="M506 212 Q526 244 516 288" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
+            <path d="M365 312 L365 226 Q365 200 389 194 L441 194 Q465 200 465 226 L465 312" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M397 186 L415 198 L433 186" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="sc-tie" d="M410 198 L420 198 L417 208 L422 246 L415 256 L408 246 L413 208 Z" fill="currentColor"/>
+            <path d="M451 212 Q471 244 461 288" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
           </g>
 
-          <!-- 桌子（遮挡人物下半身） -->
-          <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <rect x="36" y="304" width="608" height="12" rx="6"/>
-            <path d="M76 316 L76 410"/>
-            <path d="M604 316 L604 410"/>
-          </g>
+          <!-- 桌面（只要桌面以上，无桌腿） -->
+          <rect x="36" y="304" width="608" height="12" rx="6" stroke="currentColor" stroke-width="2.5"/>
 
           <!-- 显示器 + 滚动的代码 -->
           <g>
@@ -203,6 +192,23 @@
             <circle class="sc-led" cx="348" cy="264" r="3" fill="#17f700"/>
           </g>
 
+          <!-- 头部：会晃动、低头揉眼、凑近屏幕瞪大眼（画在显示器之后，凑近时头贴到屏幕前） -->
+          <g class="sc-lean">
+            <g class="sc-bob">
+              <circle cx="415" cy="142" r="32" stroke="currentColor" stroke-width="2.5"/>
+              <g class="sc-eyes-swap">
+                <g class="sc-eyes">
+                  <path d="M400 142 L409 142" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M421 142 L430 142" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                </g>
+              </g>
+              <g class="sc-eyes-wide">
+                <circle cx="404.5" cy="140.5" r="7" fill="currentColor"/>
+                <circle cx="425.5" cy="140.5" r="7" fill="currentColor"/>
+              </g>
+            </g>
+          </g>
+
           <!-- 键盘 / 鼠标 / 咖啡杯 -->
           <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M386 302 L394 290 L504 290 L512 302"/>
@@ -214,10 +220,18 @@
           <path class="sc-steam s1" d="M586 262 Q591 254 586 247 Q582 241 587 234" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
           <path class="sc-steam s2" d="M598 260 Q603 252 598 245 Q594 239 599 232" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
 
-          <!-- 左臂：撑在桌面上的那只（画在最后，位于桌沿之前） -->
+          <!-- 敲键盘的手臂 -->
           <g class="sc-arm">
-            <path d="M434 212 Q392 240 402 262 Q410 284 440 296" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
-            <circle cx="446" cy="299" r="6" fill="currentColor"/>
+            <path d="M379 212 Q358 238 364 262 Q370 284 398 296" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
+            <circle cx="404" cy="299" r="6" fill="currentColor"/>
+          </g>
+
+          <!-- 揉眼的手臂：累了抬起来揉眼睛 -->
+          <g class="sc-arm-rub">
+            <g class="sc-rub">
+              <path d="M379 212 C366 240 370 258 386 262 C402 266 406 204 402 160" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
+              <circle cx="402" cy="152" r="7" fill="currentColor"/>
+            </g>
           </g>
         </svg>
       </div>
