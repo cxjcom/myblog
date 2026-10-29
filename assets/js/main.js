@@ -1,6 +1,6 @@
 /* ============================================================
    拾光小栈 · 站点脚本（零依赖）
-   主题切换 / 全局搜索 / 粒子背景 / 页面渲染 / 文章增强
+   主题切换 / 全局搜索 / 霓虹装饰层 / 页面渲染 / 文章增强
    ============================================================ */
 "use strict";
 
@@ -69,48 +69,22 @@ function initDecor() {
       </div>
     </div>`
   );
-  initBackground();
+  initBackdrop();
 }
 
-/* ---------------- 背景主题 ---------------- */
-let bgStop = null;
-function applyBackground(id) {
-  const presets = window.BG_PRESETS || {};
-  const preset = presets[id] || presets.aurora || { css: "", canvas: "particles" };
-  try {
-    localStorage.setItem("bg", id);
-  } catch (e) {}
-  document.documentElement.dataset.bg = id;
-  document.documentElement.dataset.photo =
-    ["aurora", "fireflies", "stars", "nebula", "planet", "circuit"].includes(id) ? "dark" : "bright";
-  if (typeof bgStop === "function") bgStop();
-  bgStop = null;
-  $$(".aurora, .particles").forEach((el) => el.remove());
-  if (typeof preset.css === "string") {
-    document.body.insertAdjacentHTML(
-      "beforeend",
-      `<div class="aurora ${preset.css}" aria-hidden="true">
-        <div class="aurora-blob a1"></div>
-        <div class="aurora-blob a2"></div>
-        <div class="aurora-blob a3"></div>
-      </div>`
-    );
-  }
-  if (preset.canvas && window.BG_PAINTERS && window.BG_PAINTERS[preset.canvas]) {
-    const canvas = document.createElement("canvas");
-    canvas.className = "particles";
-    canvas.setAttribute("aria-hidden", "true");
-    document.body.appendChild(canvas);
-    bgStop = window.BG_PAINTERS[preset.canvas](canvas, canvas.getContext("2d")) || null;
-  }
-  document.dispatchEvent(new CustomEvent("bgchange", { detail: id }));
-}
-function initBackground() {
-  let saved = "aurora";
-  try {
-    saved = localStorage.getItem("bg") || "aurora";
-  } catch (e) {}
-  applyBackground(saved);
+/* ---------------- 霓虹装饰层 ----------------
+   固定背景：暗夜网格 + 双色光晕 + 扫描光线，纯 CSS 动效 */
+function initBackdrop() {
+  $$(".neon-scene").forEach((el) => el.remove());
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `<div class="neon-scene" aria-hidden="true">
+      <div class="neon-grid"></div>
+      <div class="glow-orb o1"></div>
+      <div class="glow-orb o2"></div>
+      <div class="neon-scan"></div>
+    </div>`
+  );
 }
 
 /* ---------------- 主题 ---------------- */
@@ -414,6 +388,7 @@ function initHome() {
       window.POSTS.reduce((s, p) => s + p.words, 0) >= 10000
         ? (window.POSTS.reduce((s, p) => s + p.words, 0) / 10000).toFixed(1) + "w"
         : window.POSTS.reduce((s, p) => s + p.words, 0);
+  observeReveals();
 }
 
 /* ---------------- 首页：星系动态（星核呼吸 / 内外双环：彗星·星尘·星体） ---------------- */

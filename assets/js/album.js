@@ -6,14 +6,7 @@
 /* ---------------- 公开照片（想让所有访客看到就加在这里） ----------------
    把图片文件放进 assets/img/gallery/，然后加一行：
    { src: "assets/img/gallery/xxx.jpg", title: "标题", date: "2026-10-26" }, */
-const ALBUM_PHOTOS = [
-  { src: "assets/img/bg/nebula.webp",    title: "星云深处",   date: "2026-10-24" },
-  { src: "assets/img/bg/aurora.webp",    title: "极光之夜",   date: "2026-10-24" },
-  { src: "assets/img/bg/sakura.webp",    title: "樱花季节",   date: "2026-10-24" },
-  { src: "assets/img/bg/fireflies.webp", title: "萤火虫森林", date: "2026-10-24" },
-  { src: "assets/img/bg/stars.webp",     title: "满天星野",   date: "2026-10-24" },
-  { src: "assets/img/bg/planet.webp",    title: "遥远行星",   date: "2026-10-24" },
-];
+const ALBUM_PHOTOS = [];
 
 const ALBUM_KEY = "album.user.v1";          // 旧版 localStorage 数据（仅用于迁移）
 const ALBUM_HIDDEN_KEY = "album.hidden.v1"; // 被删除的内置照片（src 列表）
@@ -24,9 +17,12 @@ const ALBUM_DB = (() => {
   function open() {
     if (dbp) return dbp;
     dbp = new Promise((resolve, reject) => {
-      const req = indexedDB.open("myblog-album", 1);
+      /* v2：幂等建 store，兼容缺 photos 存储的旧库 */
+      const req = indexedDB.open("myblog-album", 2);
       req.onupgradeneeded = () => {
-        req.result.createObjectStore("photos", { keyPath: "id" });
+        const db = req.result;
+        if (!db.objectStoreNames.contains("photos"))
+          db.createObjectStore("photos", { keyPath: "id" });
       };
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
@@ -120,7 +116,12 @@ function initAlbumPage() {
 
   async function allPhotos() {
     const hidden = new Set(loadHiddenPhotos());
-    const users = await ALBUM_DB.all();
+    let users = [];
+    try {
+      users = await ALBUM_DB.all();
+    } catch (e) {
+      users = []; /* 存储异常时降级：只展示内置照片 */
+    }
     return [
       ...users.map((p) => ({ ...p, key: "u:" + p.id })),
       ...ALBUM_PHOTOS.filter((p) => !hidden.has("d:" + p.src)).map((p) => ({ ...p, key: "d:" + p.src })),
