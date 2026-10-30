@@ -1,7 +1,7 @@
 /* 拾光小栈 Service Worker：文章与静态资源离线可读 */
 "use strict";
 
-const CACHE = "myblog-v2.1.9";
+const CACHE = "myblog-v2.2.0";
 const CORE = ["", "index.html", "blog.html", "archive.html", "about.html", "album.html", "music.html", "shelf.html"];
 
 self.addEventListener("install", (e) => {
