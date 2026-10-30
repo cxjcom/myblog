@@ -3727,3 +3727,55 @@ button.chip:hover {
 @keyframes bulletScroll {
   to { transform: translateX(calc(-100% - 100vw)); }
 }
+
+/* ============================================================
+   v2.3 全站代码元素风格
+   ============================================================ */
+
+/* 标签胶囊 → 代码标签 <tag> */
+.chip::before { content: "<"; opacity: 0.45; font-family: var(--font-mono); }
+.chip::after { content: ">"; opacity: 0.45; font-family: var(--font-mono); }
+
+/* 列表页大标题：终端提示符 */
+.page-head h1::before,
+.error-page h1::before {
+  content: "> ";
+  font-family: var(--font-mono);
+  color: var(--accent-bright);
+  text-shadow: 0 0 12px rgba(23, 247, 0, 0.5);
+}
+
+/* 列表页头部右侧：半透明代码片段水印 */
+.page-head::before {
+  content: "function dream() {\A  const day = write(code, life);\A  return dream;\A}";
+  white-space: pre-line;
+  position: absolute;
+  right: 0;
+  top: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.8;
+  text-align: right;
+  color: var(--accent);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+/* 页脚：代码收尾一行 */
+.site-footer .footer-inner::after {
+  content: "while (alive) { keep_writing(); }";
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--text-faint);
+  opacity: 0.85;
+}
+
+/* 统计数字：等宽字体 */
+.stat b { font-family: var(--font-mono); }
+
+@media (max-width: 900px) {
+  .page-head::before { display: none; }
+}
