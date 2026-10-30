@@ -3494,7 +3494,7 @@ button.chip:hover {
 /* 身体轻微起伏 */
 .sc-figure {
   transform-box: view-box;
-  transform-origin: 484px 296px;
+  transform-origin: 432px 296px;
   animation: scSway 6s ease-in-out infinite;
 }
 @keyframes scSway {
@@ -3505,21 +3505,21 @@ button.chip:hover {
 /* 头部 16s 主时间线：平视 → 低头偏头揉眼 → 凑近屏幕瞪大眼 */
 .sc-lean {
   transform-box: view-box;
-  transform-origin: 484px 188px;
+  transform-origin: 432px 188px;
   animation: scLean 16s ease-in-out infinite;
 }
 @keyframes scLean {
   0%, 40% { transform: translate(0, 0) rotate(0deg); }
   46%, 54% { transform: translate(2px, 7px) rotate(-5deg); }
   60%, 66% { transform: translate(0, 0) rotate(0deg); }
-  72%, 86% { transform: translate(-46px, 12px) rotate(-7deg); }
+  72%, 86% { transform: translate(-38px, 12px) rotate(-7deg); }
   92%, 100% { transform: translate(0, 0) rotate(0deg); }
 }
 
 /* 头部小幅度晃动（始终存在） */
 .sc-bob {
   transform-box: view-box;
-  transform-origin: 484px 172px;
+  transform-origin: 432px 172px;
   animation: scBob 3.6s ease-in-out infinite;
 }
 @keyframes scBob {
@@ -3530,7 +3530,7 @@ button.chip:hover {
 /* 敲键盘的手臂：小幅摆动带停顿，揉眼时段让位隐藏 */
 .sc-arm {
   transform-box: view-box;
-  transform-origin: 446px 210px;
+  transform-origin: 398px 210px;
   animation: scArm 16s ease infinite;
 }
 @keyframes scArm {
@@ -3559,7 +3559,7 @@ button.chip:hover {
 }
 .sc-rub {
   transform-box: view-box;
-  transform-origin: 444px 260px;
+  transform-origin: 396px 260px;
   animation: scRubWiggle 1.1s ease-in-out infinite;
 }
 @keyframes scRubWiggle {
@@ -3580,7 +3580,7 @@ button.chip:hover {
 }
 .sc-eyes {
   transform-box: view-box;
-  transform-origin: 475px 140px;
+  transform-origin: 421px 140px;
   animation: scBlink 4.6s linear infinite;
 }
 @keyframes scBlink {

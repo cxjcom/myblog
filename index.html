@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/img/hero/galaxy-cutout.webp?v=1.7.3">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.1.3">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.1.4">
   <script>
     (function () {
       try {
@@ -146,10 +146,10 @@
 
           <!-- 人物躯干（实心，被桌面遮挡下半身） -->
           <g class="sc-figure">
-            <path d="M432 298 L432 224 Q432 198 456 192 L512 192 Q536 198 536 224 L536 298 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
-            <path d="M466 184 L484 196 L502 184" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path class="sc-tie" d="M479 196 L489 196 L486 206 L491 244 L484 254 L477 244 L482 206 Z" fill="currentColor"/>
-            <path d="M521 210 Q540 242 530 280" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+            <path d="M380 298 L380 224 Q380 198 404 192 L460 192 Q484 198 484 224 L484 298 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M414 184 L432 196 L450 184" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="sc-tie" d="M427 196 L437 196 L434 206 L439 244 L432 254 L425 244 L430 206 Z" fill="currentColor"/>
+            <path d="M469 210 Q488 242 478 280" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
           </g>
 
           <!-- 透视桌面：向后收进的台面 + 前沿厚度 -->
@@ -200,14 +200,14 @@
             <circle class="sc-led" cx="274" cy="243" r="2.8" fill="#17f700"/>
           </g>
 
-          <!-- 键盘（贴在电脑正前方）/ 鼠标 / 咖啡杯，均带椭圆接触阴影 -->
-          <ellipse class="sc-shadow" cx="212" cy="296" rx="84" ry="5.5"/>
-          <ellipse class="sc-shadow" cx="322" cy="293" rx="15" ry="4"/>
+          <!-- 键盘（人物手前，与电脑相对）/ 鼠标 / 咖啡杯，均带椭圆接触阴影 -->
+          <ellipse class="sc-shadow" cx="372" cy="296" rx="76" ry="5.5"/>
+          <ellipse class="sc-shadow" cx="480" cy="293" rx="15" ry="4"/>
           <ellipse class="sc-shadow" cx="596" cy="299" rx="18" ry="4.5"/>
           <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
-            <path d="M140 278 L280 280 L292 293 L130 292 Z"/>
-            <path d="M138 286 L286 287" stroke-width="1.5" fill="none" opacity=".6"/>
-            <ellipse cx="322" cy="289" rx="12" ry="6.5"/>
+            <path d="M315 278 L445 280 L452 293 L306 292 Z"/>
+            <path d="M312 286 L450 287" stroke-width="1.5" fill="none" opacity=".6"/>
+            <ellipse cx="480" cy="289" rx="12" ry="6.5"/>
             <ellipse cx="596" cy="268" rx="15" ry="5.5"/>
             <path d="M581 268 L583 294 M611 268 L609 294"/>
             <path d="M583 294 Q596 299 609 294" fill="none"/>
@@ -220,31 +220,31 @@
           <!-- 头部：初始视线望向电脑；会晃动、低头揉眼、前倾凑近瞪大眼 -->
           <g class="sc-lean">
             <g class="sc-bob">
-              <circle cx="484" cy="140" r="32" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
+              <circle cx="432" cy="140" r="32" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
               <g class="sc-eyes-swap">
                 <g class="sc-eyes">
-                  <path d="M462 140 L472 140" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                  <path d="M478 140 L488 140" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M410 140 L420 140" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M426 140 L436 140" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
                 </g>
               </g>
               <g class="sc-eyes-wide">
-                <circle cx="466" cy="138.5" r="7" fill="currentColor"/>
-                <circle cx="482" cy="138.5" r="7" fill="currentColor"/>
+                <circle cx="414" cy="138.5" r="7" fill="currentColor"/>
+                <circle cx="430" cy="138.5" r="7" fill="currentColor"/>
               </g>
             </g>
           </g>
 
           <!-- 手臂：搭在鼠标上（键盘在电脑跟前，人物只远远望着屏幕） -->
           <g class="sc-arm">
-            <path d="M446 210 Q384 232 366 254 Q356 272 326 284" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
-            <circle cx="322" cy="286" r="5.5" fill="currentColor"/>
+            <path d="M398 210 Q368 240 360 262 Q356 276 362 286" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+            <circle cx="366" cy="289" r="5.5" fill="currentColor"/>
           </g>
 
           <!-- 揉眼的手臂 -->
           <g class="sc-arm-rub">
             <g class="sc-rub">
-              <path d="M446 210 C424 238 428 256 444 260 C462 264 470 200 468 152" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
-              <circle cx="468" cy="144" r="7" fill="currentColor"/>
+              <path d="M398 210 C376 238 380 256 396 260 C414 264 422 200 420 150" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+              <circle cx="420" cy="144" r="7" fill="currentColor"/>
             </g>
           </g>
         </svg>
