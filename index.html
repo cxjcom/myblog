@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/img/hero/galaxy-cutout.webp?v=1.7.3">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.2.8">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.2.9">
   <script>
     (function () {
       try {
@@ -159,7 +159,7 @@
             <path d="M380 298 L380 224 Q380 198 404 192 L460 192 Q484 198 484 224 L484 298 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
             <path d="M414 184 L432 196 L450 184" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path class="sc-tie" d="M427 196 L437 196 L434 206 L439 244 L432 254 L425 244 L430 206 Z" fill="currentColor"/>
-            <path d="M469 210 Q488 242 478 280" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+            <path d="M469 210 Q482 238 476 262" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
           </g>
 
           <!-- 透视桌面：向后收进的台面 + 前沿厚度 -->
@@ -168,13 +168,7 @@
             <path class="sc-desk-front" d="M30 304 L648 304 L648 314 L30 314 Z" stroke-linecap="round"/>
           </g>
 
-          <!-- 键盘（电脑正后方，桌子深处，两侧从显示器后露出） -->
-          <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
-            <path d="M52 272 L344 274 L356 288 L40 287 Z"/>
-            <path d="M48 281 L350 282" stroke-width="1.5" fill="none" opacity=".6"/>
-          </g>
-
-          <!-- 显示器（不规则手绘外形，微微倾斜，参考 jiejoe.com） -->
+                    <!-- 显示器（不规则手绘外形，微微倾斜，参考 jiejoe.com） -->
           <g>
             <ellipse class="sc-shadow" cx="194" cy="295" rx="46" ry="7"/>
             <path d="M186 275 L206 275 L212 290 L180 290 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
@@ -223,11 +217,18 @@
             </g>
           </g>
 
-          <!-- 鼠标（人物手边）/ 咖啡杯（右端），均带椭圆接触阴影 -->
-          <ellipse class="sc-shadow" cx="322" cy="293" rx="15" ry="4"/>
+          <!-- 键盘（缩短，人物双手之间）/ 鼠标 / 咖啡杯，均带椭圆接触阴影 -->
+          <ellipse class="sc-shadow" cx="390" cy="296" rx="62" ry="5"/>
+          <ellipse class="sc-shadow" cx="490" cy="293" rx="15" ry="4"/>
           <ellipse class="sc-shadow" cx="532" cy="299" rx="18" ry="4.5"/>
           <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
-            <ellipse cx="322" cy="289" rx="12" ry="6.5"/>
+            <path d="M332 279 L448 281 L456 293 L324 292 Z"/>
+            <path d="M328 287 L452 288" stroke-width="1.5" fill="none" opacity=".6"/>
+            <ellipse cx="490" cy="289" rx="12" ry="6.5"/>
+          </g>
+          <path d="M476 262 Q464 276 448 287" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+          <circle cx="444" cy="290" r="5.5" fill="currentColor"/>
+          <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
             <ellipse cx="532" cy="268" rx="15" ry="5.5"/>
             <path d="M517 268 L519 294 M547 268 L545 294"/>
             <path d="M519 294 Q532 299 545 294" fill="none"/>
@@ -256,8 +257,8 @@
 
           <!-- 手臂：搭在鼠标上 -->
           <g class="sc-arm">
-            <path d="M398 210 Q384 232 366 254 Q356 272 326 284" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
-            <circle cx="322" cy="286" r="5.5" fill="currentColor"/>
+            <path d="M398 210 Q384 232 366 254 Q360 272 362 286" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+            <circle cx="366" cy="289" r="5.5" fill="currentColor"/>
           </g>
 
           <!-- 揉眼的手臂 -->
