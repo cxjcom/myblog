@@ -87,6 +87,38 @@ function initBackdrop() {
   );
 }
 
+/* ---------------- 导航悬停：小人接话 ---------------- */
+const NAV_REPLIES = {
+  home: "欢迎来到我的小站！",
+  blog: "这是我的博客文章",
+  archive: "这是我的时光机",
+  projects: "这是我的项目库",
+  links: "这是我的导航收藏",
+  about: "这是关于我的故事",
+  album: "这是我的相册库",
+  music: "这是我的音乐库",
+  guestbook: "来给我留言吧！",
+  me: "这是我的个人主页",
+};
+function initNavReply() {
+  const bubble = $(".sc-bubble");
+  const reply = $("#scReply");
+  if (!bubble || !reply) return;
+  $$(".site-header .nav-links a").forEach((a) => {
+    const msg = NAV_REPLIES[a.dataset.page];
+    if (!msg) return;
+    const show = () => {
+      reply.textContent = msg;
+      bubble.classList.add("is-reply");
+    };
+    const hide = () => bubble.classList.remove("is-reply");
+    a.addEventListener("mouseenter", show);
+    a.addEventListener("mouseleave", hide);
+    a.addEventListener("focus", show);
+    a.addEventListener("blur", hide);
+  });
+}
+
 /* ---------------- 主题 ---------------- */
 function initTheme() {
   $$(".js-toggle-theme").forEach((btn) =>
@@ -833,6 +865,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPostPage();
   initGiscus();
   initRandomPost();
+  initNavReply();
   observeReveals();
   /* 文章列表等待仓库文章合并完成后渲染 */
   (window.POSTS_READY || Promise.resolve()).then(() => {
