@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/img/hero/galaxy-cutout.webp?v=1.7.3">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.1.5">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.1.6">
   <script>
     (function () {
       try {
@@ -138,13 +138,13 @@
               <stop offset="0%" stop-color="#17f700" stop-opacity=".2"/>
               <stop offset="100%" stop-color="#17f700" stop-opacity="0"/>
             </radialGradient>
-            <clipPath id="scScreen"><path d="M104 120 L284 125 L284 236 L104 241 Z"/></clipPath>
+            <clipPath id="scScreen"><path d="M104 152 L284 157 L284 268 L104 273 Z"/></clipPath>
           </defs>
 
           <!-- 显示器后方柔光 -->
-          <ellipse class="sc-glow" cx="200" cy="185" rx="185" ry="125" fill="url(#scGlow)"/>
+          <ellipse class="sc-glow" cx="200" cy="210" rx="180" ry="120" fill="url(#scGlow)"/>
 
-          <!-- 人物躯干（实心，被桌面遮挡下半身） -->
+          <!-- 人物躯干（实心，被桌面遮挡下半身），坐在桌子左中位置 -->
           <g class="sc-figure">
             <path d="M380 298 L380 224 Q380 198 404 192 L460 192 Q484 198 484 224 L484 298 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
             <path d="M414 184 L432 196 L450 184" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -158,56 +158,59 @@
             <path class="sc-desk-front" d="M30 304 L648 304 L648 314 L30 314 Z" stroke-linecap="round"/>
           </g>
 
-          <!-- 显示器（居左，侧面/顶面可见，朝向人物） -->
+          <!-- 键盘（电脑正后方，桌子深处，两侧从显示器后露出） -->
+          <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
+            <path d="M70 269 L318 271 L330 283 L58 282 Z"/>
+            <path d="M66 276 L322 277" stroke-width="1.5" fill="none" opacity=".6"/>
+          </g>
+
+          <!-- 显示器（前移到桌子前沿，侧面/顶面可见，转向人物） -->
           <g>
-            <ellipse class="sc-shadow" cx="196" cy="270" rx="44" ry="7.5"/>
-            <ellipse cx="195" cy="268" rx="26" ry="6" stroke="currentColor" stroke-width="2.5"/>
-            <path d="M182 254 L178 266 M208 253 L212 265" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            <path class="sc-top" d="M92 108 L110 100 L314 106 L296 114 Z"/>
-            <path class="sc-side" d="M296 114 L314 106 L314 242 L296 250 Z"/>
-            <path d="M92 108 L296 114 L296 250 L92 256 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M104 120 L284 125 L284 236 L104 241 Z" fill="#0b100c"/>
+            <ellipse class="sc-shadow" cx="194" cy="295" rx="44" ry="7"/>
+            <ellipse cx="194" cy="292" rx="26" ry="6" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M180 282 L176 290 M208 281 L212 290" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path class="sc-top" d="M92 140 L110 132 L314 138 L296 146 Z"/>
+            <path class="sc-side" d="M296 146 L314 138 L314 272 L296 278 Z"/>
+            <path d="M92 140 L296 146 L296 278 L92 284 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M104 152 L284 157 L284 268 L104 273 Z" fill="#0b100c"/>
             <g clip-path="url(#scScreen)">
-              <g transform="translate(0 -3.07) skewY(1.68)">
+              <g transform="translate(0 -2.89) skewY(1.59)">
                 <g class="sc-code">
                   <g>
-                    <rect x="116" y="128" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="143" width="140" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                    <rect x="132" y="158" width="60" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="116" y="173" width="150" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="188" width="105" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
-                    <rect x="116" y="203" width="55" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="218" width="130" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                    <rect x="116" y="233" width="85" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="248" width="135" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="116" y="263" width="75" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="116" y="160" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="175" width="140" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="132" y="190" width="60" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="116" y="205" width="150" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="220" width="105" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
+                    <rect x="116" y="235" width="55" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="250" width="130" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="116" y="265" width="85" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="280" width="135" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="116" y="295" width="75" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
                   </g>
                   <g transform="translate(0 150)">
-                    <rect x="116" y="128" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="143" width="140" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                    <rect x="132" y="158" width="60" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="116" y="173" width="150" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="188" width="105" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
-                    <rect x="116" y="203" width="55" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="218" width="130" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                    <rect x="116" y="233" width="85" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="132" y="248" width="135" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                    <rect x="116" y="263" width="75" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="116" y="160" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="175" width="140" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="132" y="190" width="60" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="116" y="205" width="150" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="220" width="105" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
+                    <rect x="116" y="235" width="55" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="250" width="130" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="116" y="265" width="85" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="132" y="280" width="135" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="116" y="295" width="75" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
                   </g>
                 </g>
               </g>
             </g>
-            <circle class="sc-led" cx="274" cy="243" r="2.8" fill="#17f700"/>
+            <circle class="sc-led" cx="286" cy="275" r="2.8" fill="#17f700"/>
           </g>
 
-          <!-- 键盘（人物手前，与电脑相对）/ 鼠标 / 咖啡杯，均带椭圆接触阴影 -->
-          <ellipse class="sc-shadow" cx="195" cy="297" rx="92" ry="5.5"/>
-          <ellipse class="sc-shadow" cx="480" cy="293" rx="15" ry="4"/>
+          <!-- 鼠标（人物手边）/ 咖啡杯（右端），均带椭圆接触阴影 -->
+          <ellipse class="sc-shadow" cx="322" cy="293" rx="15" ry="4"/>
           <ellipse class="sc-shadow" cx="596" cy="299" rx="18" ry="4.5"/>
           <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
-            <path d="M110 279 L268 281 L280 294 L98 293 Z"/>
-            <path d="M106 287 L276 288" stroke-width="1.5" fill="none" opacity=".6"/>
-            <ellipse cx="480" cy="289" rx="12" ry="6.5"/>
+            <ellipse cx="322" cy="289" rx="12" ry="6.5"/>
             <ellipse cx="596" cy="268" rx="15" ry="5.5"/>
             <path d="M581 268 L583 294 M611 268 L609 294"/>
             <path d="M583 294 Q596 299 609 294" fill="none"/>
@@ -217,7 +220,7 @@
           <path class="sc-steam s1" d="M590 256 Q595 248 590 241 Q586 235 591 228" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
           <path class="sc-steam s2" d="M602 254 Q607 246 602 239 Q598 233 603 226" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
 
-          <!-- 头部：初始视线望向电脑；会晃动、低头揉眼、前倾凑近瞪大眼 -->
+          <!-- 头部：初始视线望向右侧电脑；会晃动、低头揉眼、前倾凑近瞪大眼 -->
           <g class="sc-lean">
             <g class="sc-bob">
               <circle cx="432" cy="140" r="32" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
@@ -234,7 +237,7 @@
             </g>
           </g>
 
-          <!-- 手臂：搭在鼠标上（键盘在电脑跟前，人物只远远望着屏幕） -->
+          <!-- 手臂：搭在鼠标上 -->
           <g class="sc-arm">
             <path d="M398 210 Q384 232 366 254 Q356 272 326 284" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
             <circle cx="322" cy="286" r="5.5" fill="currentColor"/>
