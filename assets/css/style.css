@@ -3794,3 +3794,207 @@ button.chip:hover {
   font-weight: 600;
   fill: var(--accent);
 }
+
+
+/* ---------- 正在播放：独立播放界面 ---------- */
+.np-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(8, 10, 9, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  overflow-y: auto;
+}
+.np-overlay[hidden] { display: none; }
+.np-panel {
+  position: relative;
+  width: min(980px, 100%);
+  padding: 30px 32px 22px;
+}
+.np-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text-soft);
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+.np-close:hover { color: var(--accent); border-color: var(--accent); transform: rotate(90deg); }
+.np-main {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 26px;
+  align-items: start;
+}
+.np-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.np-disc {
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  position: relative;
+  border: 2px solid rgba(23, 247, 0, 0.45);
+  background:
+    radial-gradient(circle at center, var(--card-solid) 0 26%, transparent 26.5%),
+    repeating-radial-gradient(circle at center, rgba(23, 247, 0, 0.16) 0 2px, transparent 2px 9px);
+  box-shadow: 0 0 34px -8px rgba(23, 247, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: npSpin 9s linear infinite;
+}
+@keyframes npSpin { to { transform: rotate(360deg); } }
+.np-disc-core {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gradient);
+  color: #04150a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  animation: npSpin 9s linear infinite reverse;
+}
+.np-artist-card {
+  width: 100%;
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.np-avatar {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient);
+  color: #04150a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  box-shadow: 0 0 18px -4px rgba(23, 247, 0, 0.5);
+}
+.np-artist {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+  letter-spacing: 1px;
+}
+.np-title { margin: 2px 0 6px; font-size: 18px; }
+.np-platform { pointer-events: none; }
+.np-player { width: 100%; }
+.np-player iframe { width: 100%; border: 0; border-radius: 12px; display: block; }
+.np-player audio { width: 100%; }
+.np-lyrics-wrap {
+  position: relative;
+  max-height: 430px;
+  overflow: hidden;
+  padding: 8px 4px 8px 22px;
+  border-left: 1px solid var(--border);
+  -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+}
+.np-lyrics { transition: transform 0.6s ease; }
+.np-line {
+  margin: 0;
+  padding: 8px 2px;
+  font-size: 14.5px;
+  color: var(--text-faint);
+  transition: color 0.3s, transform 0.3s, text-shadow 0.3s;
+  transform-origin: left center;
+}
+.np-line.active {
+  color: var(--accent-bright);
+  text-shadow: 0 0 14px rgba(23, 247, 0, 0.45);
+  transform: scale(1.05);
+  font-weight: 600;
+}
+.np-notes {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  font-size: 34px;
+  color: rgba(23, 247, 0, 0.5);
+  padding: 46px 0 10px;
+}
+.np-notes span { animation: npFloat 3s ease-in-out infinite alternate; }
+.np-notes span:nth-child(2) { animation-delay: -0.8s; font-size: 28px; }
+.np-notes span:nth-child(3) { animation-delay: -1.6s; }
+.np-notes span:nth-child(4) { animation-delay: -2.2s; font-size: 26px; }
+@keyframes npFloat { to { transform: translateY(-14px) rotate(8deg); } }
+.np-idle {
+  text-align: center;
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  letter-spacing: 2px;
+}
+.np-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.np-hint { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+
+/* 歌单卡片上的播放界面入口 */
+.music-play {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--accent);
+  background: transparent;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.music-play:hover {
+  background: var(--accent-bright);
+  color: #04150a;
+  box-shadow: 0 0 12px rgba(23, 247, 0, 0.5);
+}
+
+/* 表单歌词输入 */
+.music-form textarea {
+  flex: 1 1 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+  min-height: 64px;
+}
+.music-form textarea:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+@media (max-width: 860px) {
+  .np-main { grid-template-columns: 1fr; }
+  .np-lyrics-wrap { max-height: 300px; border-left: none; border-top: 1px solid var(--border); padding-left: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .np-disc, .np-disc-core, .np-notes span { animation: none; }
+}
