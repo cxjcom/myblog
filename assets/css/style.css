@@ -3691,7 +3691,7 @@ button.chip:hover {
 @media (prefers-reduced-motion: reduce) {
   .sc-bubble span:first-child { opacity: 1; animation: none; }
   .sc-steam { display: none; }
-  .sc-danmaku { display: none; }
+  .sc-bullet { display: none; }
 }
 
 /* 3D 立体感：桌面厚度 / 显示器侧面顶面 / 接触阴影 */
@@ -3704,18 +3704,26 @@ button.chip:hover {
 [data-theme="light"] .sc-top { fill: rgba(0, 0, 0, 0.05); }
 [data-theme="light"] .sc-shadow { fill: rgba(0, 0, 0, 0.14); }
 
-/* 弹幕：屏幕上的评论从右向左飘过 */
-.sc-danmaku text {
-  font-family: var(--font-mono);
-  font-size: 8px;
-  font-weight: 600;
+/* 弹幕：工位区域背景上飘过的评论 */
+.sc-bullet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
-.sc-danmaku .dm {
-  animation: dmScroll var(--d, 9s) linear infinite;
+.sc-bullet span {
+  position: absolute;
+  left: 100%;
+  top: var(--y, 20%);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--c, rgba(23, 247, 0, 0.32));
+  animation: bulletScroll var(--d, 18s) linear infinite;
   animation-delay: var(--dl, 0s);
   will-change: transform;
 }
-@keyframes dmScroll {
-  from { transform: translateX(300px); }
-  to { transform: translateX(-140px); }
+@keyframes bulletScroll {
+  to { transform: translateX(calc(-100% - 100vw)); }
 }
