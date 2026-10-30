@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/img/hero/galaxy-cutout.webp?v=1.7.3">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.1.7">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.1.8">
   <script>
     (function () {
       try {
@@ -138,7 +138,7 @@
               <stop offset="0%" stop-color="#17f700" stop-opacity=".2"/>
               <stop offset="100%" stop-color="#17f700" stop-opacity="0"/>
             </radialGradient>
-            <clipPath id="scScreen"><path d="M104 152 L284 157 L284 268 L104 273 Z"/></clipPath>
+            <clipPath id="scScreen"><path d="M112 150 L276 142 L280 258 L112 264 Z"/></clipPath>
           </defs>
 
           <!-- 显示器后方柔光 -->
@@ -164,17 +164,17 @@
             <path d="M48 281 L350 282" stroke-width="1.5" fill="none" opacity=".6"/>
           </g>
 
-          <!-- 显示器（前移到桌子前沿，侧面/顶面可见，转向人物） -->
+          <!-- 显示器（不规则手绘外形，微微倾斜，参考 jiejoe.com） -->
           <g>
-            <ellipse class="sc-shadow" cx="194" cy="295" rx="44" ry="7"/>
-            <ellipse cx="194" cy="292" rx="26" ry="6" stroke="currentColor" stroke-width="2.5"/>
-            <path d="M180 282 L176 290 M208 281 L212 290" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            <path class="sc-top" d="M92 140 L110 132 L314 138 L296 146 Z"/>
-            <path class="sc-side" d="M296 146 L314 138 L314 272 L296 278 Z"/>
-            <path d="M92 140 L296 146 L296 278 L92 284 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M104 152 L284 157 L284 268 L104 273 Z" fill="#0b100c"/>
+            <ellipse class="sc-shadow" cx="194" cy="295" rx="46" ry="7"/>
+            <ellipse cx="196" cy="293" rx="27" ry="6" stroke="currentColor" stroke-width="2.5" transform="rotate(-2 196 293)"/>
+            <path d="M182 280 Q180 288 172 291 M212 278 Q216 287 222 291" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path class="sc-top" d="M106 136 L124 122 L306 124 L288 136 Z"/>
+            <path class="sc-side" d="M288 136 L306 124 L310 250 L292 262 Z"/>
+            <path d="M96 148 Q94 138 106 136 L270 128 Q284 127 288 136 L292 262 Q293 274 282 276 L104 282 Q94 283 95 272 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M112 150 L276 142 L280 258 L112 264 Z" fill="#0b100c"/>
             <g clip-path="url(#scScreen)">
-              <g transform="translate(0 -2.89) skewY(1.59)">
+              <g transform="rotate(-2.8 196 200)">
                 <g class="sc-code">
                   <g>
                     <rect x="116" y="160" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
@@ -202,8 +202,14 @@
                   </g>
                 </g>
               </g>
-            </g>
-            <circle class="sc-led" cx="286" cy="275" r="2.8" fill="#17f700"/>
+                <g transform="rotate(6 252 168)">
+                  <rect x="232" y="152" width="40" height="32" rx="3" fill="#cfe8d2"/>
+                  <circle cx="252" cy="158" r="2.5" fill="#17f700"/>
+                  <rect x="238" y="166" width="28" height="4" rx="2" fill="#0b100c" opacity=".25"/>
+                  <rect x="238" y="173" width="20" height="4" rx="2" fill="#0b100c" opacity=".25"/>
+                </g>
+              </g>
+            <circle class="sc-led" cx="276" cy="268" r="2.8" fill="#17f700"/>
           </g>
 
           <!-- 鼠标（人物手边）/ 咖啡杯（右端），均带椭圆接触阴影 -->
