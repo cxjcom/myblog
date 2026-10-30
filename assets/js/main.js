@@ -101,17 +101,17 @@ const NAV_REPLIES = {
   me: "这是我的个人主页",
 };
 function initNavReply() {
-  const bubble = $(".sc-bubble");
-  const reply = $("#scReply");
-  if (!bubble || !reply) return;
+  const say = $("#scSay");
+  const sayText = $("#scSayText");
+  if (!say || !sayText) return;
   $$(".site-header .nav-links a").forEach((a) => {
     const msg = NAV_REPLIES[a.dataset.page];
     if (!msg) return;
     const show = () => {
-      reply.textContent = msg;
-      bubble.classList.add("is-reply");
+      sayText.textContent = msg;
+      say.classList.add("is-reply");
     };
-    const hide = () => bubble.classList.remove("is-reply");
+    const hide = () => say.classList.remove("is-reply");
     a.addEventListener("mouseenter", show);
     a.addEventListener("mouseleave", hide);
     a.addEventListener("focus", show);

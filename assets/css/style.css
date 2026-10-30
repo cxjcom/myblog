@@ -3780,21 +3780,17 @@ button.chip:hover {
   .page-head::before { display: none; }
 }
 
-/* 小人接话：悬停导航栏目时气泡切换为对应回复 */
-.sc-reply {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px;
-  font-family: var(--font-mono);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--accent);
+/* 小人接话：悬停导航栏目时头顶弹出回复气泡 */
+.sc-say {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(10px);
   transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
 }
-.sc-bubble.is-reply .sc-reply { opacity: 1; transform: translateY(0); }
-.sc-bubble.is-reply > span:not(.sc-reply) { animation: none; opacity: 0; }
+.sc-say.is-reply { opacity: 1; transform: translateY(0); }
+.sc-say-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--accent);
+}
