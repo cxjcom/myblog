@@ -3494,7 +3494,7 @@ button.chip:hover {
 /* 身体轻微起伏 */
 .sc-figure {
   transform-box: view-box;
-  transform-origin: 415px 310px;
+  transform-origin: 415px 300px;
   animation: scSway 6s ease-in-out infinite;
 }
 @keyframes scSway {
@@ -3512,7 +3512,7 @@ button.chip:hover {
   0%, 40% { transform: translate(0, 0) rotate(0deg); }
   46%, 54% { transform: translate(2px, 7px) rotate(-5deg); }
   60%, 66% { transform: translate(0, 0) rotate(0deg); }
-  72%, 86% { transform: translate(-34px, 13px) rotate(-8deg); }
+  72%, 86% { transform: translate(-55px, 14px) rotate(-9deg); }
   92%, 100% { transform: translate(0, 0) rotate(0deg); }
 }
 
@@ -3692,3 +3692,13 @@ button.chip:hover {
   .sc-bubble span:first-child { opacity: 1; animation: none; }
   .sc-steam { display: none; }
 }
+
+/* 3D 立体感：桌面厚度 / 显示器侧面顶面 / 接触阴影 */
+.sc-desk-front { fill: rgba(0, 0, 0, 0.3); stroke: currentColor; }
+.sc-side { fill: rgba(0, 0, 0, 0.32); stroke: currentColor; stroke-width: 2.5; stroke-linejoin: round; }
+.sc-top { fill: rgba(255, 255, 255, 0.06); stroke: currentColor; stroke-width: 2.5; stroke-linejoin: round; }
+.sc-shadow { fill: rgba(0, 0, 0, 0.4); }
+[data-theme="light"] .sc-desk-front { fill: rgba(0, 0, 0, 0.12); }
+[data-theme="light"] .sc-side { fill: rgba(0, 0, 0, 0.16); }
+[data-theme="light"] .sc-top { fill: rgba(0, 0, 0, 0.05); }
+[data-theme="light"] .sc-shadow { fill: rgba(0, 0, 0, 0.14); }

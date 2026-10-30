@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/img/hero/galaxy-cutout.webp?v=1.7.3">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.1.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.1.2">
   <script>
     (function () {
       try {
@@ -132,70 +132,98 @@
           <span>咖啡续命中…</span>
           <span>键盘敲击中…</span>
         </div>
-        <svg class="sc-svg" viewBox="0 0 680 318" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="sc-svg" viewBox="0 0 680 330" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="scGlow" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#17f700" stop-opacity=".2"/>
               <stop offset="100%" stop-color="#17f700" stop-opacity="0"/>
             </radialGradient>
-            <clipPath id="scScreen"><rect x="110" y="132" width="240" height="116" rx="8"/></clipPath>
+            <clipPath id="scScreen"><path d="M152 134 L318 139 L318 240 L152 245 Z"/></clipPath>
           </defs>
 
           <!-- 显示器后方柔光 -->
-          <ellipse class="sc-glow" cx="230" cy="210" rx="170" ry="120" fill="url(#scGlow)"/>
+          <ellipse class="sc-glow" cx="240" cy="195" rx="180" ry="120" fill="url(#scGlow)"/>
 
-          <!-- 人物躯干（画在桌面之前，被桌沿遮挡下半身） -->
+          <!-- 椅背（人物身后，拉开层次） -->
+          <rect x="358" y="150" width="116" height="112" rx="24" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
+
+          <!-- 人物躯干（实心，被桌面遮挡下半身） -->
           <g class="sc-figure">
-            <path d="M365 312 L365 226 Q365 200 389 194 L441 194 Q465 200 465 226 L465 312" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M365 300 L365 226 Q365 200 389 194 L441 194 Q465 200 465 226 L465 300 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
             <path d="M397 186 L415 198 L433 186" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path class="sc-tie" d="M410 198 L420 198 L417 208 L422 246 L415 256 L408 246 L413 208 Z" fill="currentColor"/>
-            <path d="M451 212 Q471 244 461 288" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
+            <path d="M451 212 Q471 244 461 282" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
           </g>
 
-          <!-- 桌面（只要桌面以上，无桌腿） -->
-          <rect x="36" y="304" width="608" height="12" rx="6" stroke="currentColor" stroke-width="2.5"/>
+          <!-- 透视桌面：向后收进的台面 + 前沿厚度 -->
+          <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+            <path d="M70 268 L610 268 L646 306 L34 306 Z" fill="var(--card-solid)"/>
+            <path class="sc-desk-front" d="M34 306 L646 306 L646 316 L34 316 Z" stroke-linecap="round"/>
+          </g>
 
-          <!-- 显示器 + 滚动的代码 -->
+          <!-- 显示器（带侧面 / 顶面，微微转向人物） -->
           <g>
-            <rect x="96" y="118" width="268" height="156" rx="14" stroke="currentColor" stroke-width="2.5"/>
-            <rect x="110" y="132" width="240" height="116" rx="8" fill="#0b100c"/>
+            <ellipse class="sc-shadow" cx="235" cy="271" rx="44" ry="8"/>
+            <ellipse cx="235" cy="269" rx="26" ry="6.5" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M222 256 L218 266 M248 254 L252 264" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path class="sc-top" d="M140 122 L156 114 L346 120 L330 128 Z"/>
+            <path class="sc-side" d="M330 128 L346 120 L346 244 L330 252 Z"/>
+            <path d="M140 122 L330 128 L330 252 L140 258 Z" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M152 134 L318 139 L318 240 L152 245 Z" fill="#0b100c"/>
             <g clip-path="url(#scScreen)">
-              <g class="sc-code">
-                <g>
-                  <rect x="118" y="140" width="120" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="155" width="170" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                  <rect x="134" y="170" width="90" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="118" y="185" width="200" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="200" width="130" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
-                  <rect x="118" y="215" width="80" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="230" width="160" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                  <rect x="118" y="245" width="110" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="260" width="190" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="118" y="275" width="140" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                </g>
-                <g transform="translate(0 150)">
-                  <rect x="118" y="140" width="120" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="155" width="170" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                  <rect x="134" y="170" width="90" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="118" y="185" width="200" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="200" width="130" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
-                  <rect x="118" y="215" width="80" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="230" width="160" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
-                  <rect x="118" y="245" width="110" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="134" y="260" width="190" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
-                  <rect x="118" y="275" width="140" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+              <g transform="translate(0 -4.8) skewY(1.81)">
+                <g class="sc-code">
+                  <g>
+                    <rect x="160" y="140" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="155" width="140" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="176" y="170" width="70" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="160" y="185" width="150" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="200" width="110" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
+                    <rect x="160" y="215" width="60" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="230" width="130" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="160" y="245" width="90" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="260" width="140" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="160" y="275" width="80" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                  </g>
+                  <g transform="translate(0 150)">
+                    <rect x="160" y="140" width="100" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="155" width="140" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="176" y="170" width="70" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="160" y="185" width="150" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="200" width="110" height="7" rx="3.5" fill="#00e5ff" opacity=".8"/>
+                    <rect x="160" y="215" width="60" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="230" width="130" height="7" rx="3.5" fill="#17f700" opacity=".85"/>
+                    <rect x="160" y="245" width="90" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="176" y="260" width="140" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                    <rect x="160" y="275" width="80" height="7" rx="3.5" fill="#cfe8d2" opacity=".45"/>
+                  </g>
                 </g>
               </g>
             </g>
-            <path d="M212 274 L228 274 L236 302 L204 302 Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-            <rect x="178" y="296" width="84" height="8" rx="4" stroke="currentColor" stroke-width="2.5"/>
-            <circle class="sc-led" cx="348" cy="264" r="3" fill="#17f700"/>
+            <circle class="sc-led" cx="318" cy="247" r="3" fill="#17f700"/>
           </g>
 
-          <!-- 头部：会晃动、低头揉眼、凑近屏幕瞪大眼（画在显示器之后，凑近时头贴到屏幕前） -->
+          <!-- 键盘 / 鼠标 / 咖啡杯（都带椭圆接触阴影） -->
+          <ellipse class="sc-shadow" cx="450" cy="299" rx="60" ry="5.5"/>
+          <ellipse class="sc-shadow" cx="538" cy="296" rx="16" ry="4"/>
+          <ellipse class="sc-shadow" cx="594" cy="301" rx="19" ry="4.5"/>
+          <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--card-solid)">
+            <path d="M402 282 L494 284 L506 297 L394 296 Z"/>
+            <path d="M399 290 L501 291" stroke-width="1.5" fill="none" opacity=".6"/>
+            <ellipse cx="538" cy="291" rx="12" ry="6.5"/>
+            <ellipse cx="594" cy="270" rx="15" ry="5.5"/>
+            <path d="M579 270 L581 296 M609 270 L607 296"/>
+            <path d="M581 296 Q594 301 607 296" fill="none"/>
+            <path d="M609 276 Q622 284 608 292" fill="none"/>
+          </g>
+          <ellipse cx="594" cy="270" rx="12.5" ry="4" fill="#0b100c"/>
+          <path class="sc-steam s1" d="M588 258 Q593 250 588 243 Q584 237 589 230" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
+          <path class="sc-steam s2" d="M600 256 Q605 248 600 241 Q596 235 601 228" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
+
+          <!-- 头部：晃动 / 低头揉眼 / 凑近屏幕瞪大眼 -->
           <g class="sc-lean">
             <g class="sc-bob">
-              <circle cx="415" cy="142" r="32" stroke="currentColor" stroke-width="2.5"/>
+              <circle cx="415" cy="142" r="32" fill="var(--card-solid)" stroke="currentColor" stroke-width="2.5"/>
               <g class="sc-eyes-swap">
                 <g class="sc-eyes">
                   <path d="M400 142 L409 142" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
@@ -209,24 +237,13 @@
             </g>
           </g>
 
-          <!-- 键盘 / 鼠标 / 咖啡杯 -->
-          <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M386 302 L394 290 L504 290 L512 302"/>
-            <path d="M396 296 L502 296" stroke-width="1.5" opacity=".6"/>
-            <ellipse cx="540" cy="297" rx="13" ry="7"/>
-            <rect x="574" y="272" width="34" height="30" rx="5"/>
-            <path d="M608 278 Q620 286 608 296"/>
-          </g>
-          <path class="sc-steam s1" d="M586 262 Q591 254 586 247 Q582 241 587 234" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
-          <path class="sc-steam s2" d="M598 260 Q603 252 598 245 Q594 239 599 232" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0"/>
-
-          <!-- 敲键盘的手臂 -->
+          <!-- 敲键盘的手臂（伸到桌面上方） -->
           <g class="sc-arm">
-            <path d="M379 212 Q358 238 364 262 Q370 284 398 296" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
-            <circle cx="404" cy="299" r="6" fill="currentColor"/>
+            <path d="M379 212 Q354 240 364 262 Q376 282 424 290" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
+            <circle cx="430" cy="292" r="6" fill="currentColor"/>
           </g>
 
-          <!-- 揉眼的手臂：累了抬起来揉眼睛 -->
+          <!-- 揉眼的手臂 -->
           <g class="sc-arm-rub">
             <g class="sc-rub">
               <path d="M379 212 C366 240 370 258 386 262 C402 266 406 204 402 160" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
