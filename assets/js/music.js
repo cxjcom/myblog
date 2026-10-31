@@ -16,6 +16,7 @@ const MUSIC_LIST = [
   },
 ];
 
+let REMOTE_MUSIC = null; /* 公共歌单：后台写入 data/music.json，这里拉取合并 */
 const MUSIC_KEY = "music.user.v1";        // 自己添加的歌曲
 const MUSIC_HIDDEN_KEY = "music.hidden.v1"; // 被删除的内置歌曲
 const MUSIC_HIST_KEY = "music.history.v1";  // 听歌记录 [{key,title,artist,at}]
@@ -129,7 +130,7 @@ function initMusicPage() {
 
   function allTracks() {
     const hidden = new Set(loadHiddenTracks());
-    return [...userTracks(), ...MUSIC_LIST.filter((t) => !hidden.has("d:" + t.type + ":" + t.src))]
+    return [...userTracks(), ...(REMOTE_MUSIC || MUSIC_LIST).filter((t) => !hidden.has("d:" + t.type + ":" + t.src))]
       .map((t) => ({ ...t, key: t.user ? "u:" + t.id : "d:" + t.type + ":" + t.src }));
   }
   npGetTracks = allTracks;
@@ -274,6 +275,14 @@ function initMusicPage() {
   });
 
   render();
+
+  /* 公共歌单数据：后台（data/music.json）到达后重渲染 */
+  fetch("data/music.json", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((arr) => {
+      if (Array.isArray(arr)) { REMOTE_MUSIC = arr; render(); renderHistory(); }
+    })
+    .catch(() => {});
 }
 
 document.addEventListener("DOMContentLoaded", () => {

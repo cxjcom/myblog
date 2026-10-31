@@ -6,7 +6,7 @@
 /* ---------------- 公开照片（想让所有访客看到就加在这里） ----------------
    把图片文件放进 assets/img/gallery/，然后加一行：
    { src: "assets/img/gallery/xxx.jpg", title: "标题", date: "2026-10-26" }, */
-const ALBUM_PHOTOS = [];
+let ALBUM_PHOTOS = []; /* 公共相册：后台写入 data/album.json，这里拉取渲染 */
 
 const ALBUM_KEY = "album.user.v1";          // 旧版 localStorage 数据（仅用于迁移）
 const ALBUM_HIDDEN_KEY = "album.hidden.v1"; // 被删除的内置照片（src 列表）
@@ -249,6 +249,14 @@ function initAlbumPage() {
   });
 
   migrateAlbum().then(render);
+
+  /* 公共相册数据：后台（data/album.json）到达后重渲染 */
+  fetch("data/album.json", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((arr) => {
+      if (Array.isArray(arr)) { ALBUM_PHOTOS = arr; render(); }
+    })
+    .catch(() => {});
 }
 
 document.addEventListener("DOMContentLoaded", () => {
