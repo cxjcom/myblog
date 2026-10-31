@@ -1,0 +1,9 @@
+# Cloudflare Worker 部署配置（wrangler）
+# 密码与签名密钥不放在此文件，部署时用 `wrangler secret put` 写入（加密存储）
+name = "blog-api"
+main = "cloudflare/worker.js"
+compatibility_date = "2024-12-01"
+
+[[kv_namespaces]]
+binding = "BLOG_DATA"
+id = "b1c2aa0b54bb4d2bb9ef582e4c6e8a6e"

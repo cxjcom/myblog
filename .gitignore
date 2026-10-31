@@ -1,3 +1,4 @@
+.env
 .DS_Store
 Thumbs.db
 *.log
@@ -7,3 +8,5 @@ node_modules/
 __pycache__/
 *.pyc
 scripts/mail_config.json
+.worker-creds.txt
+.wrangler/
