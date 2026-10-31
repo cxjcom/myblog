@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>私密空间</title>
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.5.0">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches))
+          document.documentElement.dataset.theme = "dark";
+        else if (t === "light") document.documentElement.dataset.theme = "light";
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="private">
+  <header class="site-header">
+    <nav class="nav container">
+      <a class="brand" href="index.html"><span class="brand-dot"></span><span>私密空间</span></a>
+      <span class="chip admin-badge">仅自己可见</span>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <!-- 锁屏 -->
+    <section id="vaultLock" class="glass-card vault-lock">
+      <h1 id="lockTitle">🔐 设置解锁密码</h1>
+      <p class="vault-hint" id="lockHint">第一次使用：设置一个解锁密码。手记内容会用它加密后只存在本机浏览器，忘记密码将无法找回。</p>
+      <input type="password" id="vaultPass" placeholder="解锁密码" autocomplete="new-password">
+      <input type="password" id="vaultPass2" placeholder="再输一遍确认" autocomplete="new-password" hidden>
+      <button class="btn btn-primary" id="vaultUnlock">解锁</button>
+      <p class="vault-hint vault-msg" id="vaultMsg"></p>
+    </section>
+
+    <!-- 手记 -->
+    <section id="vaultMain" hidden>
+      <div class="vault-head">
+        <h1>📔 私密手记</h1>
+        <button class="btn" id="vaultLockBtn">锁定</button>
+      </div>
+
+      <div class="glass-card vault-add">
+        <input type="text" id="noteTitle" placeholder="标题（可不填）">
+        <textarea id="noteText" rows="4" placeholder="写点什么……只存在这台浏览器里，加密保存"></textarea>
+        <button class="btn btn-primary" id="noteAdd">＋ 记一条</button>
+      </div>
+
+      <div class="vault-list" id="noteList"></div>
+
+      <details class="glass-card vault-cf">
+        <summary>🛡️ 想让整个页面也上 Cloudflare Access 验证？看这里</summary>
+        <div class="vault-cf-body">
+          <p>当前这个页面的内容已用密码加密存在<strong>本机浏览器</strong>，别人打开也只会看到锁。但页面本身如果部署在 <code>cxjcom.github.io</code>，Cloudflare Access 罩不住它（GitHub 托管的域名，Cloudflare 无法在前面拦截）。想让它也过 Access 验证，需要三步：</p>
+          <ol>
+            <li><strong>准备一个自己的域名</strong>（任意注册商），把域名的 DNS 托管到 Cloudflare（免费计划即可）。</li>
+            <li><strong>GitHub Pages 绑定自定义域名</strong>：仓库 Settings → Pages → Custom domain 填入域名；Cloudflare DNS 里加 CNAME 指向 <code>cxjcom.github.io</code> 并开启橙色云代理；SSL/TLS 模式选 Full；仓库根目录放 CNAME 文件。</li>
+            <li><strong>Cloudflare Zero Trust → Access → Applications → 自托管应用</strong>：域名填你的博客，路径填 <code>/private.html</code>（想连后台一起保护就再加一条 <code>/admin.html</code>）；策略 Action=Allow，Include 选 Emails 填自己的邮箱，登录方式 One-time PIN。之后访问这个页面会先要求邮箱验证码。</li>
+          </ol>
+          <p>详细图文见仓库根目录的 <code>CLOUDFLARE-ACCESS.md</code>。没配 Access 也没关系——手记内容始终是密码加密的，页面也未被任何地方链接。</p>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+    "use strict";
+    const $ = (s, el) => (el || document).querySelector(s);
+    const VAULT_KEY = "private.vault.v1";
+    const enc = new TextEncoder(), dec = new TextDecoder();
+    let cryptoKey = null;   /* 解锁后的密钥只存在内存里 */
+    let NOTES = [];
+
+    function loadVault() {
+      try { return JSON.parse(localStorage.getItem(VAULT_KEY) || "null"); }
+      catch (e) { return null; }
+    }
+    function saveVault(v) { localStorage.setItem(VAULT_KEY, JSON.stringify(v)); }
+
+    async function deriveKey(pass, salt) {
+      const base = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations: 150000, hash: "SHA-256" },
+        base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+      );
+    }
+    async function seal(key, obj) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(JSON.stringify(obj)));
+      return { iv: Array.from(iv), data: Array.from(new Uint8Array(ct)) };
+    }
+    async function open_(key, blob) {
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(blob.iv) }, key, new Uint8Array(blob.data));
+      return JSON.parse(dec.decode(pt));
+    }
+    const b2s = (b) => btoa(String.fromCharCode(...b));
+    const s2b = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+    function showMsg(t, err) {
+      const el = $("#vaultMsg");
+      el.textContent = t || "";
+      el.style.color = err ? "#ff6b6b" : "var(--accent)";
+    }
+
+    function renderNotes() {
+      const box = $("#noteList");
+      if (!NOTES.length) {
+        box.innerHTML = '<div class="glass-card vault-empty">还没有手记，写第一条吧。</div>';
+        return;
+      }
+      const sorted = [...NOTES].sort((a, b) => b.at - a.at);
+      box.innerHTML = sorted.map((n) => `
+        <div class="glass-card vault-note" data-id="${n.id}">
+          <div class="vault-note-head">
+            <b>${n.title ? escapeHtml(n.title) : "<span class='vault-notitle'>无题</span>"}</b>
+            <time>${new Date(n.at).toLocaleString("zh-CN", { hour12: false })}</time>
+          </div>
+          <p class="vault-note-body">${escapeHtml(n.text)}</p>
+          <div class="vault-note-ops">
+            <button class="btn note-edit" data-id="${n.id}">编辑</button>
+            <button class="btn admin-danger note-del" data-id="${n.id}">删除</button>
+          </div>
+        </div>`).join("");
+    }
+
+    function escapeHtml(v) {
+      return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+      ));
+    }
+
+    async function persist() {
+      const vault = loadVault();
+      const kept = [];
+      for (const n of NOTES) kept.push({ id: n.id, at: n.at, blob: await seal(cryptoKey, { title: n.title, text: n.text }) });
+      vault.items = kept;
+      saveVault(vault);
+    }
+
+    async function unlockUI() {
+      const vault = loadVault();
+      NOTES = [];
+      for (const it of (vault.items || [])) {
+        try {
+          const d = await open_(cryptoKey, it.blob);
+          NOTES.push({ id: it.id, at: it.at, title: d.title, text: d.text });
+        } catch (e) { /* 解密失败的条目跳过 */ }
+      }
+      $("#vaultLock").hidden = true;
+      $("#vaultMain").hidden = false;
+      renderNotes();
+    }
+
+    /* 事件 */
+    $("#vaultUnlock").addEventListener("click", async () => {
+      const pass = $("#vaultPass").value;
+      if (!pass) { showMsg("请输入密码", true); return; }
+      const vault = loadVault();
+      if (!vault) {
+        if (pass !== $("#vaultPass2").value) { showMsg("两次输入不一致", true); return; }
+        if (pass.length < 6) { showMsg("密码至少 6 位", true); return; }
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        cryptoKey = await deriveKey(pass, salt);
+        const check = await seal(cryptoKey, { ok: 1 });
+        saveVault({ v: 1, salt: b2s(salt), check, items: [] });
+        showMsg("密码已设置");
+        await unlockUI();
+        return;
+      }
+      try {
+        const key = await deriveKey(pass, s2b(vault.salt));
+        await open_(key, vault.check);   /* 用校验块验密码 */
+        cryptoKey = key;
+        showMsg("");
+        $("#vaultPass").value = ""; $("#vaultPass2").value = "";
+        await unlockUI();
+      } catch (e) {
+        showMsg("密码不对", true);
+      }
+    });
+    $("#vaultPass").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#vaultUnlock").click(); });
+    $("#vaultPass2").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#vaultUnlock").click(); });
+
+    $("#noteAdd").addEventListener("click", async () => {
+      if (!cryptoKey) return;
+      const title = $("#noteTitle").value.trim();
+      const text = $("#noteText").value.trim();
+      if (!text) { return; }
+      NOTES.push({ id: "n" + Date.now() + Math.random().toString(36).slice(2, 6), at: Date.now(), title, text });
+      $("#noteTitle").value = ""; $("#noteText").value = "";
+      await persist();
+      renderNotes();
+    });
+
+    $("#noteList").addEventListener("click", async (e) => {
+      const del = e.target.closest(".note-del");
+      const edit = e.target.closest(".note-edit");
+      const card = e.target.closest(".vault-note");
+      if (!card) return;
+      const id = card.dataset.id;
+      if (del && confirm("删除这条手记？不可恢复。")) {
+        NOTES = NOTES.filter((n) => n.id !== id);
+        await persist();
+        renderNotes();
+      }
+      if (edit) {
+        const n = NOTES.find((x) => x.id === id);
+        const body = card.querySelector(".vault-note-body");
+        if (body.dataset.editing) return;
+        body.dataset.editing = "1";
+        body.innerHTML = `<textarea class="vault-editbox" rows="5">${escapeHtml(n.text)}</textarea>
+          <button class="btn btn-primary note-save" data-id="${id}">保存修改</button>`;
+        card.querySelector(".note-save").addEventListener("click", async (ev) => {
+          ev.stopPropagation();
+          n.text = card.querySelector(".vault-editbox").value;
+          await persist();
+          renderNotes();
+        });
+      }
+    });
+
+    $("#vaultLockBtn").addEventListener("click", () => {
+      cryptoKey = null; NOTES = [];
+      $("#vaultMain").hidden = true;
+      $("#vaultLock").hidden = false;
+      $("#lockTitle").textContent = "🔐 输入密码解锁";
+      $("#lockHint").textContent = "手记加密存在本机浏览器，输入解锁密码查看。";
+      $("#vaultPass2").hidden = true;
+      $("#vaultPass").value = "";
+      showMsg("");
+    });
+
+    /* 初始化：判断是设置密码还是解锁 */
+    (function init() {
+      const vault = loadVault();
+      if (vault) {
+        $("#lockTitle").textContent = "🔐 输入密码解锁";
+        $("#lockHint").textContent = "手记加密存在本机浏览器，输入解锁密码查看。";
+        $("#vaultPass2").hidden = true;
+      }
+    })();
+  })();
+  </script>
+</body>
+</html>
