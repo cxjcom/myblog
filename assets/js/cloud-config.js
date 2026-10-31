@@ -2,7 +2,7 @@
    部署 Worker 后（见 cloudflare/DEPLOY.md），把你的 Worker 地址填到下一行引号里：
    例如 window.CLOUD_API = "https://blog-api.xxx.workers.dev";
    留空 = 不使用云端（前台回退读仓库 data/*.json，后台走本地服务器） */
-window.CLOUD_API = "";
+window.CLOUD_API = "https://blog-api-48z.pages.dev";
 
 /* 读取（公开） */
 window.cfGet = async function (name) {
