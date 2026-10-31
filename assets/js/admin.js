@@ -4,7 +4,6 @@
    ============================================================ */
 "use strict";
 
-const ADMIN_HASH = "483fe429f6344a84429517dc0dc11621f88cfc1e41413a444fbdbf2b67a228ee";
 const REPO = "cxjcom/myblog";
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -35,11 +34,6 @@ function setStatus(text, isErr) {
   const el = $("#adminStatus");
   el.textContent = text || "";
   el.style.color = isErr ? "#ff6b6b" : "var(--accent)";
-}
-
-async function sha256hex(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 function b64of(str) {
@@ -168,19 +162,6 @@ async function verifyCode() {
     enterConsole();
   } catch (e) {
     loginMsg("✕ " + e.message, true);
-  }
-}
-
-async function pwdLogin() {
-  const pwd = $("#adminPwd").value;
-  if (!pwd) { loginMsg("请输入管理密码", true); return; }
-  if ((await sha256hex(pwd)) === ADMIN_HASH) {
-    sessionStorage.setItem("adminOk", "1");
-    PAT = $("#adminPat").value.trim();
-    if (PAT) sessionStorage.setItem("adminPat", PAT);
-    enterConsole();
-  } else {
-    loginMsg("密码不对哦", true);
   }
 }
 
@@ -366,8 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#sendCodeBtn").addEventListener("click", sendCode);
   $("#verifyBtn").addEventListener("click", verifyCode);
   $("#adminCode").addEventListener("keydown", (e) => { if (e.key === "Enter") verifyCode(); });
-  $("#pwdLoginBtn").addEventListener("click", pwdLogin);
-  $("#adminPwd").addEventListener("keydown", (e) => { if (e.key === "Enter") pwdLogin(); });
   $("#cloudLoginBtn").addEventListener("click", async () => {
     try {
       const token = await cfLogin($("#cloudPass").value);
