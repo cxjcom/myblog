@@ -1,17 +1,15 @@
 /**
  * 拾光小栈 · Cloudflare Pages 动态后端（_worker.js 高级模式）
- * 能力：公开读取数据 + 密码登录 + 邮箱验证码登录（QQ SMTP 直发）+ 令牌鉴权写入
+ * 能力：公开读取数据 + 密码登录 + 邮箱验证码登录（Brevo API 发信）+ 令牌鉴权写入
  *
- * 需要在 Pages 项目设置里配置（Settings → 环境变量）：
+ * Pages 项目环境变量配置（Settings → 环境变量）：
  *   KV 绑定：BLOG_DATA
  *   Secret：ADMIN_PASS（云端登录密码）
  *   Secret：API_SIGN（令牌签名密钥）
- *   Secret：MAIL_SENDER（发件邮箱，如 717583885@qq.com）
- *   Secret：MAIL_AUTH_CODE（QQ 邮箱 SMTP 授权码）
+ *   Secret：BREVO_KEY（Brevo API Key，用于发送验证码邮件）
+ *   Secret：MAIL_SENDER（已验证的发件邮箱，如 717583885@qq.com）
  *   变量：ADMIN_EMAILS（允许接收验证码的邮箱，逗号分隔）
  */
-
-import { connect } from "cloudflare:sockets";
 
 const NAMES = ["profile", "posts", "album", "music", "mood"];
 const JSON_HEADERS = {
@@ -29,10 +27,6 @@ function b64url(bytes) {
   let s = "";
   bytes.forEach((b) => (s += String.fromCharCode(b)));
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function b64str(str) {
-  return btoa(unescape(encodeURIComponent(str)));
 }
 
 async function hmacSign(secret, text) {
@@ -60,66 +54,10 @@ async function verifyToken(request, env) {
   return Number(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) > Date.now();
 }
 
-/* ---------------- 极简 SMTP 客户端（QQ 邮箱 465 隐式 TLS） ---------------- */
-async function smtpSendMail(env, to, code) {
-  const socket = connect({ hostname: "smtp.qq.com", port: 465, secureTransport: "on" });
-  const writer = socket.writable.getWriter();
-  const reader = socket.readable.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
-
-  async function readReply() {
-    while (true) {
-      const idx = buf.indexOf("\r\n");
-      if (idx !== -1) {
-        const line = buf.slice(0, idx);
-        buf = buf.slice(idx + 2);
-        if (line.length < 4 || line[3] === " ") return line; /* 多行应答的最后一行 */
-      } else {
-        const { value, done } = await reader.read();
-        if (done) throw new Error("SMTP 连接中断");
-        buf += dec.decode(value, { stream: true });
-      }
-    }
-  }
-
-  async function cmd(text, expect) {
-    if (text !== null) await writer.write(new TextEncoder().encode(text + "\r\n"));
-    const reply = await readReply();
-    if (expect && !reply.startsWith(expect)) {
-      throw new Error("SMTP " + expect + " 校验失败：" + reply.slice(0, 140));
-    }
-    return reply;
-  }
-
-  try {
-    await readReply();                                        /* 220 问候 */
-    await cmd("EHLO shiguang", "250");
-    await cmd("AUTH LOGIN", "334");
-    await cmd(b64str(env.MAIL_SENDER), "334");
-    await cmd(b64str(env.MAIL_AUTH_CODE), "235");
-    await cmd(`MAIL FROM:<${env.MAIL_SENDER}>`, "250");
-    await cmd(`RCPT TO:<${to}>`, "250");
-    await cmd("DATA", "354");
-    const subjectB64 = b64str("拾光小栈后台登录验证码");
-    const mail =
-      `From: 拾光小栈 <${env.MAIL_SENDER}>\r\n` +
-      `To: <${to}>\r\n` +
-      `Subject: =?utf-8?B?${subjectB64}?=\r\n` +
-      `MIME-Version: 1.0\r\n` +
-      `Content-Type: text/plain; charset=utf-8\r\n` +
-      `\r\n` +
-      `你的后台登录验证码是：${code}\r\n\r\n5 分钟内有效。若非本人操作请忽略本邮件。\r\n.`;
-    await cmd(mail, "250");
-    await cmd("QUIT", null);
-  } finally {
-    try { writer.releaseLock(); reader.releaseLock(); socket.close(); } catch (e) {}
-  }
-}
-
+/* ---------------- 验证码：Brevo API 发信 ---------------- */
 async function sendCode(env, email) {
-  if (!env.MAIL_SENDER || !env.MAIL_AUTH_CODE) {
-    return json({ ok: false, message: "发件邮箱未配置（Pages 环境变量缺 MAIL_SENDER / MAIL_AUTH_CODE）" }, 500);
+  if (!env.BREVO_KEY) {
+    return json({ ok: false, message: "Brevo API Key 未配置：注册 brevo.com 并验证发件人后，把 API Key 填入 Pages 环境变量 BREVO_KEY" }, 500);
   }
   const allow = String(env.ADMIN_EMAILS || "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
   if (allow.length && !allow.includes(email)) {
@@ -130,10 +68,19 @@ async function sendCode(env, email) {
   if (cd) return json({ ok: false, message: "发送太频繁，请 1 分钟后再试" }, 429);
 
   const code = String(Math.floor(100000 + Math.random() * 900000));
-  try {
-    await smtpSendMail(env, email, code);
-  } catch (e) {
-    return json({ ok: false, message: "邮件发送失败（Cloudflare 边缘到 QQ SMTP 跨网不通）：" + String(e.message || e).slice(0, 140) }, 502);
+  const r = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": env.BREVO_KEY, "Content-Type": "application/json", accept: "application/json" },
+    body: JSON.stringify({
+      sender: { name: "拾光小栈", email: env.MAIL_SENDER },
+      to: [{ email }],
+      subject: "拾光小栈后台登录验证码",
+      textContent: `你的后台登录验证码是：${code}\n\n5 分钟内有效。若非本人操作请忽略本邮件。`,
+    }),
+  });
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    return json({ ok: false, message: "Brevo 发送失败（" + r.status + "）：" + t.slice(0, 140) }, 502);
   }
   await env.BLOG_DATA.put("code:" + email, code, { expirationTtl: 300 });  /* 5 分钟有效 */
   await env.BLOG_DATA.put("code:cd:" + email, "1", { expirationTtl: 60 });
@@ -164,10 +111,10 @@ export default {
       return await sendCode(env, String(body.email || "").trim().toLowerCase());
     }
     if (url.pathname === "/api/verifycode" && request.method === "POST") {
-      try {
-        const body = await request.json();
-        return await verifyCode(env, String(body.email || "").trim().toLowerCase(), String(body.code || "").trim());
-      } catch (e) { return json({ ok: false, message: "请求格式错误" }, 400); }
+      let body;
+      try { body = await request.json(); }
+      catch (e) { return json({ ok: false, message: "请求格式错误" }, 400); }
+      return await verifyCode(env, String(body.email || "").trim().toLowerCase(), String(body.code || "").trim());
     }
 
     if (url.pathname === "/api/login" && request.method === "POST") {

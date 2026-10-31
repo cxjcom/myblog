@@ -123,7 +123,8 @@ async function sendCode() {
   try {
     btn.disabled = true;
     loginMsg("发送中…");
-    const r = await fetch("/api/sendcode", {
+    const url = window.CLOUD_API ? window.CLOUD_API + "/api/sendcode" : "/api/sendcode";
+    const r = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -149,6 +150,22 @@ async function verifyCode() {
   const code = $("#adminCode").value.trim();
   if (!code) { loginMsg("请输入验证码", true); return; }
   try {
+    if (window.CLOUD_API) {
+      /* 云端验证：成功即签发令牌，任何设备可登录 */
+      const r = await fetch(window.CLOUD_API + "/api/verifycode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.message || "验证失败");
+      sessionStorage.setItem("cfToken", j.token);
+      sessionStorage.setItem("adminOk", "1");
+      PAT = $("#adminPat").value.trim();
+      if (PAT) sessionStorage.setItem("adminPat", PAT);
+      enterConsole();
+      return;
+    }
     const r = await fetch("/api/verifycode", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -157,8 +174,6 @@ async function verifyCode() {
     const j = await r.json();
     if (!j.ok) throw new Error(j.message || "验证失败");
     sessionStorage.setItem("adminOk", "1");
-    PAT = $("#adminPat").value.trim();
-    if (PAT) sessionStorage.setItem("adminPat", PAT);
     enterConsole();
   } catch (e) {
     loginMsg("✕ " + e.message, true);
