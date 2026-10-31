@@ -14,6 +14,7 @@ import base64
 import random
 import smtplib
 import time
+from email.header import Header
 from email.mime.text import MIMEText
 import json
 import os
@@ -24,6 +25,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+MAIL_CONFIG = ROOT / "scripts" / "mail_config.json"
+np_codes = {}  # 邮箱验证码：{email: {code, exp, sentAt}}
 DATA_FILE = ROOT / "data" / "profile.json"
 
 # 允许写入的字段白名单（与 assets/js/profile.js 的 PROFILE_DEFAULTS 对应）
@@ -225,9 +228,6 @@ class BlogHandler(SimpleHTTPRequestHandler):
 
         pushed, message = self._git_sync("data/mood.json", "chore: 更新心情签到（data/mood.json）")
         self._reply(200, {"ok": True, "pushed": pushed, "message": message})
-
-    MAIL_CONFIG = ROOT / "scripts" / "mail_config.json"
-    np_codes = {}
 
     def _mail_cfg(self):
         try:
