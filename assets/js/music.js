@@ -16,6 +16,7 @@ const MUSIC_LIST = [
   },
 ];
 
+let REMOTE_MUSIC = null; /* 公共歌单：后台写入 data/music.json，这里拉取合并 */
 const MUSIC_KEY = "music.user.v1";        // 自己添加的歌曲
 const MUSIC_HIDDEN_KEY = "music.hidden.v1"; // 被删除的内置歌曲
 const MUSIC_HIST_KEY = "music.history.v1";  // 听歌记录 [{key,title,artist,at}]
@@ -128,9 +129,7 @@ function initMusicPage() {
   }
 
   function allTracks() {
-    const hidden = new Set(loadHiddenTracks());
-    return [...userTracks(), ...MUSIC_LIST.filter((t) => !hidden.has("d:" + t.type + ":" + t.src))]
-      .map((t) => ({ ...t, key: t.user ? "u:" + t.id : "d:" + t.type + ":" + t.src }));
+    return (REMOTE_MUSIC || MUSIC_LIST).map((t) => ({ ...t, key: "d:" + t.type + ":" + t.src }));
   }
   npGetTracks = allTracks;
 
@@ -154,8 +153,7 @@ function initMusicPage() {
             ${t.artist ? `<span class="chip">${esc(t.artist)}</span>` : ""}
             ${(t.neteaseId || /music\.163\.com.*[?&]id=(\d+)/.test(t.src)) ? `<a class="music-open" href="https://music.163.com/song?id=${(t.neteaseId || (t.src.match(/[?&]id=(\d+)/) || [])[1])}" target="_blank" rel="noopener" title="在网易云打开这首歌">网易云 ↗</a>` : ""}
             <button class="music-play" title="进入播放界面" aria-label="进入播放界面">▶</button>
-            <button class="music-log" title="记入听歌记录" aria-label="记入听歌记录">♪</button>
-            <button class="music-del" title="删除这首歌" aria-label="删除歌曲">✕</button>
+            
           </div>
           ${t.note ? `<p class="music-note">${esc(t.note)}</p>` : ""}
           ${render2(esc(t.src), esc(t.title || "未命名"))}
@@ -212,68 +210,17 @@ function initMusicPage() {
       if (t) npOpen(t);
       return;
     }
-    const log = e.target.closest(".music-log");
-    if (log) {
-      const item = log.closest(".music-item");
-      const t = allTracks().find((x) => x.key === item.dataset.key);
-      if (t) { recordPlay(t.key, t.title, t.artist); renderHistory(); }
-      log.classList.add("done");
-      setTimeout(() => log.classList.remove("done"), 800);
-      return;
-    }
-    const del = e.target.closest(".music-del");
-    if (!del) return;
-    const key = del.closest(".music-item").dataset.key;
-    if (key.startsWith("u:")) {
-      const id = key.slice(2);
-      const tracks = userTracks();
-      const removed = tracks.find((t) => t.id === id);
-      if (removed && confirm(`删除「${removed.title || "未命名"}」？此操作不可恢复。`)) {
-        saveStore(MUSIC_KEY, tracks.filter((t) => t.id !== id));
-        render();
-      }
-    } else {
-      const hidden = loadHiddenTracks();
-      if (!hidden.includes(key)) {
-        hidden.push(key);
-        saveStore(MUSIC_HIDDEN_KEY, hidden);
-        render();
-      }
-    }
-  });
-
-  $("#musicRestore").addEventListener("click", () => {
-    saveStore(MUSIC_HIDDEN_KEY, []);
-    render();
-  });
-
-  $("#musicForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const title = $("#musicTitle").value.trim();
-    const artist = $("#musicArtist").value.trim();
-    const link = $("#musicLink").value.trim();
-    const lyrics = $("#musicLyrics") ? $("#musicLyrics").value.trim() : "";
-    const parsed = parseMusicLink(link);
-    if (!parsed) {
-      alert("没有识别出音乐链接：支持网易云 / Apple Music / B 站视频页链接、外链代码，或 mp3 等音频直链。");
-      return;
-    }
-    const tracks = userTracks();
-    tracks.unshift({
-      user: true,
-      id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
-      title: title || (parsed.neteaseId ? "网易云歌曲 " + parsed.neteaseId : "未命名"),
-      artist,
-      lyrics: lyrics || undefined,
-      ...parsed,
-    });
-    if (saveStore(MUSIC_KEY, tracks)) {
-      $("#musicForm").reset();
-      render();
-    }
   });
 
   render();
+
+  /* 公共歌单：后台（data/music.json）到达后重渲染 */
+  fetch("data/music.json", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((arr) => {
+      if (Array.isArray(arr)) { REMOTE_MUSIC = arr; render(); }
+    })
+    .catch(() => {});
 }
 
 document.addEventListener("DOMContentLoaded", () => {

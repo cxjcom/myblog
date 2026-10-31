@@ -115,17 +115,7 @@ function initAlbumPage() {
   let renderSeq = 0; /* 防止异步渲染乱序 */
 
   async function allPhotos() {
-    const hidden = new Set(loadHiddenPhotos());
-    let users = [];
-    try {
-      users = await ALBUM_DB.all();
-    } catch (e) {
-      users = []; /* 存储异常时降级：只展示内置照片 */
-    }
-    return [
-      ...users.map((p) => ({ ...p, key: "u:" + p.id })),
-      ...ALBUM_PHOTOS.filter((p) => !hidden.has("d:" + p.src)).map((p) => ({ ...p, key: "d:" + p.src })),
-    ];
+    return ALBUM_PHOTOS.map((p) => ({ ...p, key: "d:" + p.src }));
   }
 
   async function render() {
@@ -198,54 +188,6 @@ function initAlbumPage() {
       const p = (await allPhotos()).find((x) => x.key === item.dataset.key);
       if (p) openLightbox(p);
     }
-  });
-
-  $("#albumRestore").addEventListener("click", () => {
-    saveHidden([]);
-    render();
-  });
-
-  /* 文件上传（可多选） */
-  $("#albumFile").addEventListener("change", (e) => {
-    const files = [...(e.target.files || [])];
-    if (!files.length) return;
-    let pending = files.length;
-    files.forEach((file) => {
-      compressImageFile(file, async (dataURL) => {
-        await ALBUM_DB.put({
-          id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
-          user: true,
-          src: dataURL,
-          title: file.name.replace(/\.[a-z0-9]+$/i, "").slice(0, 30) || "我的照片",
-          date: new Date().toISOString().slice(0, 10),
-          createdAt: Date.now(),
-        });
-        render();
-        if (--pending === 0) grid.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
-    e.target.value = "";
-  });
-
-  /* 图片链接添加 */
-  $("#albumUrlForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const src = $("#albumUrl").value.trim();
-    if (!/^https?:\/\//i.test(src)) {
-      alert("请粘贴以 http(s):// 开头的图片链接");
-      return;
-    }
-    await ALBUM_DB.put({
-      id: "u" + Date.now() + Math.random().toString(36).slice(2, 7),
-      user: true,
-      src,
-      title: $("#albumTitle").value.trim() || "网络图片",
-      date: new Date().toISOString().slice(0, 10),
-      createdAt: Date.now(),
-    });
-    $("#albumUrl").value = "";
-    $("#albumTitle").value = "";
-    render();
   });
 
   migrateAlbum().then(render);

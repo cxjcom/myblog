@@ -8,7 +8,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.5.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.6.0">
   <script>
     (function () {
       try {
@@ -50,6 +50,7 @@
         <button class="admin-tab" data-tab="posts">文章</button>
         <button class="admin-tab" data-tab="album">相册</button>
         <button class="admin-tab" data-tab="music">音乐</button>
+        <button class="admin-tab" data-tab="mood">心情</button>
         <button class="btn" id="adminLogout" style="margin-left:auto">退出登录</button>
       </div>
       <p class="admin-status" id="adminStatus"></p>
@@ -111,6 +112,24 @@
         </div>
       </div>
 
+      <!-- 心情 -->
+      <div class="admin-pane" id="pane-mood" hidden>
+        <div class="glass-card admin-card">
+          <h2>心情签到 <span class="admin-file">data/mood.json</span></h2>
+          <p class="admin-hint">先在下方选一个表情，再点月历里的日期打上/取消心情。改完点保存。</p>
+          <div class="mood-picker-row" id="adminMoodPicker"></div>
+          <div class="admin-mood-wrap">
+            <div class="admin-mood-head">
+              <button class="btn" id="moodPrev">‹ 上月</button>
+              <b id="adminMoodMeta"></b>
+              <button class="btn" id="moodNext">下月 ›</button>
+            </div>
+            <div class="mood-grid" id="adminMoodGrid"></div>
+          </div>
+          <button class="btn btn-primary" id="saveMood">保存心情</button>
+        </div>
+      </div>
+
       <!-- 音乐 -->
       <div class="admin-pane" id="pane-music" hidden>
         <div class="glass-card admin-card">
@@ -125,7 +144,7 @@
     </section>
   </main>
 
-  <script src="assets/js/music.js?v=2.4.0"></script>
+  <script src="assets/js/music.js?v=2.6.0"></script>
   <script src="assets/js/admin.js?v=2.4.0"></script>
 </body>
 </html>

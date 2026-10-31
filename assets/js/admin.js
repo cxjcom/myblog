@@ -12,6 +12,17 @@ const esc = (v) => String(v == null ? "" : v)
   .replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 let PAT = sessionStorage.getItem("adminPat") || "";
+const MOODS = [
+  { e: "😄", label: "开心", tint: "rgba(255, 205, 110, 0.4)" },
+  { e: "🥰", label: "喜爱", tint: "rgba(255, 158, 205, 0.38)" },
+  { e: "😌", label: "平静", tint: "rgba(133, 222, 190, 0.38)" },
+  { e: "🤔", label: "思考", tint: "rgba(150, 190, 255, 0.38)" },
+  { e: "😴", label: "疲惫", tint: "rgba(170, 175, 235, 0.38)" },
+  { e: "🥲", label: "低落", tint: "rgba(160, 200, 230, 0.34)" },
+];
+let MOOD = {};
+let moodCur = new Date();
+let moodSel = MOODS[0].e;
 let PROFILE = {};
 let POSTS = [];
 let ALBUM = [];
@@ -120,16 +131,19 @@ function enterConsole() {
 async function loadAll() {
   setStatus("加载中…");
   const bust = "?v=" + Date.now();
-  const [pf, po, al, mu] = await Promise.all([
+  const [pf, po, al, mu, mo] = await Promise.all([
     fetch("data/profile.json" + bust).then((r) => r.json()).catch(() => ({})),
     fetch("data/posts.json" + bust).then((r) => r.json()).catch(() => []),
     fetch("data/album.json" + bust).then((r) => r.json()).catch(() => []),
     fetch("data/music.json" + bust).then((r) => r.json()).catch(() => []),
+    fetch("data/mood.json" + bust).then((r) => r.json()).catch(() => ({})),
   ]);
   PROFILE = pf && typeof pf === "object" ? pf : {};
   POSTS = Array.isArray(po) ? po : [];
   ALBUM = Array.isArray(al) ? al : [];
   MUSIC = Array.isArray(mu) ? mu : [];
+  MOOD = mo && typeof mo === "object" ? mo : {};
+  renderMood();
   renderProfile();
   renderPosts();
   renderAlbum();
@@ -283,6 +297,8 @@ document.addEventListener("DOMContentLoaded", () => {
     $$(".admin-pane").forEach((p) => (p.hidden = p.id !== "pane-" + t.dataset.tab));
   }));
 
+  bindMood();
+
   /* 资料保存 */
   $("#saveProfile").addEventListener("click", async () => {
     try {
@@ -405,3 +421,66 @@ document.addEventListener("DOMContentLoaded", () => {
     catch (e) { setStatus("✕ " + e.message, true); }
   });
 });
+
+
+/* ---------------- 心情签到 ---------------- */
+function moodTintOf(e) {
+  const hit = MOODS.find((m) => m.e === e);
+  return hit ? hit.tint : "rgba(160, 170, 190, 0.3)";
+}
+
+function renderMoodPicker() {
+  $("#adminMoodPicker").innerHTML = MOODS.map((m, i) =>
+    `<button type="button" class="mood-opt${m.e === moodSel ? " on" : ""}" data-m="${m.e}" style="--tint:${m.tint}" aria-label="心情：${m.label}">${m.e}</button>`
+  ).join("");
+}
+
+function renderMoodGrid() {
+  const now = moodCur;
+  const y = now.getFullYear(), m = now.getMonth();
+  const first = new Date(y, m, 1);
+  const startWd = first.getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+  const prefix = y + "-" + String(m + 1).padStart(2, "0") + "-";
+  const wnames = ["日", "一", "二", "三", "四", "五", "六"];
+  let html = wnames.map((w) => `<span class="mood-wn">${w}</span>`).join("");
+  for (let i = 0; i < startWd; i++) html += "<span></span>";
+  for (let d = 1; d <= days; d++) {
+    const k = prefix + String(d).padStart(2, "0");
+    const stamped = MOOD[k];
+    const cls = "mood-day" + (stamped ? " stamped" : "");
+    const tint = stamped ? ` style="--tint:${moodTintOf(stamped)}"` : "";
+    html += `<button type="button" class="${cls}" data-k="${k}"${tint}>${stamped || d}</button>`;
+  }
+  $("#adminMoodGrid").innerHTML = html;
+  const count = Object.keys(MOOD).filter((k) => k.startsWith(prefix)).length;
+  $("#adminMoodMeta").textContent = y + " 年 " + (m + 1) + " 月 · 本月签到 " + count + " 天";
+}
+
+function renderMood() {
+  renderMoodPicker();
+  renderMoodGrid();
+}
+
+function bindMood() {
+  $("#adminMoodPicker").addEventListener("click", (e) => {
+    const b = e.target.closest(".mood-opt");
+    if (!b) return;
+    moodSel = b.dataset.m;
+    $$("#adminMoodPicker .mood-opt").forEach((x) => x.classList.toggle("on", x === b));
+  });
+  $("#adminMoodGrid").addEventListener("click", (e) => {
+    const b = e.target.closest(".mood-day");
+    if (!b) return;
+    const k = b.dataset.k;
+    if (MOOD[k] === moodSel) delete MOOD[k];
+    else MOOD[k] = moodSel;
+    renderMoodGrid();
+  });
+  $("#moodPrev").addEventListener("click", () => { moodCur = new Date(moodCur.getFullYear(), moodCur.getMonth() - 1, 1); renderMoodGrid(); });
+  $("#moodNext").addEventListener("click", () => { moodCur = new Date(moodCur.getFullYear(), moodCur.getMonth() + 1, 1); renderMoodGrid(); });
+  $("#saveMood").addEventListener("click", async () => {
+    try { await saveData("mood.json", MOOD, "chore: 更新心情签到（后台）"); }
+    catch (e) { setStatus("✕ " + e.message, true); }
+  });
+}

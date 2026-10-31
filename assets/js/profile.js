@@ -49,12 +49,10 @@ function zodiacOf(birthday) {
 }
 
 function loadProfile() {
-  let server = null, draft = null;
+  let server = null;
   try { server = SERVER_PROFILE; } catch (e) {}
-  try { draft = JSON.parse(localStorage.getItem(PROFILE_DRAFT_KEY) || "null"); } catch (e) {}
-  return Object.assign({}, PROFILE_DEFAULTS, server || {}, draft || {});
+  return Object.assign({}, PROFILE_DEFAULTS, server || {});
 }
-
 /* 本机草稿：编辑后先落在这里立即生效，同步到仓库成功后清除 */
 function saveDraft(p) {
   try { localStorage.setItem(PROFILE_DRAFT_KEY, JSON.stringify(p)); } catch (e) {}
@@ -177,122 +175,6 @@ function initProfilePage() {
     $("#viewZodiac").textContent = p.birthday ? zodiacOf(p.birthday) : "—";
     $("#viewJob").textContent = p.job || "—";
   }
-
-  function fillForm() {
-    const p = loadProfile();
-    tempAvatar = p.avatar || "";
-    $("#formAvatarPreview").innerHTML = profileAvatarHTML(p);
-    $("#formSiteName").value = p.siteName;
-    $("#formName").value = p.name;
-    $("#formMotto").value = p.motto;
-    $("#formBio").value = p.bio;
-    $("#formLocation").value = p.location;
-    $("#formGithub").value = p.github;
-    $("#formEmail").value = p.email;
-    $("#formQQ").value = p.qq || "";
-    $("#formWechat").value = p.wechat || "";
-    $("#formBirthday").value = p.birthday || "";
-    $("#formJob").value = p.job || "";
-    $("#formTags").value = (p.tags || []).join(", ");
-    $("#formGoal").value = p.yearGoal || 20;
-  }
-
-  function toggleEdit(editing) {
-    $("#profileView").hidden = editing;
-    $("#profileView").classList.toggle("hidden", editing);
-    $("#profileForm").hidden = !editing;
-    $("#profileForm").classList.toggle("hidden", !editing);
-    if (editing) fillForm();
-  }
-
-  $("#editBtn").addEventListener("click", () => toggleEdit(true));
-  $("#cancelEdit").addEventListener("click", () => toggleEdit(false));
-
-  $("#profileForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const p = loadProfile();
-    p.siteName = $("#formSiteName").value.trim() || "拾光小栈";
-    p.name = $("#formName").value.trim() || "拾光";
-    p.motto = $("#formMotto").value.trim();
-    p.bio = $("#formBio").value.trim();
-    p.location = $("#formLocation").value.trim();
-    p.github = $("#formGithub").value.trim().replace(/^@/, "");
-    p.email = $("#formEmail").value.trim();
-    p.qq = $("#formQQ").value.trim();
-    p.wechat = $("#formWechat").value.trim();
-    p.birthday = $("#formBirthday").value;
-    p.job = $("#formJob").value.trim();
-    p.tags = $("#formTags").value.split(/[,，、]/).map((t) => t.trim()).filter(Boolean).slice(0, 8);
-    p.yearGoal = Math.max(1, +$("#formGoal").value || 20);
-    p.avatar = tempAvatar || "";
-    saveProfile(p);
-    render();
-    applyProfileToSite(p);
-    toggleEdit(false);
-    syncAfterSave(p);
-  });
-
-  /* 保存后自动尝试同步到仓库；失败时提示如何启用永久保存 */
-  function showSyncStatus(text, sticky) {
-    const el = $("#syncStatus");
-    if (!el) return;
-    el.textContent = text;
-    el.hidden = false;
-    el.classList.toggle("ok", /✅/.test(text));
-    if (!sticky) setTimeout(() => { el.hidden = true; }, 6000);
-  }
-
-  async function syncAfterSave(p) {
-    showSyncStatus("已在本机生效，正在同步到 GitHub 仓库…", true);
-    const r = await syncProfileToRepo(p);
-    if (r.ok && r.pushed) {
-      SERVER_PROFILE = p; /* 仓库已是最新，草稿可以清掉 */
-      clearDraft();
-      showSyncStatus("✅ 已保存并同步到 GitHub 仓库（data/profile.json），线上站点稍后自动更新", false);
-    } else if (r.ok) {
-      showSyncStatus("✅ 资料已写入 data/profile.json：" + (r.message || "仓库已更新"), false);
-    } else {
-      showSyncStatus("💾 已保存在本机浏览器。要永久保存到仓库，请用 scripts/dev_server.py 启动本地站点后重新保存", true);
-    }
-  }
-
-  $("#resetProfile").addEventListener("click", () => {
-    if (!confirm("确定放弃本机未同步的修改吗？资料将回到仓库 data/profile.json 中保存的版本。")) return;
-    clearDraft();
-    tempAvatar = loadProfile().avatar || "";
-    render();
-    applyProfileToSite(loadProfile());
-    toggleEdit(false);
-    showSyncStatus("已回到仓库资料", false);
-  });
-
-  $("#avatarReset").addEventListener("click", () => {
-    tempAvatar = "";
-    $("#formAvatarPreview").innerHTML = escapeHTML(($("#formName").value.trim() || "拾").charAt(0));
-  });
-
-  $("#avatarInput").addEventListener("change", (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        /* 居中裁剪为正方形并压缩到 256px，控制本地存储体积 */
-        const S = 256;
-        const c = document.createElement("canvas");
-        c.width = S; c.height = S;
-        const cx = c.getContext("2d");
-        const side = Math.min(img.width, img.height);
-        cx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
-        tempAvatar = c.toDataURL("image/jpeg", 0.85);
-        $("#formAvatarPreview").innerHTML = `<img src="${tempAvatar}" alt="新头像预览">`;
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  });
 
   render();
 }
@@ -531,28 +413,15 @@ function loadMoods() {
 function initMood() {
   const grid = $("#moodGrid");
   if (!grid) return;
-  const picker = $("#moodPicker");
-  picker.innerHTML = MOODS.map((m, i) => `
-    <button type="button" class="mood-opt${i === 0 ? " on" : ""}" data-m="${m.e}" style="--tint:${m.tint}" aria-label="心情：${m.label}">
-      <span class="m-emoji" aria-hidden="true">${m.e}</span><span class="m-label">${m.label}</span>
-    </button>`).join("");
-  picker.addEventListener("click", (e) => {
-    const b = e.target.closest(".mood-opt");
-    if (!b) return;
-    currentMood = b.dataset.m;
-    $$(".mood-opt", picker).forEach((x) => x.classList.toggle("on", x === b));
-  });
 
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth();
-  const first = new Date(y, m, 1);
-  const days = new Date(y, m + 1, 0).getDate();
-  const offset = (first.getDay() + 6) % 7; /* 周一开头 */
-  const moods = loadMoods();
-  const key = (d) => y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-  const wnames = ["一", "二", "三", "四", "五", "六", "日"];
-
-  function render() {
+  function render(moods) {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth();
+    const first = new Date(y, m, 1);
+    const days = new Date(y, m + 1, 0).getDate();
+    const offset = (first.getDay() + 6) % 7; /* 周一开头 */
+    const key = (d) => y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+    const wnames = ["一", "二", "三", "四", "五", "六", "日"];
     let html = wnames.map((w) => `<span class="mood-wn">${w}</span>`).join("");
     for (let i = 0; i < offset; i++) html += "<span></span>";
     for (let d = 1; d <= days; d++) {
@@ -560,27 +429,20 @@ function initMood() {
       const stamped = moods[k];
       const cls = "mood-day" + (stamped ? " stamped" : "") + (d === now.getDate() ? " today" : "");
       const tint = stamped ? ` style="--tint:${moodTintOf(stamped)}"` : "";
-      html += `<button type="button" class="${cls}" data-k="${k}" title="${k}${stamped ? " · " + stamped : ""}"${tint}>${stamped || d}</button>`;
+      html += `<span class="${cls}"${tint}>${stamped || d}</span>`;
     }
     grid.innerHTML = html;
     const monthPrefix = y + "-" + String(m + 1).padStart(2, "0");
     const count = Object.keys(moods).filter((k) => k.startsWith(monthPrefix)).length;
-    $("#moodMeta").textContent = y + " 年 " + (m + 1) + " 月 · 本月签到 " + count + " 天";
+    $("#moodMeta").textContent = y + " 年 " + (m + 1) + " 月 · 本月签到 " + count + " 天（由站长在后台更新）";
   }
 
-  grid.addEventListener("click", (e) => {
-    const b = e.target.closest(".mood-day");
-    if (!b) return;
-    const k = b.dataset.k;
-    if (moods[k] === currentMood) delete moods[k];
-    else moods[k] = currentMood;
-    try { localStorage.setItem(MOOD_KEY, JSON.stringify(moods)); } catch (err) {}
-    render();
-  });
-
-  render();
+  render({});
+  fetch("data/mood.json", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((o) => { if (o && typeof o === "object") render(o); })
+    .catch(() => {});
 }
-
 
 /* ---------------- 个人主页/首页：今日天气 + 城市切换 + 三日预报（Open-Meteo） ---------------- */
 const WMO_MAP = {

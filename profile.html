@@ -61,7 +61,7 @@
       <div class="page-head-left">
         <span class="kicker">Profile</span>
         <h1>个人<span class="gradient-text">主页</span></h1>
-        <p>我的资料卡。点击「编辑资料」可以修改头像、昵称和各种信息——保存后立即生效，并同步到首页与品牌印章。</p>
+        <p>我的资料卡。所有资料在站长后台统一维护，本页面为只读展示。</p>
       </div>
     </div>
 
@@ -79,10 +79,7 @@
               <p class="profile-motto" id="viewMotto"></p>
               <div class="profile-tags" id="viewTags"></div>
             </div>
-            <button class="btn btn-primary" id="editBtn" type="button">
-              <svg viewBox="0 0 24 24" class="btn-ico"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>
-              编辑资料
-            </button>
+
           </div>
           <p class="profile-bio" id="viewBio"></p>
           <div class="profile-grid">
@@ -105,39 +102,7 @@
         </div>
       </div>
 
-      <!-- 编辑视图 -->
-      <form class="glass-card profile-card hidden" id="profileForm" novalidate>
-        <div class="form-avatar-row">
-          <div class="profile-avatar" id="formAvatarPreview">拾</div>
-          <div class="form-avatar-side">
-            <label class="btn file-label">
-              更换头像
-              <input type="file" id="avatarInput" accept="image/*" hidden>
-            </label>
-            <button type="button" class="btn" id="avatarReset">恢复默认头像</button>
-            <p class="form-hint">支持 JPG / PNG，会自动居中裁剪为正方形并压缩，随资料一起保存</p>
-          </div>
-        </div>
-        <label class="form-row"><span>站点名称</span><input id="formSiteName" maxlength="20" placeholder="显示在左上角和页脚的站名"></label>
-        <label class="form-row"><span>昵称 / ID</span><input id="formName" maxlength="20" placeholder="显示在首页和资料卡上的名字"></label>
-        <label class="form-row"><span>个性签名</span><input id="formMotto" maxlength="40" placeholder="一句话介绍自己"></label>
-        <label class="form-row"><span>个人简介</span><textarea id="formBio" rows="3" maxlength="200" placeholder="多写一点也没关系"></textarea></label>
-        <label class="form-row"><span>所在地</span><input id="formLocation" maxlength="30" placeholder="如：湖北 · 黄石"></label>
-        <label class="form-row"><span>GitHub 用户名</span><input id="formGithub" maxlength="40" placeholder="不带 @ 的用户名"></label>
-        <label class="form-row"><span>邮箱</span><input id="formEmail" maxlength="60" placeholder="you@example.com"></label>
-        <label class="form-row"><span>QQ 号</span><input id="formQQ" maxlength="20" placeholder="你的 QQ 号（可不填）"></label>
-        <label class="form-row"><span>微信号</span><input id="formWechat" maxlength="40" placeholder="你的微信号（可不填）"></label>
-        <label class="form-row"><span>生日</span><input type="date" id="formBirthday" aria-label="出生年月日"></label>
-        <label class="form-row"><span>职业</span><input id="formJob" maxlength="30" placeholder="如：后端工程师 / 学生（可不填）"></label>
-        <label class="form-row"><span>兴趣标签</span><input id="formTags" maxlength="100" placeholder="逗号分隔，如：前端, 摄影, 读书（最多 8 个）"></label>
-        <label class="form-row"><span>年度目标</span><input id="formGoal" type="number" min="1" max="365" placeholder="今年想写多少篇（默认 20）"></label>
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary">保存修改</button>
-          <button type="button" class="btn" id="cancelEdit">取消</button>
-          <button type="button" class="btn" id="resetProfile">放弃本机修改</button>
-        </div>
-        <p class="form-note">保存后先在本机生效；通过 scripts/dev_server.py 启动本地站点时会自动同步到 GitHub 仓库（data/profile.json），线上站点稍后自动更新。</p>
-        <p class="form-note sync-status" id="syncStatus" hidden></p>
+cStatus" hidden></p>
       </form>
     </div>
 
@@ -168,7 +133,7 @@
 
         <div class="glass-card me-card reveal">
           <div class="me-card-head"><span class="me-ico">🗓️</span><h3>本月心情</h3><span class="me-hint" id="moodMeta"></span></div>
-          <div class="mood-picker" id="moodPicker" role="radiogroup" aria-label="选择心情"></div>
+
           <div class="mood-grid" id="moodGrid"></div>
           <p class="form-note">点日期盖一个选中的心情，再点一次可清除</p>
         </div>
@@ -295,9 +260,9 @@
     </div>
   </footer>
 
-  <script src="assets/js/posts.js?v=2.0.0"></script>
-  <script src="assets/js/profile.js?v=2.0.0"></script>
-  <script src="assets/js/main.js?v=2.2.6"></script>
+  <script src="assets/js/posts.js?v=2.6.0"></script>
+  <script src="assets/js/profile.js?v=2.6.0"></script>
+  <script src="assets/js/main.js?v=2.6.0"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>
 </html>

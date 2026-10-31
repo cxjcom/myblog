@@ -9,7 +9,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.6.0">
   <script>
     (function () {
       try {
@@ -65,22 +65,7 @@
         <p>收藏生活的快门瞬间。点击照片可以放大观看。</p>
       </section>
 
-      <section class="section">
-        <div class="glass-card album-add">
-          <div class="album-add-row">
-            <label class="btn btn-primary album-upload-btn">
-              ⬆ 上传图片
-              <input type="file" id="albumFile" accept="image/*" multiple hidden>
-            </label>
-            <form id="albumUrlForm" class="album-url-form">
-              <input type="url" id="albumUrl" placeholder="粘贴图片链接 https://…" aria-label="图片链接">
-              <input type="text" id="albumTitle" placeholder="标题（可选）" aria-label="照片标题">
-              <button class="btn" type="submit">添加</button>
-            </form>
-          </div>
-          <p class="form-note">照片增删都保存在当前浏览器的 IndexedDB 里（容量大，可存几百张），换设备或清缓存后不会保留；删除内置照片后可点右上角「恢复默认内容」找回。想让所有访客都看到：把图片放进 <code>assets/img/gallery/</code> 目录，再到 <code>assets/js/album.js</code> 的 <code>ALBUM_PHOTOS</code> 里加一行即可。</p>
-        </div>
-      </section>
+
 
       <section class="section">
         <div class="section-head">
@@ -88,7 +73,7 @@
             <span class="kicker">Photos</span>
             <h2>照片墙 <span id="albumCount" class="count-hint"></span></h2>
           </div>
-          <button class="btn" id="albumRestore" hidden>恢复默认内容</button>
+          
         </div>
         <div class="album-grid" id="albumGrid"></div>
         <div class="empty-state" id="albumEmpty" hidden>
@@ -125,10 +110,10 @@
     </div>
   </footer>
 
-  <script src="assets/js/posts.js?v=2.0.0"></script>
-  <script src="assets/js/profile.js?v=2.0.0"></script>
-  <script src="assets/js/album.js?v=2.0.1"></script>
-  <script src="assets/js/main.js?v=2.2.6"></script>
+  <script src="assets/js/posts.js?v=2.6.0"></script>
+  <script src="assets/js/profile.js?v=2.6.0"></script>
+  <script src="assets/js/album.js?v=2.6.0"></script>
+  <script src="assets/js/main.js?v=2.6.0"></script>
   <script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})}</script>
 </body>
 </html>

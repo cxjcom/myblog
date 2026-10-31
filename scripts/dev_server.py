@@ -52,8 +52,10 @@ class BlogHandler(SimpleHTTPRequestHandler):
             self._save_list("music.json", "音乐")
         elif path == "/api/upload":
             self._save_upload()
+        elif path == "/api/mood":
+            self._save_mood()
         else:
-            self.send_error(404, "只有 /api/profile /api/posts /api/album /api/music /api/upload 支持 POST")
+            self.send_error(404, "只有 /api/profile /api/posts /api/album /api/music /api/upload /api/mood 支持 POST")
             return
 
     def _read_json_body(self, err_label):
@@ -189,6 +191,32 @@ class BlogHandler(SimpleHTTPRequestHandler):
             "ok": True, "pushed": pushed, "message": message,
             "path": "assets/img/gallery/" + name,
         })
+
+    def _save_mood(self):
+        """后台心情签到：保存 data/mood.json（日期→表情 的对象）。"""
+        body = self._read_json_body("心情数据")
+        if body is None:
+            return
+        if not isinstance(body, dict):
+            self._reply(400, {"ok": False, "message": "心情数据必须是 JSON 对象"})
+            return
+
+        new_text = json.dumps(body, ensure_ascii=False, indent=2) + "\n"
+        target = ROOT / "data" / "mood.json"
+        if target.exists() and target.read_text(encoding="utf-8") == new_text:
+            self._reply(200, {"ok": True, "pushed": False, "message": "内容没有变化，跳过提交"})
+            return
+
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with open(target, "w", encoding="utf-8", newline="\n") as f:
+                f.write(new_text)
+        except OSError as e:
+            self._reply(500, {"ok": False, "message": "写入 data/mood.json 失败：%s" % e})
+            return
+
+        pushed, message = self._git_sync("data/mood.json", "chore: 更新心情签到（data/mood.json）")
+        self._reply(200, {"ok": True, "pushed": pushed, "message": message})
 
     def _git_sync(self, rel_path, message):
         def run(*args):
