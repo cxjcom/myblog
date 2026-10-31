@@ -10,3 +10,4 @@ __pycache__/
 scripts/mail_config.json
 .worker-creds.txt
 .wrangler/
+dist/
