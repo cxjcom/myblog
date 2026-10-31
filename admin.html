@@ -8,7 +8,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.6.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.7.0">
   <script>
     (function () {
       try {
@@ -31,120 +31,172 @@
   <main id="main" class="container">
     <!-- 登录门 -->
     <section id="adminLogin" class="glass-card admin-login">
-      <h1>🔐 站主登录</h1>
-      <p class="admin-hint">输入管理密码进入后台，可修改前台展示的资料、文章、相册与音乐。</p>
-      <input type="password" id="adminPwd" placeholder="管理密码" autocomplete="current-password">
-      <button class="btn btn-primary" id="adminLoginBtn">进入后台</button>
-      <p class="admin-hint admin-msg" id="adminLoginMsg"></p>
+      <div class="admin-login-brand">⚡</div>
+      <h1>拾光小栈 · 站主验证</h1>
+      <p class="admin-hint">验证码将发送到你的 QQ 邮箱，5 分钟内有效。</p>
+
+      <div class="admin-code-row">
+        <input type="email" id="adminEmail" placeholder="管理员邮箱" value="717583885@qq.com">
+        <button class="btn" id="sendCodeBtn">发送验证码</button>
+      </div>
+      <input type="text" id="adminCode" placeholder="6 位邮箱验证码" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      <button class="btn btn-primary" id="verifyBtn">验证并进入后台</button>
+
       <details class="admin-pat">
-        <summary>在线上站点（GitHub Pages）修改？展开设置 GitHub Token</summary>
-        <p class="admin-hint">在本地 127.0.0.1:8080 修改无需 Token（自动提交推送）；在 cxjcom.github.io 上修改需要具备本仓库写入权限的 Personal Access Token，只在本次会话内使用。</p>
+        <summary>备用方式：管理密码登录</summary>
+        <input type="password" id="adminPwd" placeholder="管理密码" autocomplete="current-password">
+        <button class="btn" id="pwdLoginBtn">密码进入</button>
+      </details>
+
+      <details class="admin-pat">
+        <summary>线上站点（GitHub Pages）修改？设置 GitHub Token</summary>
+        <p class="admin-hint">本地修改无需 Token；线上修改需要本仓库写入权限的 PAT，仅本次会话使用。</p>
         <input type="password" id="adminPat" placeholder="GitHub Personal Access Token（可选）" autocomplete="off">
       </details>
+
+      <p class="admin-hint admin-msg" id="adminLoginMsg"></p>
+      <p class="admin-hint">首次使用邮箱验证码：在 QQ 邮箱设置里开启 SMTP 并获取授权码，填入 scripts/mail_config.json（该文件不会被提交）。</p>
     </section>
 
     <!-- 控制台 -->
     <section id="adminConsole" hidden>
-      <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="profile">个人资料</button>
-        <button class="admin-tab" data-tab="posts">文章</button>
-        <button class="admin-tab" data-tab="album">相册</button>
-        <button class="admin-tab" data-tab="music">音乐</button>
-        <button class="admin-tab" data-tab="mood">心情</button>
-        <button class="btn" id="adminLogout" style="margin-left:auto">退出登录</button>
-      </div>
-      <p class="admin-status" id="adminStatus"></p>
-
-      <!-- 个人资料 -->
-      <div class="admin-pane" id="pane-profile">
-        <div class="glass-card admin-card">
-          <h2>个人资料 <span class="admin-file">data/profile.json</span></h2>
-          <div class="admin-grid" id="profileFields"></div>
-          <button class="btn btn-primary" id="saveProfile">保存资料</button>
-        </div>
-      </div>
-
-      <!-- 文章 -->
-      <div class="admin-pane" id="pane-posts" hidden>
-        <div class="glass-card admin-card">
-          <h2>文章管理 <span class="admin-file">data/posts.json</span></h2>
-          <p class="admin-hint">这里管理的是「自定义文章」（会与 posts/ 目录里的内置示例文章合并展示）。新建后填好正文保存即可发布。</p>
-          <div class="admin-list" id="postList"></div>
-          <div class="admin-row">
-            <button class="btn" id="postNew">＋ 新建文章</button>
-            <button class="btn btn-primary" id="savePosts">保存全部文章</button>
+      <div class="admin-shell">
+        <aside class="admin-side glass-card">
+          <div class="admin-side-brand">⚡<b>拾光后台</b></div>
+          <nav class="admin-nav">
+            <button class="admin-navbtn active" data-tab="overview">📊 概览</button>
+            <button class="admin-navbtn" data-tab="profile">👤 个人资料</button>
+            <button class="admin-navbtn" data-tab="posts">📝 文章</button>
+            <button class="admin-navbtn" data-tab="album">🖼 相册</button>
+            <button class="admin-navbtn" data-tab="music">🎵 音乐</button>
+            <button class="admin-navbtn" data-tab="mood">🌈 心情</button>
+          </nav>
+          <div class="admin-side-foot">
+            <span class="chip" id="adminMode">本地模式</span>
+            <button class="btn" id="adminLogout">退出登录</button>
           </div>
-          <div class="admin-editor" id="postEditor" hidden>
-            <input id="peTitle" placeholder="标题">
-            <div class="admin-row">
-              <input id="peSlug" placeholder="slug（英文标识，唯一）" style="flex:1">
-              <input id="peDate" type="date" style="flex:none">
+        </aside>
+
+        <div class="admin-body">
+          <p class="admin-status" id="adminStatus"></p>
+
+          <!-- 概览 -->
+          <div class="admin-pane" id="pane-overview">
+            <div class="admin-stats">
+              <div class="glass-card admin-stat"><b id="ovPosts">0</b><span>篇文章</span></div>
+              <div class="glass-card admin-stat"><b id="ovPhotos">0</b><span>张照片</span></div>
+              <div class="glass-card admin-stat"><b id="ovMusic">0</b><span>首歌曲</span></div>
+              <div class="glass-card admin-stat"><b id="ovMood">0</b><span>天心情签到</span></div>
             </div>
-            <input id="peTags" placeholder="标签，逗号分隔">
-            <textarea id="peSummary" rows="2" placeholder="摘要（列表卡片上显示）"></textarea>
-            <label class="admin-check"><input type="checkbox" id="peFeatured"> 上首页精选</label>
-            <textarea id="peBody" rows="14" placeholder="正文（HTML；写法参考 posts/_template.html）"></textarea>
-            <div class="admin-row">
-              <button class="btn btn-primary" id="peSave">保存此文章（先存草稿）</button>
-              <button class="btn admin-danger" id="peDelete">删除此文章</button>
-              <button class="btn" id="peCancel">收起</button>
+            <div class="glass-card admin-card">
+              <h2>快捷入口</h2>
+              <div class="admin-quick">
+                <button class="btn" data-go="profile">✏️ 改资料</button>
+                <button class="btn" data-go="posts">📝 写文章</button>
+                <button class="btn" data-go="album">🖼 传照片</button>
+                <button class="btn" data-go="music">🎵 管理歌单</button>
+                <button class="btn" data-go="mood">🌈 打心情</button>
+                <a class="btn" href="index.html" target="_blank">🌐 看前台效果</a>
+              </div>
+            </div>
+            <div class="glass-card admin-card">
+              <h2>最新文章</h2>
+              <ol class="admin-ovlist" id="ovRecent"></ol>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- 相册 -->
-      <div class="admin-pane" id="pane-album" hidden>
-        <div class="glass-card admin-card">
-          <h2>相册管理 <span class="admin-file">data/album.json</span></h2>
-          <div class="admin-list" id="albumList"></div>
-          <div class="admin-row admin-add">
-            <input id="alTitle" placeholder="照片标题" style="flex:1">
-            <input id="alDate" type="date" style="flex:none">
-          </div>
-          <div class="admin-row admin-add">
-            <input id="alUrl" placeholder="图片链接（或用右侧上传本地图片）" style="flex:1">
-            <input type="file" id="alFile" accept="image/*" style="flex:none">
-            <button class="btn" id="alAdd">＋ 添加照片</button>
-          </div>
-          <p class="admin-hint">上传的图片会存入仓库 assets/img/gallery/ 并自动推送。</p>
-          <button class="btn btn-primary" id="saveAlbum">保存相册</button>
-        </div>
-      </div>
-
-      <!-- 心情 -->
-      <div class="admin-pane" id="pane-mood" hidden>
-        <div class="glass-card admin-card">
-          <h2>心情签到 <span class="admin-file">data/mood.json</span></h2>
-          <p class="admin-hint">先在下方选一个表情，再点月历里的日期打上/取消心情。改完点保存。</p>
-          <div class="mood-picker-row" id="adminMoodPicker"></div>
-          <div class="admin-mood-wrap">
-            <div class="admin-mood-head">
-              <button class="btn" id="moodPrev">‹ 上月</button>
-              <b id="adminMoodMeta"></b>
-              <button class="btn" id="moodNext">下月 ›</button>
+          <!-- 个人资料 -->
+          <div class="admin-pane" id="pane-profile" hidden>
+            <div class="glass-card admin-card">
+              <h2>个人资料 <span class="admin-file">data/profile.json</span></h2>
+              <div class="admin-grid" id="profileFields"></div>
+              <button class="btn btn-primary" id="saveProfile">保存资料</button>
             </div>
-            <div class="mood-grid" id="adminMoodGrid"></div>
           </div>
-          <button class="btn btn-primary" id="saveMood">保存心情</button>
-        </div>
-      </div>
 
-      <!-- 音乐 -->
-      <div class="admin-pane" id="pane-music" hidden>
-        <div class="glass-card admin-card">
-          <h2>音乐管理 <span class="admin-file">data/music.json</span></h2>
-          <div class="admin-list" id="musicAdminList"></div>
-          <div class="admin-row">
-            <button class="btn" id="musicAdd">＋ 新增歌曲</button>
-            <button class="btn btn-primary" id="saveMusic">保存歌单</button>
+          <!-- 文章 -->
+          <div class="admin-pane" id="pane-posts" hidden>
+            <div class="glass-card admin-card">
+              <h2>文章管理 <span class="admin-file">data/posts.json</span></h2>
+              <p class="admin-hint">这里管理「自定义文章」（与 posts/ 目录的内置示例文章合并展示）。</p>
+              <div class="admin-list" id="postList"></div>
+              <div class="admin-row">
+                <button class="btn" id="postNew">＋ 新建文章</button>
+                <button class="btn btn-primary" id="savePosts">保存全部文章</button>
+              </div>
+              <div class="admin-editor" id="postEditor" hidden>
+                <input id="peTitle" placeholder="标题">
+                <div class="admin-row">
+                  <input id="peSlug" placeholder="slug（英文标识，唯一）" style="flex:1">
+                  <input id="peDate" type="date" style="flex:none">
+                </div>
+                <input id="peTags" placeholder="标签，逗号分隔">
+                <textarea id="peSummary" rows="2" placeholder="摘要（列表卡片上显示）"></textarea>
+                <label class="admin-check"><input type="checkbox" id="peFeatured"> 上首页精选</label>
+                <textarea id="peBody" rows="14" placeholder="正文（HTML；写法参考 posts/_template.html）"></textarea>
+                <div class="admin-row">
+                  <button class="btn btn-primary" id="peSave">保存此文章（先存草稿）</button>
+                  <button class="btn admin-danger" id="peDelete">删除此文章</button>
+                  <button class="btn" id="peCancel">收起</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 相册 -->
+          <div class="admin-pane" id="pane-album" hidden>
+            <div class="glass-card admin-card">
+              <h2>相册管理 <span class="admin-file">data/album.json</span></h2>
+              <div class="admin-list" id="albumList"></div>
+              <div class="admin-row admin-add">
+                <input id="alTitle" placeholder="照片标题" style="flex:1">
+                <input id="alDate" type="date" style="flex:none">
+              </div>
+              <div class="admin-row admin-add">
+                <input id="alUrl" placeholder="图片链接（或用右侧上传本地图片）" style="flex:1">
+                <input type="file" id="alFile" accept="image/*" style="flex:none">
+                <button class="btn" id="alAdd">＋ 添加照片</button>
+              </div>
+              <p class="admin-hint">上传的图片会存入仓库 assets/img/gallery/ 并自动推送。</p>
+              <button class="btn btn-primary" id="saveAlbum">保存相册</button>
+            </div>
+          </div>
+
+          <!-- 音乐 -->
+          <div class="admin-pane" id="pane-music" hidden>
+            <div class="glass-card admin-card">
+              <h2>音乐管理 <span class="admin-file">data/music.json</span></h2>
+              <div class="admin-list" id="musicAdminList"></div>
+              <div class="admin-row">
+                <button class="btn" id="musicAdd">＋ 新增歌曲</button>
+                <button class="btn btn-primary" id="saveMusic">保存歌单</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 心情 -->
+          <div class="admin-pane" id="pane-mood" hidden>
+            <div class="glass-card admin-card">
+              <h2>心情签到 <span class="admin-file">data/mood.json</span></h2>
+              <p class="admin-hint">先选一个表情，再点月历日期打上/取消心情。改完点保存。</p>
+              <div class="mood-picker-row" id="adminMoodPicker"></div>
+              <div class="admin-mood-wrap">
+                <div class="admin-mood-head">
+                  <button class="btn" id="moodPrev">‹ 上月</button>
+                  <b id="adminMoodMeta"></b>
+                  <button class="btn" id="moodNext">下月 ›</button>
+                </div>
+                <div class="mood-grid" id="adminMoodGrid"></div>
+              </div>
+              <button class="btn btn-primary" id="saveMood">保存心情</button>
+            </div>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <script src="assets/js/music.js?v=2.6.0"></script>
-  <script src="assets/js/admin.js?v=2.4.0"></script>
+  <script src="assets/js/music.js?v=2.7.0"></script>
+  <script src="assets/js/admin.js?v=2.7.0"></script>
 </body>
 </html>

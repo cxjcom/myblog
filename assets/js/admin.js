@@ -107,24 +107,92 @@ async function uploadImage(name, b64) {
 }
 
 /* ---------------- 登录 ---------------- */
-async function tryLogin() {
+let codeCooldown = null;
+
+function loginMsg(t, err) {
+  const el = $("#adminLoginMsg");
+  el.textContent = t || "";
+  el.style.color = err ? "#ff6b6b" : "var(--accent)";
+}
+
+async function sendCode() {
+  const email = $("#adminEmail").value.trim().toLowerCase();
+  if (!email) { loginMsg("请先填管理员邮箱", true); return; }
+  const btn = $("#sendCodeBtn");
+  try {
+    btn.disabled = true;
+    loginMsg("发送中…");
+    const r = await fetch("/api/sendcode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.message || "发送失败");
+    loginMsg("✓ 验证码已发送，请查收邮箱（5 分钟内有效）");
+    let left = 60;
+    btn.textContent = left + "s 后重发";
+    codeCooldown = setInterval(() => {
+      left--;
+      btn.textContent = left + "s 后重发";
+      if (left <= 0) { clearInterval(codeCooldown); codeCooldown = null; btn.disabled = false; btn.textContent = "发送验证码"; }
+    }, 1000);
+  } catch (e) {
+    btn.disabled = false;
+    loginMsg("✕ " + e.message, true);
+  }
+}
+
+async function verifyCode() {
+  const email = $("#adminEmail").value.trim().toLowerCase();
+  const code = $("#adminCode").value.trim();
+  if (!code) { loginMsg("请输入验证码", true); return; }
+  try {
+    const r = await fetch("/api/verifycode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.message || "验证失败");
+    sessionStorage.setItem("adminOk", "1");
+    PAT = $("#adminPat").value.trim();
+    if (PAT) sessionStorage.setItem("adminPat", PAT);
+    enterConsole();
+  } catch (e) {
+    loginMsg("✕ " + e.message, true);
+  }
+}
+
+async function pwdLogin() {
   const pwd = $("#adminPwd").value;
-  const msg = $("#adminLoginMsg");
-  if (!pwd) { msg.textContent = "请输入管理密码"; return; }
+  if (!pwd) { loginMsg("请输入管理密码", true); return; }
   if ((await sha256hex(pwd)) === ADMIN_HASH) {
     sessionStorage.setItem("adminOk", "1");
     PAT = $("#adminPat").value.trim();
     if (PAT) sessionStorage.setItem("adminPat", PAT);
     enterConsole();
   } else {
-    msg.textContent = "密码不对哦，再想想";
+    loginMsg("密码不对哦", true);
   }
 }
 
 function enterConsole() {
   $("#adminLogin").hidden = true;
   $("#adminConsole").hidden = false;
+  $("#adminMode").textContent = isLocal() ? "本地模式 · 保存即推送" : "线上模式 · 需 GitHub Token";
   loadAll();
+}
+
+function renderOverview() {
+  $("#ovPosts").textContent = POSTS.length;
+  $("#ovPhotos").textContent = ALBUM.length;
+  $("#ovMusic").textContent = MUSIC.length;
+  $("#ovMood").textContent = Object.keys(MOOD).length;
+  const recent = [...POSTS].sort((a, b) => String(b.date || "").localeCompare(String(a.date || ""))).slice(0, 5);
+  $("#ovRecent").innerHTML = recent.length
+    ? recent.map((p) => `<li><span>${esc(p.title || "未命名")}</span><time class="admin-file">${esc(p.date || "")}</time></li>`).join("")
+    : '<li class="admin-hint">还没有文章，去「文章」页发布第一篇。</li>';
 }
 
 /* ---------------- 数据加载 ---------------- */
@@ -145,6 +213,7 @@ async function loadAll() {
   MOOD = mo && typeof mo === "object" ? mo : {};
   renderMood();
   renderProfile();
+  renderOverview();
   renderPosts();
   renderAlbum();
   renderMusic();
@@ -285,17 +354,22 @@ function collectRows(boxSel, target) {
 document.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem("adminOk") === "1") enterConsole();
 
-  $("#adminLoginBtn").addEventListener("click", tryLogin);
-  $("#adminPwd").addEventListener("keydown", (e) => { if (e.key === "Enter") tryLogin(); });
+  $("#sendCodeBtn").addEventListener("click", sendCode);
+  $("#verifyBtn").addEventListener("click", verifyCode);
+  $("#adminCode").addEventListener("keydown", (e) => { if (e.key === "Enter") verifyCode(); });
+  $("#pwdLoginBtn").addEventListener("click", pwdLogin);
+  $("#adminPwd").addEventListener("keydown", (e) => { if (e.key === "Enter") pwdLogin(); });
   $("#adminLogout").addEventListener("click", () => {
     sessionStorage.removeItem("adminOk");
     location.reload();
   });
 
-  $$(".admin-tab").forEach((t) => t.addEventListener("click", () => {
-    $$(".admin-tab").forEach((x) => x.classList.toggle("active", x === t));
-    $$(".admin-pane").forEach((p) => (p.hidden = p.id !== "pane-" + t.dataset.tab));
-  }));
+  function switchTab(name) {
+    $$(".admin-navbtn").forEach((x) => x.classList.toggle("active", x.dataset.tab === name));
+    $$(".admin-pane").forEach((p) => (p.hidden = p.id !== "pane-" + name));
+  }
+  $$(".admin-navbtn").forEach((t) => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+  $$(".admin-quick [data-go]").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.go)));
 
   bindMood();
 

@@ -3998,3 +3998,106 @@ button.chip:hover {
 @media (prefers-reduced-motion: reduce) {
   .np-disc, .np-disc-core, .np-notes span { animation: none; }
 }
+
+
+/* ---------- 后台 v2：仪表盘布局 ---------- */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-top: 24px;
+}
+.admin-side {
+  position: sticky;
+  top: 74px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.admin-side-brand {
+  font-size: 17px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-nav { display: flex; flex-direction: column; gap: 4px; }
+.admin-navbtn {
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.admin-navbtn:hover { background: var(--bg-soft); color: var(--text); }
+.admin-navbtn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--accent-bright);
+}
+.admin-side-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.admin-side-foot .chip { text-align: center; pointer-events: none; }
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.admin-stat {
+  padding: 20px 18px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.admin-stat:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg), var(--glow); }
+.admin-stat b {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 32px;
+  color: var(--accent-bright);
+  text-shadow: 0 0 16px rgba(23, 247, 0, 0.35);
+}
+.admin-stat span { font-size: 13px; color: var(--text-soft); }
+.admin-quick { display: flex; gap: 10px; flex-wrap: wrap; }
+.admin-ovlist { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.admin-ovlist li { display: flex; justify-content: space-between; gap: 12px; }
+
+/* 登录页（邮箱验证码） */
+.admin-login { max-width: 470px; margin: 48px auto; padding: 34px 34px 24px; gap: 13px; }
+.admin-login-brand {
+  font-size: 40px;
+  width: 76px; height: 76px;
+  margin: 0 auto;
+  border-radius: 22px;
+  background: var(--gradient);
+  color: #04150a;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 30px -6px rgba(23, 247, 0, 0.55);
+}
+.admin-login h1 { margin: 6px 0 0; font-size: 22px; text-align: center; }
+.admin-code-row { display: flex; gap: 8px; }
+.admin-code-row input { flex: 1; min-width: 0; }
+.admin-login .btn { justify-content: center; }
+.admin-code-row .btn { white-space: nowrap; min-width: 128px; }
+
+@media (max-width: 880px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-side { position: static; }
+  .admin-nav { flex-direction: row; flex-wrap: wrap; }
+  .admin-navbtn { padding: 8px 12px; }
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+}

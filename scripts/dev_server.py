@@ -11,6 +11,10 @@
 推送到 GitHub 后，GitHub Pages 会自动重新部署，所有设备即可看到最新资料。
 """
 import base64
+import random
+import smtplib
+import time
+from email.mime.text import MIMEText
 import json
 import os
 import re
@@ -54,8 +58,12 @@ class BlogHandler(SimpleHTTPRequestHandler):
             self._save_upload()
         elif path == "/api/mood":
             self._save_mood()
+        elif path == "/api/sendcode":
+            self._send_code()
+        elif path == "/api/verifycode":
+            self._verify_code()
         else:
-            self.send_error(404, "只有 /api/profile /api/posts /api/album /api/music /api/upload /api/mood 支持 POST")
+            self.send_error(404, "只有 /api/profile /api/posts /api/album /api/music /api/upload /api/mood /api/sendcode /api/verifycode 支持 POST")
             return
 
     def _read_json_body(self, err_label):
@@ -217,6 +225,65 @@ class BlogHandler(SimpleHTTPRequestHandler):
 
         pushed, message = self._git_sync("data/mood.json", "chore: 更新心情签到（data/mood.json）")
         self._reply(200, {"ok": True, "pushed": pushed, "message": message})
+
+    MAIL_CONFIG = ROOT / "scripts" / "mail_config.json"
+    np_codes = {}
+
+    def _mail_cfg(self):
+        try:
+            cfg = json.loads(MAIL_CONFIG.read_text(encoding="utf-8"))
+            auth = str(cfg.get("authCode") or "")
+            if cfg.get("sender") and auth and "授权码" not in auth and "填" not in auth:
+                return cfg
+        except Exception:
+            pass
+        return None
+
+    def _send_code(self):
+        body = self._read_json_body("邮箱")
+        if body is None:
+            return
+        email = str(body.get("email") or "").strip().lower()
+        cfg = self._mail_cfg()
+        if not cfg:
+            self._reply(500, {"ok": False, "message": "邮箱发送尚未配置：打开 scripts/mail_config.json，按文件内说明填入 QQ 邮箱 SMTP 授权码后重启本服务器"})
+            return
+        allow = [e.lower() for e in (cfg.get("adminEmails") or [])]
+        if email not in allow:
+            self._reply(403, {"ok": False, "message": "该邮箱不在管理员名单里（scripts/mail_config.json 的 adminEmails）"})
+            return
+        now = time.time()
+        prev = np_codes.get(email)
+        if prev and now - prev.get("sentAt", 0) < 60:
+            self._reply(429, {"ok": False, "message": "发送太频繁，请 1 分钟后再试"})
+            return
+        code = "%06d" % random.randint(0, 999999)
+        try:
+            msg = MIMEText("你的拾光小栈后台登录验证码是：%s\n\n5 分钟内有效。若非本人操作请忽略本邮件。" % code, "plain", "utf-8")
+            msg["Subject"] = Header("拾光小栈后台登录验证码", "utf-8")
+            msg["From"] = cfg["sender"]
+            msg["To"] = email
+            with smtplib.SMTP_SSL(cfg.get("host", "smtp.qq.com"), int(cfg.get("port", 465)), timeout=15) as smtp:
+                smtp.login(cfg["sender"], cfg["authCode"])
+                smtp.send_message(msg)
+        except Exception as e:
+            self._reply(500, {"ok": False, "message": "邮件发送失败：%s" % e})
+            return
+        np_codes[email] = {"code": code, "exp": now + 300, "sentAt": now}
+        self._reply(200, {"ok": True, "message": "验证码已发送到 " + email})
+
+    def _verify_code(self):
+        body = self._read_json_body("验证码")
+        if body is None:
+            return
+        email = str(body.get("email") or "").strip().lower()
+        code = str(body.get("code") or "").strip()
+        rec = np_codes.get(email)
+        if not rec or time.time() > rec["exp"] or rec["code"] != code:
+            self._reply(403, {"ok": False, "message": "验证码错误或已过期"})
+            return
+        del np_codes[email]
+        self._reply(200, {"ok": True, "message": "验证通过"})
 
     def _git_sync(self, rel_path, message):
         def run(*args):

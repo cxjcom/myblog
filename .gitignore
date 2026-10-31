@@ -6,3 +6,4 @@ node_modules/
 .idea/
 __pycache__/
 *.pyc
+scripts/mail_config.json
