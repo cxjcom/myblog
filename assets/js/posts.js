@@ -103,10 +103,13 @@ function customPostUrl(slug) {
 /* 把仓库文章与本机覆盖合并进 window.POSTS；列表页等待 POSTS_READY 后再渲染 */
 window.POSTS_READY = (async () => {
   let repoPosts = [];
-  try {
-    const r = await fetch(POSTS_ROOT + "data/posts.json?v=" + Date.now(), { cache: "no-store" });
-    if (r.ok) repoPosts = await r.json();
-  } catch (e) {}
+  try { repoPosts = (await cfGet("posts")) || []; } catch (e) {}
+  if (!repoPosts.length) {
+    try {
+      const r = await fetch(POSTS_ROOT + "data/posts.json?v=" + Date.now(), { cache: "no-store" });
+      if (r.ok) repoPosts = await r.json();
+    } catch (e) {}
+  }
   /* 防御：缺 slug/title/date 的脏数据直接丢弃，避免排序/渲染报错 */
   window.REPO_POSTS = (Array.isArray(repoPosts) ? repoPosts : []).filter(
     (p) => p && p.slug && p.title && p.date

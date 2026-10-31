@@ -76,6 +76,11 @@ function migrateOldProfile() {
 
 /* 启动时拉取仓库资料（网络优先，保证同步后立即可见） */
 async function loadServerProfile() {
+  /* 云端（Worker）优先，回退仓库 data/profile.json */
+  try {
+    const cloud = await cfGet("profile");
+    if (cloud && typeof cloud === "object") { SERVER_PROFILE = cloud; return SERVER_PROFILE; }
+  } catch (e) {}
   try {
     const r = await fetch(SITE_BASE + "data/profile.json?v=" + Date.now(), { cache: "no-store" });
     if (r.ok) SERVER_PROFILE = await r.json();
@@ -438,10 +443,17 @@ function initMood() {
   }
 
   render({});
-  fetch("data/mood.json", { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((o) => { if (o && typeof o === "object") render(o); })
-    .catch(() => {});
+  (async () => {
+    let o = null;
+    try { o = await cfGet("mood"); } catch (e) {}
+    if (!o || typeof o !== "object") {
+      try {
+        const r = await fetch("data/mood.json", { cache: "no-store" });
+        if (r.ok) o = await r.json();
+      } catch (e) {}
+    }
+    if (o && typeof o === "object") render(o);
+  })();
 }
 
 /* ---------------- 个人主页/首页：今日天气 + 城市切换 + 三日预报（Open-Meteo） ---------------- */

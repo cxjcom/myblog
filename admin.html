@@ -8,7 +8,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.7.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.8.0">
   <script>
     (function () {
       try {
@@ -41,6 +41,12 @@
       </div>
       <input type="text" id="adminCode" placeholder="6 位邮箱验证码" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
       <button class="btn btn-primary" id="verifyBtn">验证并进入后台</button>
+
+      <details class="admin-pat">
+        <summary>Cloudflare 云端登录（部署 Worker 后推荐，任何设备可用）</summary>
+        <input type="password" id="cloudPass" placeholder="云端后台密码（部署时设置的 ADMIN_PASS）" autocomplete="current-password">
+        <button class="btn" id="cloudLoginBtn">云端登录</button>
+      </details>
 
       <details class="admin-pat">
         <summary>备用方式：管理密码登录</summary>
@@ -196,7 +202,8 @@
     </section>
   </main>
 
-  <script src="assets/js/music.js?v=2.7.0"></script>
-  <script src="assets/js/admin.js?v=2.7.0"></script>
+  <script src="assets/js/cloud-config.js?v=2.8.0"></script>
+  <script src="assets/js/music.js?v=2.8.0"></script>
+  <script src="assets/js/admin.js?v=2.8.0"></script>
 </body>
 </html>

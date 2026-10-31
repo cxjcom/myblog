@@ -61,6 +61,13 @@ async function ghApi(path, opts) {
 /* 保存数据文件：本地走 /api/*，线上走 GitHub Contents API */
 async function saveData(file, obj, msg) {
   const content = JSON.stringify(obj, null, 2) + "\n";
+  const cfToken = sessionStorage.getItem("cfToken");
+  if (window.CLOUD_API && cfToken) {
+    setStatus("保存到云端…");
+    await cfSave(file.replace(".json", ""), obj, cfToken);
+    setStatus("✓ 已保存，前台立即生效");
+    return;
+  }
   if (isLocal()) {
     const r = await fetch("/api/" + file.replace(".json", ""), {
       method: "POST",
@@ -180,7 +187,9 @@ async function pwdLogin() {
 function enterConsole() {
   $("#adminLogin").hidden = true;
   $("#adminConsole").hidden = false;
-  $("#adminMode").textContent = isLocal() ? "本地模式 · 保存即推送" : "线上模式 · 需 GitHub Token";
+  const mode = window.CLOUD_API ? "云端模式 · 保存全站秒生效"
+    : isLocal() ? "本地模式 · 保存即推送" : "线上模式 · 需 GitHub Token";
+  $("#adminMode").textContent = mode;
   loadAll();
 }
 
@@ -200,11 +209,11 @@ async function loadAll() {
   setStatus("加载中…");
   const bust = "?v=" + Date.now();
   const [pf, po, al, mu, mo] = await Promise.all([
-    fetch("data/profile.json" + bust).then((r) => r.json()).catch(() => ({})),
-    fetch("data/posts.json" + bust).then((r) => r.json()).catch(() => []),
-    fetch("data/album.json" + bust).then((r) => r.json()).catch(() => []),
-    fetch("data/music.json" + bust).then((r) => r.json()).catch(() => []),
-    fetch("data/mood.json" + bust).then((r) => r.json()).catch(() => ({})),
+    cfGet("profile").then((v) => v || fetch("data/profile.json" + bust).then((r) => r.json()).catch(() => ({}))),
+    cfGet("posts").then((v) => v || fetch("data/posts.json" + bust).then((r) => r.json()).catch(() => [])),
+    cfGet("album").then((v) => v || fetch("data/album.json" + bust).then((r) => r.json()).catch(() => [])),
+    cfGet("music").then((v) => v || fetch("data/music.json" + bust).then((r) => r.json()).catch(() => [])),
+    cfGet("mood").then((v) => v || fetch("data/mood.json" + bust).then((r) => r.json()).catch(() => ({}))),
   ]);
   PROFILE = pf && typeof pf === "object" ? pf : {};
   POSTS = Array.isArray(po) ? po : [];
@@ -359,6 +368,17 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#adminCode").addEventListener("keydown", (e) => { if (e.key === "Enter") verifyCode(); });
   $("#pwdLoginBtn").addEventListener("click", pwdLogin);
   $("#adminPwd").addEventListener("keydown", (e) => { if (e.key === "Enter") pwdLogin(); });
+  $("#cloudLoginBtn").addEventListener("click", async () => {
+    try {
+      const token = await cfLogin($("#cloudPass").value);
+      sessionStorage.setItem("cfToken", token);
+      sessionStorage.setItem("adminOk", "1");
+      PAT = $("#adminPat").value.trim();
+      if (PAT) sessionStorage.setItem("adminPat", PAT);
+      enterConsole();
+    } catch (e) { loginMsg("✕ " + e.message, true); }
+  });
+  $("#cloudPass").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#cloudLoginBtn").click(); });
   $("#adminLogout").addEventListener("click", () => {
     sessionStorage.removeItem("adminOk");
     location.reload();

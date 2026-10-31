@@ -214,13 +214,18 @@ function initMusicPage() {
 
   render();
 
-  /* 公共歌单：后台（data/music.json）到达后重渲染 */
-  fetch("data/music.json", { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((arr) => {
-      if (Array.isArray(arr)) { REMOTE_MUSIC = arr; render(); }
-    })
-    .catch(() => {});
+  /* 公共歌单：云端（Worker）优先，回退仓库 data/music.json */
+  (async () => {
+    let arr = null;
+    try { arr = await cfGet("music"); } catch (e) {}
+    if (!Array.isArray(arr)) {
+      try {
+        const r = await fetch("data/music.json", { cache: "no-store" });
+        if (r.ok) arr = await r.json();
+      } catch (e) {}
+    }
+    if (Array.isArray(arr)) { REMOTE_MUSIC = arr; render(); }
+  })();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
