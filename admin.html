@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>后台控制台 · 拾光小栈</title>
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.5.0">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches))
+          document.documentElement.dataset.theme = "dark";
+        else if (t === "light") document.documentElement.dataset.theme = "light";
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body data-page="admin">
+  <header class="site-header">
+    <nav class="nav container">
+      <a class="brand" href="index.html"><span class="brand-dot"></span><span>后台控制台</span></a>
+      <span class="admin-row" style="margin-left:auto;gap:8px"><a class="chip" href="private.html">私密空间 ↗</a><span class="chip admin-badge">仅站主使用</span></span>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <!-- 登录门 -->
+    <section id="adminLogin" class="glass-card admin-login">
+      <h1>🔐 站主登录</h1>
+      <p class="admin-hint">输入管理密码进入后台，可修改前台展示的资料、文章、相册与音乐。</p>
+      <input type="password" id="adminPwd" placeholder="管理密码" autocomplete="current-password">
+      <button class="btn btn-primary" id="adminLoginBtn">进入后台</button>
+      <p class="admin-hint admin-msg" id="adminLoginMsg"></p>
+      <details class="admin-pat">
+        <summary>在线上站点（GitHub Pages）修改？展开设置 GitHub Token</summary>
+        <p class="admin-hint">在本地 127.0.0.1:8080 修改无需 Token（自动提交推送）；在 cxjcom.github.io 上修改需要具备本仓库写入权限的 Personal Access Token，只在本次会话内使用。</p>
+        <input type="password" id="adminPat" placeholder="GitHub Personal Access Token（可选）" autocomplete="off">
+      </details>
+    </section>
+
+    <!-- 控制台 -->
+    <section id="adminConsole" hidden>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="profile">个人资料</button>
+        <button class="admin-tab" data-tab="posts">文章</button>
+        <button class="admin-tab" data-tab="album">相册</button>
+        <button class="admin-tab" data-tab="music">音乐</button>
+        <button class="btn" id="adminLogout" style="margin-left:auto">退出登录</button>
+      </div>
+      <p class="admin-status" id="adminStatus"></p>
+
+      <!-- 个人资料 -->
+      <div class="admin-pane" id="pane-profile">
+        <div class="glass-card admin-card">
+          <h2>个人资料 <span class="admin-file">data/profile.json</span></h2>
+          <div class="admin-grid" id="profileFields"></div>
+          <button class="btn btn-primary" id="saveProfile">保存资料</button>
+        </div>
+      </div>
+
+      <!-- 文章 -->
+      <div class="admin-pane" id="pane-posts" hidden>
+        <div class="glass-card admin-card">
+          <h2>文章管理 <span class="admin-file">data/posts.json</span></h2>
+          <p class="admin-hint">这里管理的是「自定义文章」（会与 posts/ 目录里的内置示例文章合并展示）。新建后填好正文保存即可发布。</p>
+          <div class="admin-list" id="postList"></div>
+          <div class="admin-row">
+            <button class="btn" id="postNew">＋ 新建文章</button>
+            <button class="btn btn-primary" id="savePosts">保存全部文章</button>
+          </div>
+          <div class="admin-editor" id="postEditor" hidden>
+            <input id="peTitle" placeholder="标题">
+            <div class="admin-row">
+              <input id="peSlug" placeholder="slug（英文标识，唯一）" style="flex:1">
+              <input id="peDate" type="date" style="flex:none">
+            </div>
+            <input id="peTags" placeholder="标签，逗号分隔">
+            <textarea id="peSummary" rows="2" placeholder="摘要（列表卡片上显示）"></textarea>
+            <label class="admin-check"><input type="checkbox" id="peFeatured"> 上首页精选</label>
+            <textarea id="peBody" rows="14" placeholder="正文（HTML；写法参考 posts/_template.html）"></textarea>
+            <div class="admin-row">
+              <button class="btn btn-primary" id="peSave">保存此文章（先存草稿）</button>
+              <button class="btn admin-danger" id="peDelete">删除此文章</button>
+              <button class="btn" id="peCancel">收起</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 相册 -->
+      <div class="admin-pane" id="pane-album" hidden>
+        <div class="glass-card admin-card">
+          <h2>相册管理 <span class="admin-file">data/album.json</span></h2>
+          <div class="admin-list" id="albumList"></div>
+          <div class="admin-row admin-add">
+            <input id="alTitle" placeholder="照片标题" style="flex:1">
+            <input id="alDate" type="date" style="flex:none">
+          </div>
+          <div class="admin-row admin-add">
+            <input id="alUrl" placeholder="图片链接（或用右侧上传本地图片）" style="flex:1">
+            <input type="file" id="alFile" accept="image/*" style="flex:none">
+            <button class="btn" id="alAdd">＋ 添加照片</button>
+          </div>
+          <p class="admin-hint">上传的图片会存入仓库 assets/img/gallery/ 并自动推送。</p>
+          <button class="btn btn-primary" id="saveAlbum">保存相册</button>
+        </div>
+      </div>
+
+      <!-- 音乐 -->
+      <div class="admin-pane" id="pane-music" hidden>
+        <div class="glass-card admin-card">
+          <h2>音乐管理 <span class="admin-file">data/music.json</span></h2>
+          <div class="admin-list" id="musicAdminList"></div>
+          <div class="admin-row">
+            <button class="btn" id="musicAdd">＋ 新增歌曲</button>
+            <button class="btn btn-primary" id="saveMusic">保存歌单</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/music.js?v=2.4.0"></script>
+  <script src="assets/js/admin.js?v=2.4.0"></script>
+</body>
+</html>
