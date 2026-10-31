@@ -34,7 +34,7 @@
       <h1 id="lockTitle">🔐 设置解锁密码</h1>
       <p class="vault-hint" id="lockHint">第一次使用：设置一个解锁密码。手记内容会用它加密后只存在本机浏览器，忘记密码将无法找回。</p>
       <input type="password" id="vaultPass" placeholder="解锁密码" autocomplete="new-password">
-      <input type="password" id="vaultPass2" placeholder="再输一遍确认" autocomplete="new-password" hidden>
+      <input type="password" id="vaultPass2" placeholder="再输一遍确认" autocomplete="new-password">
       <button class="btn btn-primary" id="vaultUnlock">解锁</button>
       <p class="vault-hint vault-msg" id="vaultMsg"></p>
     </section>
@@ -244,6 +244,8 @@
         $("#lockTitle").textContent = "🔐 输入密码解锁";
         $("#lockHint").textContent = "手记加密存在本机浏览器，输入解锁密码查看。";
         $("#vaultPass2").hidden = true;
+      } else {
+        $("#vaultPass2").hidden = false;   /* 首次设置：显示确认框 */
       }
     })();
   })();
