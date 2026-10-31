@@ -161,8 +161,6 @@ async function verifyCode() {
       if (!j.ok) throw new Error(j.message || "验证失败");
       sessionStorage.setItem("cfToken", j.token);
       sessionStorage.setItem("adminOk", "1");
-      PAT = $("#adminPat").value.trim();
-      if (PAT) sessionStorage.setItem("adminPat", PAT);
       enterConsole();
       return;
     }
@@ -367,8 +365,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = await cfLogin($("#cloudPass").value);
       sessionStorage.setItem("cfToken", token);
       sessionStorage.setItem("adminOk", "1");
-      PAT = $("#adminPat").value.trim();
-      if (PAT) sessionStorage.setItem("adminPat", PAT);
       enterConsole();
     } catch (e) { loginMsg("✕ " + e.message, true); }
   });
