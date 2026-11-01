@@ -118,14 +118,21 @@ export default {
     }
 
     if (url.pathname === "/api/login" && request.method === "POST") {
-      try {
-        const body = await request.json();
-        if (!env.ADMIN_PASS) return json({ ok: false, message: "Worker 未设置 ADMIN_PASS 变量" }, 500);
-        if (String(body.password || "") === env.ADMIN_PASS) {
-          return json({ ok: true, token: await makeToken(env) });
-        }
-        return json({ ok: false, message: "密码不对" }, 403);
-      } catch (e) { return json({ ok: false, message: "请求格式错误" }, 400); }
+      let body;
+      try { body = await request.json(); }
+      catch (e) { return json({ ok: false, message: "请求格式错误" }, 400); }
+      if (!env.ADMIN_PASS) return json({ ok: false, message: "Worker 未设置 ADMIN_PASS 变量" }, 500);
+      /* 防爆破：同一 IP 连续错 5 次锁 10 分钟 */
+      const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+      const failKey = "loginfail:" + ip;
+      const fails = parseInt((await env.BLOG_DATA.get(failKey)) || "0");
+      if (fails >= 5) return json({ ok: false, message: "尝试次数过多，请 10 分钟后再试" }, 429);
+      if (String(body.password || "") === env.ADMIN_PASS) {
+        await env.BLOG_DATA.delete(failKey);
+        return json({ ok: true, token: await makeToken(env) });
+      }
+      await env.BLOG_DATA.put(failKey, String(fails + 1), { expirationTtl: 600 });
+      return json({ ok: false, message: "密码不对（剩余尝试次数：" + (4 - fails) + "）" }, 403);
     }
 
     if (!NAMES.includes(name)) return json({ ok: false, message: "未知数据名称" }, 404);
