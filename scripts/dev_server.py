@@ -58,7 +58,7 @@ class BlogHandler(SimpleHTTPRequestHandler):
             length = int(self.headers.get("Content-Length") or 0)
             if length:
                 self.rfile.read(length)  # 先排空请求体，避免连接异常中断
-            self.send_error(404, "只有 /api/profile /api/posts /api/album /api/music /api/upload /api/mood 支持 POST")
+            self.send_error(404, "Unsupported POST endpoint. Use /api/profile, /api/posts, /api/album, /api/music, /api/upload or /api/mood")
             return
 
     def _read_json_body(self, err_label):
