@@ -108,74 +108,10 @@ async function uploadImage(name, b64) {
 }
 
 /* ---------------- 登录 ---------------- */
-let codeCooldown = null;
-
 function loginMsg(t, err) {
   const el = $("#adminLoginMsg");
   el.textContent = t || "";
   el.style.color = err ? "#ff6b6b" : "var(--accent)";
-}
-
-async function sendCode() {
-  const email = $("#adminEmail").value.trim().toLowerCase();
-  if (!email) { loginMsg("请先填管理员邮箱", true); return; }
-  const btn = $("#sendCodeBtn");
-  try {
-    btn.disabled = true;
-    loginMsg("发送中…");
-    const url = window.CLOUD_API ? window.CLOUD_API + "/api/sendcode" : "/api/sendcode";
-    const r = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const j = await r.json();
-    if (!j.ok) throw new Error(j.message || "发送失败");
-    loginMsg("✓ 验证码已发送，请查收邮箱（5 分钟内有效）");
-    let left = 60;
-    btn.textContent = left + "s 后重发";
-    codeCooldown = setInterval(() => {
-      left--;
-      btn.textContent = left + "s 后重发";
-      if (left <= 0) { clearInterval(codeCooldown); codeCooldown = null; btn.disabled = false; btn.textContent = "发送验证码"; }
-    }, 1000);
-  } catch (e) {
-    btn.disabled = false;
-    loginMsg("✕ " + e.message, true);
-  }
-}
-
-async function verifyCode() {
-  const email = $("#adminEmail").value.trim().toLowerCase();
-  const code = $("#adminCode").value.trim();
-  if (!code) { loginMsg("请输入验证码", true); return; }
-  try {
-    if (window.CLOUD_API) {
-      /* 云端验证：成功即签发令牌，任何设备可登录 */
-      const r = await fetch(window.CLOUD_API + "/api/verifycode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code }),
-      });
-      const j = await r.json();
-      if (!j.ok) throw new Error(j.message || "验证失败");
-      sessionStorage.setItem("cfToken", j.token);
-      sessionStorage.setItem("adminOk", "1");
-      enterConsole();
-      return;
-    }
-    const r = await fetch("/api/verifycode", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code }),
-    });
-    const j = await r.json();
-    if (!j.ok) throw new Error(j.message || "验证失败");
-    sessionStorage.setItem("adminOk", "1");
-    enterConsole();
-  } catch (e) {
-    loginMsg("✕ " + e.message, true);
-  }
 }
 
 function enterConsole() {
@@ -357,9 +293,6 @@ function collectRows(boxSel, target) {
 document.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem("adminOk") === "1") enterConsole();
 
-  $("#sendCodeBtn").addEventListener("click", sendCode);
-  $("#verifyBtn").addEventListener("click", verifyCode);
-  $("#adminCode").addEventListener("keydown", (e) => { if (e.key === "Enter") verifyCode(); });
   $("#cloudLoginBtn").addEventListener("click", async () => {
     try {
       const token = await cfLogin($("#cloudPass").value);

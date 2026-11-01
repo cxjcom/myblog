@@ -33,15 +33,6 @@
     <section id="adminLogin" class="glass-card admin-login">
       <div class="admin-login-brand">⚡</div>
       <h1>拾光小栈 · 站主验证</h1>
-      <p class="admin-hint">验证码将发送到你的 QQ 邮箱，5 分钟内有效。</p>
-
-      <div class="admin-code-row">
-        <input type="email" id="adminEmail" placeholder="管理员邮箱" value="717583885@qq.com">
-        <button class="btn" id="sendCodeBtn">发送验证码</button>
-      </div>
-      <input type="text" id="adminCode" placeholder="6 位邮箱验证码" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
-      <button class="btn btn-primary" id="verifyBtn">验证并进入后台</button>
-
       <details class="admin-pat">
         <summary>Cloudflare 云端登录（部署 Worker 后推荐，任何设备可用）</summary>
         <input type="password" id="cloudPass" placeholder="云端后台密码（部署时设置的 ADMIN_PASS）" autocomplete="current-password">
@@ -49,7 +40,6 @@
       </details>
 
       <p class="admin-hint admin-msg" id="adminLoginMsg"></p>
-      <p class="admin-hint">首次使用邮箱验证码：在 QQ 邮箱设置里开启 SMTP 并获取授权码，填入 scripts/mail_config.json（该文件不会被提交）。</p>
     </section>
 
     <!-- 控制台 -->
