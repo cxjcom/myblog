@@ -8,7 +8,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f0e">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f7f4">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.8.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.9.2">
   <script>
     (function () {
       try {
@@ -24,7 +24,7 @@
   <header class="site-header">
     <nav class="nav container">
       <a class="brand" href="index.html"><span class="brand-dot"></span><span>后台控制台</span></a>
-      <span class="admin-row" style="margin-left:auto;gap:8px"><a class="chip" href="private.html">私密空间 ↗</a><span class="chip admin-badge">仅站主使用</span></span>
+      <span class="admin-row" style="margin-left:auto;gap:8px"><span class="chip admin-badge">仅站主使用</span></span>
     </nav>
   </header>
 
@@ -33,8 +33,10 @@
     <section id="adminLogin" class="glass-card admin-login">
       <div class="admin-login-brand">⚡</div>
       <h1>拾光小栈 · 站主验证</h1>
-      <details class="admin-pat">
-        <summary>Cloudflare 云端登录（部署 Worker 后推荐，任何设备可用）</summary>
+      <button class="btn btn-primary" id="localLoginBtn" hidden>本地登录（检测到本机服务器）</button>
+      <div class="admin-login-divider" id="loginDivider" hidden>或</div>
+      <details class="admin-pat" id="cloudLoginBox">
+        <summary>Cloudflare 云端登录（任何设备可用）</summary>
         <input type="password" id="cloudPass" placeholder="云端后台密码（部署时设置的 ADMIN_PASS）" autocomplete="current-password">
         <button class="btn" id="cloudLoginBtn">云端登录</button>
       </details>
@@ -102,7 +104,7 @@
           <div class="admin-pane" id="pane-posts" hidden>
             <div class="glass-card admin-card">
               <h2>文章管理 <span class="admin-file">data/posts.json</span></h2>
-              <p class="admin-hint">这里管理「自定义文章」（与 posts/ 目录的内置示例文章合并展示）。</p>
+              <p class="admin-hint">这里管理「自定义文章」（与 posts/ 目录的内置示例文章合并展示）。点「🚀 发布文章」会立即保存并推送，前台 1-2 分钟内生效。</p>
               <div class="admin-list" id="postList"></div>
               <div class="admin-row">
                 <button class="btn" id="postNew">＋ 新建文章</button>
@@ -115,11 +117,12 @@
                   <input id="peDate" type="date" style="flex:none">
                 </div>
                 <input id="peTags" placeholder="标签，逗号分隔">
-                <textarea id="peSummary" rows="2" placeholder="摘要（列表卡片上显示）"></textarea>
+                <textarea id="peSummary" rows="2" placeholder="摘要（列表卡片上显示，留空则自动截取正文）"></textarea>
                 <label class="admin-check"><input type="checkbox" id="peFeatured"> 上首页精选</label>
                 <textarea id="peBody" rows="14" placeholder="正文（HTML；写法参考 posts/_template.html）"></textarea>
+                <span class="pe-wordcount" id="peWords"></span>
                 <div class="admin-row">
-                  <button class="btn btn-primary" id="peSave">保存此文章（先存草稿）</button>
+                  <button class="btn btn-primary" id="peSave">🚀 发布文章</button>
                   <button class="btn admin-danger" id="peDelete">删除此文章</button>
                   <button class="btn" id="peCancel">收起</button>
                 </div>
@@ -131,17 +134,22 @@
           <div class="admin-pane" id="pane-album" hidden>
             <div class="glass-card admin-card">
               <h2>相册管理 <span class="admin-file">data/album.json</span></h2>
-              <div class="admin-list" id="albumList"></div>
-              <div class="admin-row admin-add">
-                <input id="alTitle" placeholder="照片标题" style="flex:1">
-                <input id="alDate" type="date" style="flex:none">
+              <div class="alb-grid" id="albumList"></div>
+              <div class="admin-editor alb-add">
+                <div class="alb-add-preview" id="alPreview">选图片或填链接<br>这里出预览</div>
+                <div class="alb-add-fields">
+                  <input id="alTitle" placeholder="照片标题（可选）">
+                  <div class="admin-row">
+                    <input id="alDate" type="date" style="flex:none">
+                    <input id="alUrl" placeholder="图片链接（与上传二选一）" style="flex:1">
+                  </div>
+                  <div class="admin-row">
+                    <input type="file" id="alFile" accept="image/*" style="flex:1">
+                    <button class="btn btn-primary" id="alAdd">＋ 添加到相册</button>
+                  </div>
+                </div>
               </div>
-              <div class="admin-row admin-add">
-                <input id="alUrl" placeholder="图片链接（或用右侧上传本地图片）" style="flex:1">
-                <input type="file" id="alFile" accept="image/*" style="flex:none">
-                <button class="btn" id="alAdd">＋ 添加照片</button>
-              </div>
-              <p class="admin-hint">上传的图片会存入仓库 assets/img/gallery/ 并自动推送。</p>
+              <p class="admin-hint">上传的图片会存入仓库 assets/img/gallery/ 并自动推送；添加后记得点「保存相册」才会前台生效。</p>
               <button class="btn btn-primary" id="saveAlbum">保存相册</button>
             </div>
           </div>
@@ -150,9 +158,10 @@
           <div class="admin-pane" id="pane-music" hidden>
             <div class="glass-card admin-card">
               <h2>音乐管理 <span class="admin-file">data/music.json</span></h2>
+              <p class="admin-hint" style="margin:0 0 14px">粘贴链接自动识别：网易云歌曲页 / B站视频 / Apple Music / mp3 直链。标题、歌手会随链接带出，改完点「保存歌单」。</p>
               <div class="admin-list" id="musicAdminList"></div>
               <div class="admin-row">
-                <button class="btn" id="musicAdd">＋ 新增歌曲</button>
+                <button class="btn" id="musicAdd">＋ 添加歌曲</button>
                 <button class="btn btn-primary" id="saveMusic">保存歌单</button>
               </div>
             </div>
@@ -180,8 +189,8 @@
     </section>
   </main>
 
-  <script src="assets/js/cloud-config.js?v=2.8.0"></script>
-  <script src="assets/js/music.js?v=2.8.0"></script>
-  <script src="assets/js/admin.js?v=2.8.2"></script>
+  <script src="assets/js/cloud-config.js?v=2.9.2"></script>
+  <script src="assets/js/music.js?v=2.9.2"></script>
+  <script src="assets/js/admin.js?v=2.9.2"></script>
 </body>
 </html>

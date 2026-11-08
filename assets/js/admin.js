@@ -117,7 +117,8 @@ function loginMsg(t, err) {
 function enterConsole() {
   $("#adminLogin").hidden = true;
   $("#adminConsole").hidden = false;
-  const mode = window.CLOUD_API ? "云端模式 · 保存全站秒生效"
+  const hasCf = window.CLOUD_API && sessionStorage.getItem("cfToken");
+  const mode = hasCf ? "云端模式 · 保存全站秒生效"
     : isLocal() ? "本地模式 · 保存即推送" : "线上模式 · 需 GitHub Token";
   $("#adminMode").textContent = mode;
   loadAll();
@@ -234,12 +235,14 @@ function fillPostEditor(p, idx) {
 function peCollect() {
   const body = $("#peBody").value;
   const words = body.replace(/<[^>]+>/g, "").replace(/\s/g, "").length;
+  const summary = $("#peSummary").value.trim() ||
+    body.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
   return {
     slug: $("#peSlug").value.trim() || "post-" + Date.now(),
     title: $("#peTitle").value.trim() || "未命名",
     date: $("#peDate").value || new Date().toISOString().slice(0, 10),
     tags: $("#peTags").value.split(/[,，]/).map((x) => x.trim()).filter(Boolean),
-    summary: $("#peSummary").value.trim(),
+    summary,
     featured: $("#peFeatured").checked,
     body,
     minutes: Math.max(1, Math.round(words / 400)),
@@ -252,32 +255,50 @@ function renderAlbum() {
   const box = $("#albumList");
   box.innerHTML = ALBUM.length
     ? ALBUM.map((p, i) => `
-      <div class="admin-row" data-i="${i}">
-        <img src="${esc(p.src)}" alt="" loading="lazy"
-             onerror="this.style.opacity=.25">
-        <input data-i="${i}" data-f="src" value="${esc(p.src)}" placeholder="图片链接" style="flex:1;min-width:180px">
+      <figure class="alb-card" data-i="${i}">
+        <img src="${esc(p.src)}" alt="${esc(p.title || "照片")}" loading="lazy" onerror="this.style.opacity=.25">
         <input data-i="${i}" data-f="title" value="${esc(p.title || "")}" placeholder="标题">
-        <input data-i="${i}" data-f="date" value="${esc(p.date || "")}" placeholder="日期" style="max-width:120px">
-        <button class="btn admin-danger al-del" data-i="${i}">删除</button>
-      </div>`).join("")
-    : '<p class="admin-hint">相册是空的，用下方表单添加照片（链接或上传）。</p>';
+        <div class="admin-row">
+          <input data-i="${i}" data-f="date" value="${esc(p.date || "")}" placeholder="日期" style="flex:1">
+          <button class="btn admin-danger alb-del" data-i="${i}">删除</button>
+        </div>
+      </figure>`).join("")
+    : '<p class="admin-hint">相册是空的，用下方表单添加第一张照片（链接或上传都行）。</p>';
 }
 
 /* ---------------- 音乐 ---------------- */
+const MUSIC_TYPE_NAME = { embed: "网易云音乐", apple: "Apple Music", bili: "哔哩哔哩", audio: "音频直链" };
+
+/* 链接识别状态文案（renderMusic 与实时输入共用） */
+function musicRecognizeHTML(t) {
+  if (!String(t.src || "").trim()) return "";
+  const parsed = typeof parseMusicLink === "function" ? parseMusicLink(t.src) : null;
+  if (parsed) {
+    const id = parsed.neteaseId ? "（歌曲 ID " + parsed.neteaseId + "）" : "";
+    return `<p class="mu-recognize ok">✓ 识别为${MUSIC_TYPE_NAME[parsed.type] || parsed.type}${id}</p>`;
+  }
+  return `<p class="mu-recognize warn">⚠ 无法识别此链接——支持网易云歌曲页 / B站视频 / Apple Music / mp3 直链，保存时将按原样处理</p>`;
+}
+
 function renderMusic() {
   const box = $("#musicAdminList");
   box.innerHTML = MUSIC.length
     ? MUSIC.map((t, i) => `
-      <div class="admin-editor" data-i="${i}">
-        <div class="admin-row">
-          <input data-i="${i}" data-f="title" value="${esc(t.title || "")}" placeholder="歌名" style="flex:1">
-          <input data-i="${i}" data-f="artist" value="${esc(t.artist || "")}" placeholder="歌手">
+      <div class="admin-editor mu-card" data-i="${i}">
+        <div class="mu-card-head">
+          <b>${esc(t.title || "未命名")}</b>
+          <button class="btn mu-listen" data-i="${i}" title="在播放界面试听">▶ 试听</button>
           <button class="btn admin-danger mu-del" data-i="${i}">删除</button>
         </div>
-        <input data-i="${i}" data-f="src" value="${esc(t.src || "")}" placeholder="音乐链接（网易云/Apple/B站/mp3 直链）" style="width:100%">
-        <textarea data-i="${i}" data-f="lyrics" rows="3" placeholder="歌词（可选）：LRC 或每行一句">${esc(t.lyrics || "")}</textarea>
+        <label>歌名<input data-i="${i}" data-f="title" value="${esc(t.title || "")}" placeholder="歌名"></label>
+        <label>歌手<input data-i="${i}" data-f="artist" value="${esc(t.artist || "")}" placeholder="歌手（可选）"></label>
+        <label>音乐链接<input data-i="${i}" data-f="src" value="${esc(t.src || "")}" placeholder="粘贴网易云歌曲页 / B站视频 / Apple Music / mp3 直链"></label>
+        ${musicRecognizeHTML(t) || '<p class="mu-recognize"></p>'}
+        <button type="button" class="mu-lyrics-toggle" data-i="${i}">♪ 歌词（可选）${t.lyrics ? " · 已填写" : ""}</button>
+        <textarea data-i="${i}" data-f="lyrics" rows="3" hidden placeholder="歌词：LRC 格式或每行一句">${esc(t.lyrics || "")}</textarea>
       </div>`).join("")
-    : '<p class="admin-hint">歌单是空的，点「＋ 新增歌曲」。</p>';
+    : '<p class="admin-hint">歌单是空的，点「＋ 添加歌曲」粘贴一个链接试试。</p>';
+  npGetTracks = () => MUSIC.map((t, i) => ({ ...t, key: "m:" + i }));
 }
 
 /* ---------------- 通用：收集行内编辑 ---------------- */
@@ -292,6 +313,15 @@ function collectRows(boxSel, target) {
 /* ---------------- 事件绑定 ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem("adminOk") === "1") enterConsole();
+
+  /* 本地登录：仅 localhost 显示。本地 /api 无鉴权，此按钮等价于直接进控制台 */
+  const localBtn = $("#localLoginBtn"), divider = $("#loginDivider");
+  if (isLocal()) { localBtn.hidden = false; divider.hidden = false; }
+  localBtn.addEventListener("click", () => {
+    sessionStorage.setItem("adminOk", "1");
+    loginMsg("");
+    enterConsole();
+  });
 
   $("#cloudLoginBtn").addEventListener("click", async () => {
     try {
@@ -336,22 +366,44 @@ document.addEventListener("DOMContentLoaded", () => {
       renderPosts();
     }
   });
-  $("#peSave").addEventListener("click", () => {
+  $("#peSave").addEventListener("click", async () => {
     const p = peCollect();
     if (editingPostIdx >= 0 && POSTS[editingPostIdx]) POSTS[editingPostIdx] = p;
     else POSTS.unshift(p);
+    const idx = editingPostIdx >= 0 ? editingPostIdx : 0;
+    editingPostIdx = -1;
+    renderPosts();
+    setStatus("发布中…");
+    try {
+      await saveData("posts.json", POSTS, "chore: 更新文章（后台）");
+      $("#postEditor").hidden = true;
+      setStatus(`✓《${p.title}》已发布${isLocal() ? "，已推送到仓库，前台 1-2 分钟内生效" : "，前台立即生效"}`);
+      renderOverview();
+    } catch (e) {
+      /* 失败保留草稿在编辑器里 */
+      editingPostIdx = idx;
+      setStatus("✕ 发布失败：" + e.message + "（内容已留在编辑器，可直接重试）", true);
+    }
+  });
+  $("#peDelete").addEventListener("click", async () => {
+    if (editingPostIdx < 0 || !POSTS[editingPostIdx]) return;
+    if (!confirm("确定删除这篇文章？将立即保存并推送。")) return;
+    POSTS.splice(editingPostIdx, 1);
     editingPostIdx = -1;
     $("#postEditor").hidden = true;
     renderPosts();
-    setStatus("文章已存入待保存列表，记得点「保存全部文章」");
+    try {
+      await saveData("posts.json", POSTS, "chore: 更新文章（后台）");
+      setStatus("✓ 文章已删除并保存");
+      renderOverview();
+    } catch (e) { setStatus("✕ " + e.message, true); }
   });
-  $("#peDelete").addEventListener("click", () => {
-    if (editingPostIdx >= 0 && POSTS[editingPostIdx]) {
-      POSTS.splice(editingPostIdx, 1);
-      editingPostIdx = -1;
-      $("#postEditor").hidden = true;
-      renderPosts();
-    }
+  /* 正文字数实时统计 */
+  $("#peBody").addEventListener("input", () => {
+    const words = $("#peBody").value.replace(/<[^>]+>/g, "").replace(/\s/g, "").length;
+    $("#peWords").textContent = words
+      ? `正文约 ${words} 字 · 预计阅读 ${Math.max(1, Math.round(words / 400))} 分钟`
+      : "";
   });
   $("#peCancel").addEventListener("click", () => {
     editingPostIdx = -1;
@@ -364,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* 相册 */
   $("#albumList").addEventListener("click", (e) => {
-    const del = e.target.closest(".al-del");
+    const del = e.target.closest(".alb-del");
     if (del && confirm("删除这张照片？保存相册后才会提交到仓库。")) {
       ALBUM.splice(+del.dataset.i, 1);
       renderAlbum();
@@ -375,6 +427,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el.dataset.f && el.dataset.i != null && ALBUM[+el.dataset.i]) {
       ALBUM[+el.dataset.i][el.dataset.f] = el.value;
     }
+  });
+  /* 选完本地图片立刻出预览 */
+  $("#alFile").addEventListener("change", () => {
+    const file = $("#alFile").files[0];
+    const pv = $("#alPreview");
+    if (!file) { pv.innerHTML = "选图片或填链接<br>这里出预览"; return; }
+    const fr = new FileReader();
+    fr.onload = () => { pv.innerHTML = `<img src="${fr.result}" alt="预览">`; };
+    fr.readAsDataURL(file);
+  });
+  $("#alUrl").addEventListener("input", () => {
+    const url = $("#alUrl").value.trim();
+    const pv = $("#alPreview");
+    pv.innerHTML = url ? `<img src="${esc(url)}" alt="预览" onerror="this.parentNode.textContent='链接图片加载失败'">` : "选图片或填链接<br>这里出预览";
   });
   $("#alAdd").addEventListener("click", async () => {
     const title = $("#alTitle").value.trim();
@@ -391,11 +457,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         src = await uploadImage(file.name, b64);
       }
-      if (!src) { setStatus("请填图片链接或选择本地图片", true); return; }
+      if (!src) { setStatus("请填图片链接或选择本地图片（二选一）", true); return; }
+      if (ALBUM.some((p) => p.src === src)) { setStatus("这张照片已经在相册里了", true); return; }
       ALBUM.push({ src, title, date });
       $("#alTitle").value = ""; $("#alUrl").value = ""; $("#alFile").value = "";
+      $("#alPreview").innerHTML = "选图片或填链接<br>这里出预览";
       renderAlbum();
-      setStatus("照片已加入列表，记得点「保存相册」提交到仓库");
+      setStatus("照片已加入列表，记得点「保存相册」前台才会生效");
     } catch (e) { setStatus("✕ " + e.message, true); }
   });
   $("#saveAlbum").addEventListener("click", async () => {
@@ -406,36 +474,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* 音乐 */
   $("#musicAdd").addEventListener("click", () => {
+    /* 防呆：已有没填完的空卡片时不再新增，引导先填写 */
+    const emptyIdx = MUSIC.findIndex((t) => !String(t.title || "").trim() && !String(t.src || "").trim());
+    if (emptyIdx >= 0) {
+      setStatus("已有一张没填完的卡片——先把链接填上，或删掉它再添加", true);
+      renderMusic();
+      const card = $(`#musicAdminList .mu-card[data-i="${emptyIdx}"] input[data-f="src"]`);
+      if (card) card.focus();
+      return;
+    }
     MUSIC.unshift({ title: "", artist: "", type: "embed", src: "", lyrics: "" });
     renderMusic();
+    const first = $('#musicAdminList .mu-card input[data-f="title"]');
+    if (first) first.focus();
   });
   $("#musicAdminList").addEventListener("click", (e) => {
+    const listen = e.target.closest(".mu-listen");
+    if (listen) {
+      collectRows("#musicAdminList", MUSIC); /* 试听当前编辑值 */
+      const t = MUSIC[+listen.dataset.i];
+      if (t && String(t.src || "").trim()) npOpen({ ...t, key: "m:" + listen.dataset.i });
+      else setStatus("先填音乐链接再试听", true);
+      return;
+    }
+    const lyr = e.target.closest(".mu-lyrics-toggle");
+    if (lyr) {
+      const ta = lyr.parentElement.querySelector("textarea[data-f='lyrics']");
+      if (ta) { ta.hidden = !ta.hidden; if (!ta.hidden) ta.focus(); }
+      return;
+    }
     const del = e.target.closest(".mu-del");
-    if (del && confirm("删除这首歌曲？保存歌单后才会提交到仓库。")) {
+    if (del && confirm("删除这首歌曲？保存歌单后才会提交。")) {
       MUSIC.splice(+del.dataset.i, 1);
       renderMusic();
     }
   });
   $("#musicAdminList").addEventListener("input", (e) => {
     const el = e.target;
-    if (el.dataset.f && el.dataset.i != null && MUSIC[+el.dataset.i]) {
-      MUSIC[+el.dataset.i][el.dataset.f] = el.value;
+    if (!el.dataset.f || el.dataset.i == null || !MUSIC[+el.dataset.i]) return;
+    MUSIC[+el.dataset.i][el.dataset.f] = el.value;
+    if (el.dataset.f === "title") {
+      const head = el.closest(".mu-card").querySelector(".mu-card-head b");
+      if (head) head.textContent = el.value.trim() || "未命名";
+    }
+    if (el.dataset.f === "src") {
+      const recog = el.closest(".mu-card").querySelector(".mu-recognize");
+      if (recog) {
+        const html = musicRecognizeHTML(MUSIC[+el.dataset.i]);
+        if (html) recog.outerHTML = html;
+        else { recog.className = "mu-recognize"; recog.textContent = ""; }
+      }
     }
   });
   $("#saveMusic").addEventListener("click", async () => {
     collectRows("#musicAdminList", MUSIC);
+    /* 丢弃全空行（标题/歌手/链接/歌词全空） */
+    const before = MUSIC.length;
+    MUSIC = MUSIC.filter((t) =>
+      String(t.title || "").trim() || String(t.artist || "").trim() ||
+      String(t.src || "").trim() || String(t.lyrics || "").trim());
+    const dropped = before - MUSIC.length;
+    /* 链接解析：识别成功的规范化 type/src，识别失败的保留原样 */
+    let unknown = 0;
     MUSIC.forEach((t) => {
       const parsed = typeof parseMusicLink === "function" ? parseMusicLink(t.src || "") : null;
       if (parsed) {
         t.type = parsed.type;
         t.src = parsed.src;
         if (parsed.neteaseId) t.neteaseId = parsed.neteaseId;
-      } else if (t.type == null) {
-        t.type = "embed";
+        else delete t.neteaseId;
+      } else {
+        unknown++;
+        if (t.type == null) t.type = "embed";
       }
     });
-    try { await saveData("music.json", MUSIC, "chore: 更新歌单（后台）"); }
-    catch (e) { setStatus("✕ " + e.message, true); }
+    if (unknown && !confirm(`有 ${unknown} 条链接无法识别（按原样保存，前台可能显示异常）。\n继续保存吗？`)) {
+      renderMusic();
+      setStatus("已取消保存，检查一下带 ⚠ 的链接", true);
+      return;
+    }
+    renderMusic();
+    try {
+      await saveData("music.json", MUSIC, "chore: 更新歌单（后台）");
+      setStatus("✓ 歌单已保存" + (dropped ? `，自动丢弃了 ${dropped} 条空记录` : ""));
+    } catch (e) { setStatus("✕ " + e.message, true); }
   });
 });
 

@@ -1,9 +1,15 @@
 /* ============================================================
-   音乐空间：公开歌单 + 本地添加/删除 + 多平台解析 + 听歌记录
+   音乐空间：公开歌单 + 多平台解析 + 听歌记录
    ============================================================ */
 "use strict";
 
-/* ---------------- 公开歌单（想让所有访客听到就加在这里） ----------------
+/* 兜底：admin.html 等不加载 main.js 的页面也要用到 escapeHTML */
+if (typeof window.escapeHTML !== "function") {
+  window.escapeHTML = (s) =>
+    String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ---------------- 公开歌单（后台写入 data/music.json，这里拉取渲染） ----------------
    type: "embed" 网易云外链 | "apple" Apple Music | "bili" B 站 | "audio" 音频直链 */
 const MUSIC_LIST = [
   {
@@ -17,27 +23,7 @@ const MUSIC_LIST = [
 ];
 
 let REMOTE_MUSIC = null; /* 公共歌单：后台写入 data/music.json，这里拉取合并 */
-const MUSIC_KEY = "music.user.v1";        // 自己添加的歌曲
-const MUSIC_HIDDEN_KEY = "music.hidden.v1"; // 被删除的内置歌曲
 const MUSIC_HIST_KEY = "music.history.v1";  // 听歌记录 [{key,title,artist,at}]
-
-function loadUserTracks() {
-  try {
-    const arr = JSON.parse(localStorage.getItem(MUSIC_KEY) || "[]");
-    return Array.isArray(arr) ? arr : [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function loadHiddenTracks() {
-  try {
-    const arr = JSON.parse(localStorage.getItem(MUSIC_HIDDEN_KEY) || "[]");
-    return Array.isArray(arr) ? arr : [];
-  } catch (e) {
-    return [];
-  }
-}
 
 function saveStore(key, val) {
   try {
@@ -65,6 +51,34 @@ function recordPlay(key, title, artist) {
   if (h[0] && h[0].key === key && Date.now() - h[0].at < 30000) return;
   h.unshift({ key, title, artist, at: Date.now() });
   saveStore(MUSIC_HIST_KEY, h.slice(0, 100));
+}
+
+/* 顶层函数：前台音乐页与后台试听共用（npOpen 也会调用） */
+function renderHistory() {
+  const box = $("#musicHistory");
+  if (!box) return;
+  const h = loadHistory();
+  box.hidden = h.length === 0;
+  if (!h.length) return;
+  const fmt = (ts) => {
+    const d = new Date(ts), now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    const hh = String(d.getHours()).padStart(2, "0"), mm = String(d.getMinutes()).padStart(2, "0");
+    return sameDay ? `今天 ${hh}:${mm}` : `${d.getMonth() + 1}/${d.getDate()} ${hh}:${mm}`;
+  };
+  const recent = h.slice(0, 5);
+  const counts = {};
+  h.forEach((x) => { counts[x.key] = counts[x.key] || { n: 0, title: x.title, artist: x.artist }; counts[x.key].n++; });
+  const top = Object.values(counts).sort((a, b) => b.n - a.n).slice(0, 5);
+  box.innerHTML = `
+    <div class="music-hist glass-card reveal">
+      <h3><span class="music-dot"></span>最近播放</h3>
+      <ol class="hist-list">${recent.map((x) => `<li><span class="hist-title">${escapeHTML(x.title)}</span><time>${fmt(x.at)}</time></li>`).join("")}</ol>
+    </div>
+    <div class="music-hist glass-card reveal">
+      <h3><span class="music-dot"></span>常听排行</h3>
+      <ol class="hist-list top">${top.map((x, i) => `<li><b class="hist-rank">${i + 1}</b><span class="hist-title">${escapeHTML(x.title)}</span><time>${x.n} 次</time></li>`).join("")}</ol>
+    </div>`;
 }
 
 /* ---------------- 链接智能识别 ----------------
@@ -118,16 +132,6 @@ function initMusicPage() {
   npEnsure();
   const esc = escapeHTML;
 
-  function userTracks() {
-    const arr = loadUserTracks();
-    let dirty = false;
-    arr.forEach((t) => {
-      if (!t.id) { t.id = "u" + Date.now() + Math.random().toString(36).slice(2, 7); dirty = true; }
-    });
-    if (dirty) saveStore(MUSIC_KEY, arr);
-    return arr;
-  }
-
   function allTracks() {
     return (REMOTE_MUSIC || MUSIC_LIST).map((t) => ({ ...t, key: "d:" + t.type + ":" + t.src }));
   }
@@ -140,7 +144,6 @@ function initMusicPage() {
   function render() {
     const tracks = allTracks();
     $("#musicCount").textContent = "· " + tracks.length + " 首";
-    $("#musicRestore").hidden = loadHiddenTracks().length === 0;
     $("#musicEmpty").hidden = tracks.length > 0;
     list.innerHTML = tracks
       .map((t) => {
@@ -165,32 +168,7 @@ function initMusicPage() {
   }
 
   /* ---------------- 听歌记录面板 ---------------- */
-  function renderHistory() {
-    const box = $("#musicHistory");
-    if (!box) return;
-    const h = loadHistory();
-    box.hidden = h.length === 0;
-    if (!h.length) return;
-    const fmt = (ts) => {
-      const d = new Date(ts), now = new Date();
-      const sameDay = d.toDateString() === now.toDateString();
-      const hh = String(d.getHours()).padStart(2, "0"), mm = String(d.getMinutes()).padStart(2, "0");
-      return sameDay ? `今天 ${hh}:${mm}` : `${d.getMonth() + 1}/${d.getDate()} ${hh}:${mm}`;
-    };
-    const recent = h.slice(0, 5);
-    const counts = {};
-    h.forEach((x) => { counts[x.key] = counts[x.key] || { n: 0, title: x.title, artist: x.artist }; counts[x.key].n++; });
-    const top = Object.values(counts).sort((a, b) => b.n - a.n).slice(0, 5);
-    box.innerHTML = `
-      <div class="music-hist glass-card reveal">
-        <h3><span class="music-dot"></span>最近播放</h3>
-        <ol class="hist-list">${recent.map((x) => `<li><span class="hist-title">${esc(x.title)}</span><time>${fmt(x.at)}</time></li>`).join("")}</ol>
-      </div>
-      <div class="music-hist glass-card reveal">
-        <h3><span class="music-dot"></span>常听排行</h3>
-        <ol class="hist-list top">${top.map((x, i) => `<li><b class="hist-rank">${i + 1}</b><span class="hist-title">${esc(x.title)}</span><time>${x.n} 次</time></li>`).join("")}</ol>
-      </div>`;
-  }
+  /* renderHistory 已提升到顶层，供 npOpen / 后台试听共用 */
 
   /* 原生 audio 播放自动记录 */
   list.addEventListener("play", (e) => {
@@ -371,7 +349,8 @@ function npOpen(track) {
   if (track.type === "audio") {
     player.innerHTML = `<audio controls autoplay src="${escapeHTML(src)}"></audio>`;
   } else {
-    player.innerHTML = MUSIC_PLAYER[track.type](escapeHTML(src), escapeHTML(track.title || "未命名"));
+    const renderer = MUSIC_PLAYER[track.type] || MUSIC_PLAYER.embed;
+    player.innerHTML = renderer(escapeHTML(src), escapeHTML(track.title || "未命名"));
   }
   npState.audio = player.querySelector("audio") || null;
 

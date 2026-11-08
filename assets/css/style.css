@@ -4076,7 +4076,7 @@ button.chip:hover {
 .admin-ovlist { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 .admin-ovlist li { display: flex; justify-content: space-between; gap: 12px; }
 
-/* 登录页（邮箱验证码） */
+/* 登录页 */
 .admin-login { max-width: 470px; margin: 48px auto; padding: 34px 34px 24px; gap: 13px; }
 .admin-login-brand {
   font-size: 40px;
@@ -4100,4 +4100,214 @@ button.chip:hover {
   .admin-nav { flex-direction: row; flex-wrap: wrap; }
   .admin-navbtn { padding: 8px 12px; }
   .admin-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* ---------- 后台 v2.9：通用件补全 ---------- */
+.admin-body { min-width: 0; }
+.admin-status {
+  min-height: 22px;
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.admin-pane { display: flex; flex-direction: column; gap: 16px; }
+.admin-pane[hidden] { display: none; }
+.admin-card { padding: 22px 24px; }
+.admin-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+.admin-file {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-faint);
+  padding: 2px 8px;
+  border: 1px dashed var(--border);
+  border-radius: 7px;
+}
+.admin-hint { margin: 10px 0 0; font-size: 13px; color: var(--text-faint); line-height: 1.7; }
+.admin-msg { min-height: 18px; font-size: 14px; font-weight: 600; }
+.admin-badge { font-size: 12px; pointer-events: none; }
+
+/* 表单输入：与 .form-row 同一套视觉 */
+.admin-card input:not([type="file"]):not([type="checkbox"]),
+.admin-card textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14.5px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.admin-card input:not([type="file"]):not([type="checkbox"]):focus,
+.admin-card textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.admin-card textarea { resize: vertical; min-height: 64px; line-height: 1.7; }
+.admin-card input[type="file"] { font-size: 13px; color: var(--text-soft); max-width: 100%; }
+.admin-card input[type="date"] { flex: none; }
+
+/* 字段行：label 包裹式（个人资料/文章编辑共用） */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+.admin-grid label,
+.admin-card > label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.admin-grid label.full,
+.admin-card > label.full { grid-column: 1 / -1; }
+
+/* 列表行与编辑卡 */
+.admin-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.admin-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.admin-row .btn { padding: 9px 16px; font-size: 14px; white-space: nowrap; }
+.admin-row input { flex: 1; min-width: 120px; width: auto; }
+.admin-add { padding: 14px; border: 1px dashed var(--border-strong); border-radius: 14px; }
+.admin-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-soft);
+}
+.admin-editor[hidden] { display: none; }
+.admin-editor .admin-row input { min-width: 0; }
+.admin-danger {
+  color: #ff6b6b;
+  border-color: rgba(255, 107, 107, 0.4);
+}
+.admin-danger:hover {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 14px -4px rgba(255, 107, 107, 0.5);
+}
+.admin-check {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text) !important;
+  cursor: pointer;
+}
+.admin-check input { width: auto !important; accent-color: var(--accent); }
+
+/* 音乐管理卡片 */
+.mu-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.mu-card-head b { flex: 1; min-width: 120px; font-size: 15px; }
+.mu-recognize {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+.mu-recognize.ok { color: var(--accent); }
+.mu-recognize.warn { color: #ffb84d; }
+.mu-lyrics-toggle { font-size: 12.5px; color: var(--text-faint); background: none; border: none; cursor: pointer; padding: 0; align-self: flex-start; }
+.mu-lyrics-toggle:hover { color: var(--accent); }
+
+/* 相册管理网格 */
+.alb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.alb-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-soft);
+}
+.alb-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: var(--bg);
+}
+.alb-card input { font-size: 13px !important; padding: 7px 10px !important; }
+.alb-card .admin-row { gap: 6px; }
+.alb-card .btn { padding: 6px 12px; font-size: 12.5px; }
+.alb-add {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.alb-add-preview {
+  flex: none;
+  width: 168px;
+  height: 118px;
+  border-radius: 11px;
+  border: 1px dashed var(--border-strong);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 12.5px;
+  text-align: center;
+}
+.alb-add-preview img { width: 100%; height: 100%; object-fit: cover; }
+.alb-add-fields { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 9px; }
+
+/* 文章编辑器补充 */
+.pe-wordcount { font-size: 12.5px; color: var(--text-faint); align-self: flex-end; }
+.admin-editor > input,
+.admin-editor > textarea { font-size: 14.5px; }
+
+/* 登录页 */
+.admin-pat { display: flex; flex-direction: column; gap: 10px; }
+.admin-pat summary { cursor: pointer; font-size: 14px; color: var(--text-soft); }
+.admin-pat summary:hover { color: var(--accent); }
+.admin-login .btn { justify-content: center; }
+.admin-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+.admin-login-divider::before,
+.admin-login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.admin-login input { width: 100%; }
+
+@media (max-width: 720px) {
+  .admin-grid { grid-template-columns: 1fr; }
+  .alb-add { flex-direction: column; }
+  .alb-add-preview { width: 100%; }
 }
