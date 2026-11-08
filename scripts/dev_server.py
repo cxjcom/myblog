@@ -18,6 +18,7 @@ import subprocess
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "profile.json"
@@ -42,6 +43,8 @@ class BlogHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?")[0]
+        if path.startswith("/api/") and not self._csrf_guard():
+            return
         if path == "/api/profile":
             self._save_profile()
         elif path == "/api/posts":
@@ -60,6 +63,27 @@ class BlogHandler(SimpleHTTPRequestHandler):
                 self.rfile.read(length)  # 先排空请求体，避免连接异常中断
             self.send_error(404, "Unsupported POST endpoint. Use /api/profile, /api/posts, /api/album, /api/music, /api/upload or /api/mood")
             return
+
+    def _csrf_guard(self):
+        """只接受本机同源的 JSON POST。
+
+        本地 /api/* 无鉴权且写文件后自动 git push，必须防止浏览器里的
+        恶意网页跨站伪造请求（text/plain 表单可绕过 CORS 预检）：
+        1. 带跨域 Origin 头的请求一律拒绝（同源 POST 的 Origin 也是本机）；
+        2. Content-Type 必须是 application/json —— 表单无法伪造该类型，
+           伪造时浏览器会先发 OPTIONS 预检而本处理器不支持，同样失败。
+        """
+        origin = self.headers.get("Origin")
+        if origin:
+            host = urlsplit(origin).hostname
+            if host not in ("127.0.0.1", "localhost", "::1"):
+                self._reply(403, {"ok": False, "message": "Cross-origin POST rejected"})
+                return False
+        ctype = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        if ctype != "application/json":
+            self._reply(415, {"ok": False, "message": "Content-Type must be application/json"})
+            return False
+        return True
 
     def _read_json_body(self, err_label):
         length = int(self.headers.get("Content-Length") or 0)
