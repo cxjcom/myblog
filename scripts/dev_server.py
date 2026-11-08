@@ -75,8 +75,10 @@ class BlogHandler(SimpleHTTPRequestHandler):
         """
         origin = self.headers.get("Origin")
         if origin:
-            host = urlsplit(origin).hostname
-            if host not in ("127.0.0.1", "localhost", "::1"):
+            parts = urlsplit(origin)
+            local_hosts = ("127.0.0.1", "localhost", "::1")
+            # 主机和端口都必须与本服务器一致：同主机不同端口也是跨源
+            if parts.hostname not in local_hosts or parts.port != self.server.server_port:
                 self._reply(403, {"ok": False, "message": "Cross-origin POST rejected"})
                 return False
         ctype = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
